@@ -9,8 +9,8 @@ type AuthContextType = {
   profile: User | null;
   session: Session | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
 };
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getProfile();
   }, [user]);
 
-  const register = async (name: string, email: string, password: string) => {
+  const signUp = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
 
@@ -92,57 +92,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           description: error.message,
           variant: 'destructive',
         });
-        throw error;
-      }
-
-      toast({
-        title: 'Check your inbox',
-        description: 'Verify your email to continue.',
-      });
-
-      const newUser = data.user;
-
-      if (newUser) {
-        await supabase.from('profiles').insert({
-          id: newUser.id,
-          name,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+      } else {
+        toast({
+          title: 'Check your inbox',
+          description: 'Verify your email to continue.',
         });
+
+        // Optional: You can still manually insert a profile,
+        // but the trigger should already do it.
+        const newUser = data.user;
+        if (newUser) {
+          await supabase.from('profiles').insert({
+            id: newUser.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        }
       }
+
+      return { error };
     } catch (error) {
       console.error('Error signing up:', error);
-      throw error;
+      return { error };
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) {
+      if (!error) {
         toast({
-          title: 'Login failed',
-          description: error.message,
-          variant: 'destructive',
+          title: 'Signed in successfully!',
+          description: 'Welcome back to HackXplore',
         });
-        throw error;
       }
 
-      toast({
-        title: 'Signed in successfully!',
-        description: 'Welcome back to HackXplore',
-      });
+      return { error };
     } catch (error) {
       console.error('Error signing in:', error);
-      throw error;
+      return { error };
     }
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({ title: 'Signed out successfully' });
+      toast({
+        title: 'Signed out successfully',
+      });
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -174,10 +172,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (profile) {
-        setProfile({ ...profile, ...updates });
+        setProfile({
+          ...profile,
+          ...updates,
+        });
       }
 
-      toast({ title: 'Profile updated successfully' });
+      toast({
+        title: 'Profile updated successfully',
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -187,13 +190,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value: AuthContextType = {
+  const value = {
     user,
     profile,
     session,
     loading,
-    login,
-    register,
+    signUp,
+    signIn,
     signOut,
     updateProfile,
   };
