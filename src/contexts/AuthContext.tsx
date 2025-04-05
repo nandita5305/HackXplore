@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
@@ -10,8 +9,8 @@ type AuthContextType = {
   profile: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
 };
@@ -26,14 +25,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -45,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch user profile when user changes
   useEffect(() => {
     async function getProfile() {
       if (!user) {
@@ -63,7 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error) {
           console.error('Error fetching profile:', error);
         } else if (data) {
-          // Transform database profile to app User type
           setProfile({
             id: data.id,
             email: user.email || '',
@@ -87,71 +82,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getProfile();
   }, [user]);
 
-  const signUp = async (email: string, password: string) => {
-  try {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-  toast({
-    title: "Error signing up",
-    description: error.message,
-    variant: "destructive",
-  });
-} else {
-  toast({
-    title: "Check your inbox",
-    description: "Verify your email to continue.",
-  });
+      if (error) {
+        toast({
+          title: 'Error signing up',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
 
-  // You can skip this if you want to block until email verification
-  setCurrentStep(2);
-}
-
+      toast({
+        title: 'Check your inbox',
+        description: 'Verify your email to continue.',
+      });
 
       const newUser = data.user;
 
-      // Insert initial profile
       if (newUser) {
         await supabase.from('profiles').insert({
           id: newUser.id,
+          name,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
       }
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
     }
+  };
 
-    return { error };
-  } catch (error) {
-    console.error('Error signing up:', error);
-    return { error };
-  }
-};
-
-
-  const signIn = async (email: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (!error) {
+
+      if (error) {
         toast({
-          title: "Signed in successfully!",
-          description: "Welcome back to HackXplore",
+          title: 'Login failed',
+          description: error.message,
+          variant: 'destructive',
         });
+        throw error;
       }
-      
-      return { error };
+
+      toast({
+        title: 'Signed in successfully!',
+        description: 'Welcome back to HackXplore',
+      });
     } catch (error) {
       console.error('Error signing in:', error);
-      return { error };
+      throw error;
     }
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Signed out successfully",
-      });
+      toast({ title: 'Signed out successfully' });
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -161,7 +152,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
 
     try {
-      // Transform app User type to database profile
       const dbUpdates = {
         name: updates.name,
         avatar_url: updates.avatarUrl,
@@ -181,37 +171,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .update(dbUpdates)
         .eq('id', user.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Update local profile state
       if (profile) {
-        setProfile({
-          ...profile,
-          ...updates,
-        });
+        setProfile({ ...profile, ...updates });
       }
 
-      toast({
-        title: "Profile updated successfully",
-      });
+      toast({ title: 'Profile updated successfully' });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
-        title: "Error updating profile",
-        variant: "destructive",
+        title: 'Error updating profile',
+        variant: 'destructive',
       });
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     profile,
     session,
     loading,
-    signUp,
-    signIn,
+    login,
+    register,
     signOut,
     updateProfile,
   };
