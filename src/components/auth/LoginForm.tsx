@@ -1,47 +1,121 @@
-// LoginForm.tsx
+
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
 });
 
-export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }) {
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onSwitchToSignUp: () => void;
+}
+
+export function LoginForm({ onSuccess, onSwitchToSignUp }: LoginFormProps) {
   const { signIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  async function onSubmit(values: z.infer<typeof schema>) {
-    const { error } = await signIn(values.email, values.password);
-    if (error) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await signIn(values.email, values.password);
+      
+      if (error) {
+        toast({
+          title: "Error signing in",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: "Something went wrong",
+        description: "Please try again later",
         variant: "destructive",
       });
-    } else {
-      toast({ title: "Welcome back!" });
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <Input {...form.register("email")} placeholder="you@example.com" />
-      <Input {...form.register("password")} type="password" placeholder="••••••••" />
-      <Button type="submit" className="w-full">Login</Button>
-      <p className="text-center text-sm">
-        Don’t have an account?{" "}
-        <Button variant="link" onClick={onSwitchToSignup}>Sign up</Button>
-      </p>
-    </form>
+    <Card className="w-full max-w-md border-primary/20 glass-card">
+      <CardHeader>
+        <CardTitle>Sign In</CardTitle>
+        <CardDescription>Sign in to your HackXplore account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="your.email@example.com" {...field} className="bg-background/50" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-4">
+        <div className="text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Button variant="link" className="p-0" onClick={onSwitchToSignUp}>
+            Sign Up
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
