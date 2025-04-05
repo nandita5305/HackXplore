@@ -88,31 +88,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const signUp = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({ email, password });
-      
-      if (!error) {
-        toast({
-          title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
+  try {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (!error) {
+      toast({
+        title: "Account created successfully!",
+        description: "Please check your email to verify your account.",
+      });
+
+      const newUser = data.user;
+
+      // Insert initial profile
+      if (newUser) {
+        await supabase.from('profiles').insert({
+          id: newUser.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
-        
-        // Create initial profile
-        if (user) {
-          await supabase.from('profiles').insert({
-            id: user.id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        }
       }
-      
-      return { error };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      return { error };
     }
-  };
+
+    return { error };
+  } catch (error) {
+    console.error('Error signing up:', error);
+    return { error };
+  }
+};
+
 
   const signIn = async (email: string, password: string) => {
     try {
