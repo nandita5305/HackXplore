@@ -124,10 +124,13 @@ CREATE POLICY "Users can add bookmarks"
     TO authenticated
     WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own bookmarks" 
-    ON public.bookmarks FOR DELETE 
-    TO authenticated
-    USING (auth.uid() = user_id);
+-- RLS for users accessing their own profile
+create policy "Users can manage their profile"
+on profiles
+for all
+using (auth.uid() = id)
+with check (auth.uid() = id);
+
 
 -- Automatically create profile on signup
 create or replace function public.handle_new_user()
