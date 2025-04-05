@@ -91,11 +91,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   try {
     const { data, error } = await supabase.auth.signUp({ email, password });
 
-    if (!error) {
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
-      });
+    if (error) {
+  toast({
+    title: "Error signing up",
+    description: error.message,
+    variant: "destructive",
+  });
+} else {
+  toast({
+    title: "Check your inbox",
+    description: "Verify your email to continue.",
+  });
+
+  // You can skip this if you want to block until email verification
+  setCurrentStep(2);
+}
+
 
       const newUser = data.user;
 
