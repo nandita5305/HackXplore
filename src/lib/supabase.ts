@@ -3,17 +3,18 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
 
 // Initialize the Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// We use placeholder values when environment variables are not available
+// These allow the app to load without crashing, but won't allow actual Supabase operations
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-project.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase URL or Anon Key is missing');
+// Log a warning if environment variables are missing
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.error('Supabase URL or Anon Key is missing. Please add them to your environment variables.');
+  console.warn('The app will load, but authentication and database features will not work correctly.');
 }
 
-export const supabase = createClient<Database>(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 export const getServerTimestamp = () => {
   return new Date().toISOString();
