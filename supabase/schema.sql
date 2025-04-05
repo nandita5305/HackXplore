@@ -124,29 +124,21 @@ CREATE POLICY "Users can add bookmarks"
     TO authenticated
     WITH CHECK (auth.uid() = user_id);
 
--- RLS for users accessing their own profile
-create policy "Users can manage their profile"
-on profiles
-for all
-using (auth.uid() = id)
-with check (auth.uid() = id);
+CREATE POLICY "Users can delete their own bookmarks" 
+    ON public.bookmarks FOR DELETE 
+    TO authenticated
+    USING (auth.uid() = user_id);
 
+-- Create an on-login trigger to automatically create profiles
+CREATE OR REPLACE FUNCTION public.handle_new_user() 
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id)
+  VALUES (new.id);
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Automatically create profile on signup
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-as $$
-begin
-  insert into public.profiles (id, email)
-  values (new.id, new.email);
-  return new;
-end;
-$$;
-
-drop trigger if exists on_auth_user_created on auth.users;
-
-create trigger on_auth_user_created
-after insert on auth.users
-for each row execute procedure public.handle_new_user();
-
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
