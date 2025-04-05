@@ -208,3 +208,14 @@ export default function Index() {
     </AnimatedBackground>
   );
 }
+// src/types/index.ts
+export type UserSkill = "Frontend" | "Backend" | "UI/UX" | "ML/AI" | "DevOps" | "Mobile";
+
+export type HackathonType =
+  | "Web"
+  | "AI"
+  | "Blockchain"
+  | "Fintech"
+  | "Health"
+  | "EdTech";
+
