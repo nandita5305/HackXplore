@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
@@ -31,12 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -63,10 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: data.id,
             email: user.email || '',
             name: data.name || '',
-            skills: data.skills as any || [],
-            interests: data.interests as any || [],
+            skills: data.skills || [],
+            interests: data.interests || [],
             preferredRole: data.preferred_role || undefined,
-            lookingFor: (data.looking_for as 'hackathons' | 'internships' | 'both') || 'both',
+            lookingFor: data.looking_for || 'both',
             bio: data.bio || undefined,
             githubUrl: data.github_url || undefined,
             linkedinUrl: data.linkedin_url || undefined,
@@ -74,8 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             avatarUrl: data.avatar_url || undefined,
           });
         }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+      } catch (err) {
+        console.error('Unexpected error fetching profile:', err);
       }
     }
 
@@ -85,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
+
+      console.log('[signUp result]', { data, error });
 
       if (error) {
         toast({
@@ -97,50 +96,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: 'Check your inbox',
           description: 'Verify your email to continue.',
         });
+      }
 
-        // Optional: You can still manually insert a profile,
-        // but the trigger should already do it.
-        const newUser = data.user;
-        if (newUser) {
-          await supabase.from('profiles').insert({
-            id: newUser.id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        }
+      // Fallback: manually insert profile in case trigger fails
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }).catch(console.error);
       }
 
       return { error };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      return { error };
+    } catch (err) {
+      console.error('Exception during signUp:', err);
+      return { error: err };
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      console.log('[signIn result]', { data, error });
 
       if (!error) {
         toast({
           title: 'Signed in successfully!',
-          description: 'Welcome back to HackXplore',
+          description: 'Welcome back to HackXplore!',
         });
       }
 
       return { error };
-    } catch (error) {
-      console.error('Error signing in:', error);
-      return { error };
+    } catch (err) {
+      console.error('Exception during signIn:', err);
+      return { error: err };
     }
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: 'Signed out successfully',
-      });
+      toast({ title: 'Signed out successfully' });
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -171,18 +167,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      if (profile) {
-        setProfile({
-          ...profile,
-          ...updates,
-        });
-      }
-
-      toast({
-        title: 'Profile updated successfully',
-      });
-    } catch (error) {
-      console.error('Error updating profile:', error);
+      setProfile(prev => ({ ...prev!, ...updates }));
+      toast({ title: 'Profile updated successfully' });
+    } catch (err) {
+      console.error('Error updating profile:', err);
       toast({
         title: 'Error updating profile',
         variant: 'destructive',
