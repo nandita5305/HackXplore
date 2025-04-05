@@ -43,12 +43,10 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
           />
         )}
         {currentView === "signup" && (
-          <SignUpForm onSuccess={() => {
-              // close modal or redirect to dashboard
-              }} onSwitchToLogin={() => {
-              setAuthView("login"); // your modal state manager
-        }} />
-
+          <SignUpForm
+            onSuccess={handleSuccess}
+            onSwitchToLogin={() => setView("login")}
+          />
         )}
         {currentView === "profile" && (
           <ProfileForm onComplete={handleProfileComplete} />
