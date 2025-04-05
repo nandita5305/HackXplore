@@ -1,21 +1,23 @@
+# 🌌 HackXplore — Discover Hackathons & Internships in One Place
 
-🌌 HackXplore — Find Your Next Hack, Fast
-Tired of hopping from site to site just to find a hackathon?
-HackXplore brings them all together — Devfolio, Unstop, DoraHacks, Hack2Skill, Devpost — in one clean, scrollable space.
+**Tired of missing out on exciting hackathons and internships?**  
+**HackXplore** brings them all together — from Devfolio, Unstop, DoraHacks, Hack2Skill, Devpost, and Internshala — so you never miss an opportunity again.
 
-⚙️ Built With
-🧠 Node.js + Express (Backend & Scraper)
 
-💻 HTML, CSS, JS (Frontend – React version coming soon)
+---
 
-🤖 Puppeteer (Web scraping magic)
+## ⚙️ Built With
 
-✨ Features
-Aggregates hackathons from multiple platforms
+- 🧠 **Node.js + Express** – Backend API & Scrapers  
+- 💻 **HTML, CSS, JavaScript** – Lightweight frontend *(React version coming soon)*  
+- 🤖 **Puppeteer** – Web scraping from multiple platforms
 
-Shows platform logos, deadlines, and event details
+---
 
-Hackathon ↔ Internship toggle (coming soon)
+## ✨ Features
 
-Clean, beginner-friendly interface
-
+- 🔍 Aggregated listings of **hackathons** and **internships**  
+- 🖼️ Platform logos, deadlines, duration, and stipends  
+- 🔁 Toggle switch between Hackathons ↔ Internships  
+- 🎯 Clean and focused UI for fast browsing
+  
