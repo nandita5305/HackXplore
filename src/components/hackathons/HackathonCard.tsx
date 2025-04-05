@@ -56,12 +56,25 @@ export function HackathonCard({
     <>
       <Card className={`overflow-hidden hover:shadow-lg transition-shadow duration-300 border-primary/10 ${isDetailed ? 'lg:flex' : ''}`}>
         <div className={`${isDetailed ? 'lg:w-2/5' : ''}`}>
-          <div className="h-48 overflow-hidden">
+          {/* Circular image container for better UI */}
+          <div className="relative h-48 overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70 transition-opacity z-10"></div>
             <img
               src={imageUrl}
               alt={title}
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-3">
+              <div className="flex flex-wrap gap-1.5">
+                {type && type.map((t) => (
+                  <Badge key={t} className="rounded-full bg-primary/20 backdrop-blur-sm text-primary text-xs">
+                    {t}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            {/* Animated circular pulse background */}
+            <div className="absolute -right-24 -top-24 w-48 h-48 bg-primary/20 rounded-full blur-2xl animate-pulse-slow"></div>
           </div>
         </div>
         
@@ -76,7 +89,7 @@ export function HackathonCard({
                 variant="ghost"
                 size="icon"
                 onClick={handleBookmarkClick}
-                className="h-8 w-8"
+                className="h-8 w-8 rounded-full hover:bg-primary/10"
               >
                 <BookmarkIcon
                   className={`h-5 w-5 ${bookmarked ? "fill-primary text-primary" : ""}`}
@@ -91,12 +104,6 @@ export function HackathonCard({
               <Badge variant="secondary" className="rounded-full capitalize">
                 {mode}
               </Badge>
-              
-              {type && type.map((t) => (
-                <Badge key={t} className="rounded-full bg-primary/20 text-primary">
-                  {t}
-                </Badge>
-              ))}
             </div>
             
             <div className="space-y-2">
@@ -135,14 +142,21 @@ export function HackathonCard({
           </CardContent>
           
           <CardFooter className="p-4 pt-0 flex flex-wrap gap-2">
-            <Button asChild>
+            <Button asChild className="relative overflow-hidden group">
               <a href={url} target="_blank" rel="noopener noreferrer">
-                Register
-                <ExternalLink className="h-4 w-4 ml-2" />
+                <span className="relative z-10 flex items-center">
+                  Register
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </span>
+                <span className="absolute inset-0 rounded-md bg-white/10 group-hover:animate-ripple"></span>
               </a>
             </Button>
             
-            <Button variant="outline" onClick={handleTeamCreate}>
+            <Button 
+              variant="outline" 
+              onClick={handleTeamCreate}
+              className="rounded-full border-primary/20 hover:bg-primary/10"
+            >
               Form Team
             </Button>
             

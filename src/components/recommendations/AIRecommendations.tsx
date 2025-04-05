@@ -32,14 +32,18 @@ export function AIRecommendations() {
   }, [profile]);
   
   return (
-    <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 rounded-xl shadow-lg">
+      {/* Circular decorative elements */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-xl -z-0 transform translate-x-8 -translate-y-8"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-0 transform -translate-x-8 translate-y-8 animate-float"></div>
+      
+      <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
         <CardTitle className="text-xl font-semibold flex items-center">
           <Sparkles className="h-5 w-5 mr-2 text-secondary" />
           AI Recommendations
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         <div className="mb-4">
           <p className="text-muted-foreground">
             {profile ? 
@@ -50,9 +54,9 @@ export function AIRecommendations() {
         </div>
         
         <Tabs defaultValue="hackathons">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="hackathons" className="flex-1">Hackathons</TabsTrigger>
-            <TabsTrigger value="internships" className="flex-1">Internships</TabsTrigger>
+          <TabsList className="w-full mb-4 grid grid-cols-2 rounded-full p-1 bg-background/30 backdrop-blur-sm border border-primary/10">
+            <TabsTrigger value="hackathons" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Hackathons</TabsTrigger>
+            <TabsTrigger value="internships" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Internships</TabsTrigger>
           </TabsList>
           
           <TabsContent value="hackathons" className="mt-0">
@@ -68,7 +72,7 @@ export function AIRecommendations() {
                   <HackathonCard key={hackathon.id} {...hackathon} />
                 ))}
                 <div className="flex justify-center mt-6">
-                  <Button asChild>
+                  <Button asChild className="rounded-full">
                     <a href="/hackathons">View More Hackathons</a>
                   </Button>
                 </div>
@@ -76,7 +80,7 @@ export function AIRecommendations() {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No recommendation data available</p>
-                <Button asChild>
+                <Button asChild className="rounded-full">
                   <a href="/hackathons">Explore All Hackathons</a>
                 </Button>
               </div>
@@ -96,7 +100,7 @@ export function AIRecommendations() {
                   <InternshipCard key={internship.id} {...internship} />
                 ))}
                 <div className="flex justify-center mt-6">
-                  <Button asChild>
+                  <Button asChild className="rounded-full">
                     <a href="/internships">View More Internships</a>
                   </Button>
                 </div>
@@ -104,7 +108,7 @@ export function AIRecommendations() {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No recommendation data available</p>
-                <Button asChild>
+                <Button asChild className="rounded-full">
                   <a href="/internships">Explore All Internships</a>
                 </Button>
               </div>

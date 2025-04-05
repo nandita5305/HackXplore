@@ -54,7 +54,7 @@ const CheckboxGroup = React.forwardRef<
 >(({ value, onValueChange, children, className }, ref) => {
   // Clone children to inject the checked state and onChange handler
   const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
+    if (React.isValidElement(child) && child.props.value) {
       // Get the checkbox's value from the child props
       const childValue = child.props.value;
       

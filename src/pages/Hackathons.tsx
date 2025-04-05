@@ -80,22 +80,29 @@ export default function Hackathons() {
               </p>
             </div>
             
-            <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8 relative">
+              <div className="relative overflow-hidden rounded-full shadow-lg">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search hackathons by name, organizer, or description..."
-                  className="pl-10"
+                  className="pl-12 pr-4 py-6 border-primary/20 bg-background/50 backdrop-blur-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {/* Animated circle effects */}
+                <div className="absolute -left-10 -top-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
+                <div className="absolute -right-10 -bottom-10 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
               </div>
             </form>
           </div>
         </section>
         
-        <section className="py-8 md:py-12">
+        <section className="py-8 md:py-12 relative">
+          {/* Decorative circles */}
+          <div className="absolute top-1/4 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+          <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
+          
           <div className="container">
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Filters - Mobile View */}
@@ -133,17 +140,20 @@ export default function Hackathons() {
                     <p className="text-muted-foreground mb-6">
                       Try adjusting your filters or search query
                     </p>
-                    <Button onClick={() => {
-                      setSearchQuery("");
-                      setFilters({
-                        types: [],
-                        mode: "all",
-                        prizePoolMin: 0,
-                        prizePoolMax: 100000,
-                        timeframe: "all",
-                        skills: [],
-                      });
-                    }}>
+                    <Button 
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilters({
+                          types: [],
+                          mode: "all",
+                          prizePoolMin: 0,
+                          prizePoolMax: 100000,
+                          timeframe: "all",
+                          skills: [],
+                        });
+                      }}
+                      className="rounded-full"
+                    >
                       Reset Filters
                     </Button>
                   </div>
