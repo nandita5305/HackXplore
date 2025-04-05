@@ -41,13 +41,21 @@ export function LoginForm({ onSuccess, onSwitchToSignUp }: LoginFormProps) {
       const { error } = await signIn(values.email, values.password);
       
       if (error) {
-        toast({
-          title: "Error signing in",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else if (onSuccess) {
-        onSuccess();
+  toast({
+    title: "Error signing up",
+    description: error.message,
+    variant: "destructive",
+  });
+} else {
+  toast({
+    title: "Check your inbox",
+    description: "Verify your email to continue.",
+  });
+
+  // You can skip this if you want to block until email verification
+  setCurrentStep(2);
+}
+
       }
     } catch (error) {
       toast({
