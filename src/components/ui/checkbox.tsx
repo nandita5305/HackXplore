@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"
@@ -25,4 +26,58 @@ const Checkbox = React.forwardRef<
 ))
 Checkbox.displayName = CheckboxPrimitive.Root.displayName
 
-export { Checkbox }
+// Create a CheckboxItem component (wrapper around Checkbox with label support)
+interface CheckboxItemProps extends React.ComponentPropsWithoutRef<typeof Checkbox> {
+  id?: string;
+  value: string;
+}
+
+const CheckboxItem = React.forwardRef<
+  React.ElementRef<typeof Checkbox>,
+  CheckboxItemProps
+>(({ id, value, ...props }, ref) => (
+  <Checkbox ref={ref} id={id || `checkbox-${value}`} value={value} {...props} />
+))
+CheckboxItem.displayName = "CheckboxItem"
+
+// Create a CheckboxGroup component
+interface CheckboxGroupProps {
+  value: string[];
+  onValueChange: (value: string[]) => void;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const CheckboxGroup = React.forwardRef<
+  HTMLDivElement,
+  CheckboxGroupProps
+>(({ value, onValueChange, children, className }, ref) => {
+  // Clone children to inject the checked state and onChange handler
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      // Get the checkbox's value from the child props
+      const childValue = child.props.value;
+      
+      return React.cloneElement(child, {
+        checked: value.includes(childValue),
+        onCheckedChange: (checked: boolean) => {
+          if (checked) {
+            onValueChange([...value, childValue]);
+          } else {
+            onValueChange(value.filter(v => v !== childValue));
+          }
+        }
+      });
+    }
+    return child;
+  });
+
+  return (
+    <div ref={ref} className={cn("space-y-2", className)}>
+      {childrenWithProps}
+    </div>
+  );
+});
+CheckboxGroup.displayName = "CheckboxGroup";
+
+export { Checkbox, CheckboxItem, CheckboxGroup }

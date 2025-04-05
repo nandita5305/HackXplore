@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckboxItem, CheckboxGroup } from "@/components/ui/checkbox";
+import { Checkbox, CheckboxItem, CheckboxGroup } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
