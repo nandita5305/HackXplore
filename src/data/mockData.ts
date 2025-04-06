@@ -321,7 +321,7 @@ export const hackathonsData = [
     skills: ['JavaScript', 'React', 'Node.js', 'UI/UX Design']
   },
   {
-    id: uuidv4(),
+    id: "future-innovators-2024",
     title: "Future Innovators Hackathon 2024",
     organizer: "Tech Innovators Inc.",
     dates: "November 8-10, 2024",
@@ -338,7 +338,7 @@ export const hackathonsData = [
     description: "Join us for a weekend of innovation and collaboration. Build the future with cutting-edge technology and compete for amazing prizes."
   },
   {
-    id: uuidv4(),
+    id: "global-code-fest-2024",
     title: "Global CodeFest 2024",
     organizer: "CodeFest Global",
     dates: "December 1-3, 2024",
@@ -355,7 +355,7 @@ export const hackathonsData = [
     description: "Participate in the world's largest online coding competition. Solve real-world problems and showcase your skills to a global audience."
   },
   {
-    id: uuidv4(),
+    id: "ai-innovation-challenge-2024",
     title: "AI Innovation Challenge 2024",
     organizer: "AI Innovators",
     dates: "October 20-22, 2024",
@@ -372,7 +372,7 @@ export const hackathonsData = [
     description: "Develop innovative AI solutions and compete for top prizes. Connect with industry leaders and learn from the best in the field."
   },
   {
-    id: uuidv4(),
+    id: "mobile-app-dev-2024",
     title: "Mobile App Development Hackathon 2024",
     organizer: "AppDev Inc.",
     dates: "November 15-17, 2024",
@@ -389,7 +389,7 @@ export const hackathonsData = [
     description: "Create the next big mobile app and win amazing prizes. Open to all skill levels and platforms."
   },
   {
-    id: uuidv4(),
+    id: "dora-hack-ai-2025",
     title: "DoraHacks AI Summit 2025",
     organizer: "DoraHacks",
     dates: "August 15-17, 2025",
@@ -406,7 +406,7 @@ export const hackathonsData = [
     description: "Join us for the premier AI hackathon of 2025. Build cutting-edge AI solutions and compete for top prizes. Connect with industry leaders and innovators."
   },
   {
-    id: uuidv4(),
+    id: "devtown-code-fest-2025",
     title: "DevTown CodeFest 2025",
     organizer: "DevTown",
     dates: "June 10-12, 2025",
@@ -423,7 +423,7 @@ export const hackathonsData = [
     description: "DevTown's flagship coding festival brings together developers from across India for an intense hackathon experience. Build, learn, and network with the best in the industry."
   },
   {
-    id: uuidv4(),
+    id: "dora-hacks-web3-2025",
     title: "DoraHacks Web3 Challenge",
     organizer: "DoraHacks",
     dates: "September 5-7, 2025",
@@ -440,7 +440,7 @@ export const hackathonsData = [
     description: "Build the future of Web3 with DoraHacks. This challenge focuses on decentralized applications, smart contracts, and innovative blockchain solutions."
   },
   {
-    id: uuidv4(),
+    id: "devtown-app-jam-2025",
     title: "DevTown App Jam 2025",
     organizer: "DevTown",
     dates: "July 20-22, 2025",
@@ -457,7 +457,7 @@ export const hackathonsData = [
     description: "India's biggest mobile app development hackathon. Design and develop innovative mobile applications that solve real-world problems. Open to all skill levels."
   },
   {
-    id: uuidv4(),
+    id: "devtown-app-jam-2025",
     title: "DevTown App Jam 2025",
     organizer: "DevTown",
     dates: "July 20-22, 2025",
@@ -474,7 +474,7 @@ export const hackathonsData = [
     description: "India's biggest mobile app development hackathon. Design and develop innovative mobile applications that solve real-world problems. Open to all skill levels."
   },
   {
-    id: uuidv4(),
+    id: "hackbytes-2025",
     title: "HackBytes 2025",
     organizer: "Coding Blocks",
     dates: "May 5-7, 2025",
@@ -491,7 +491,7 @@ export const hackathonsData = [
     description: "HackBytes is a global online hackathon inviting developers to build and innovate on open web technologies."
   },
   {
-    id: uuidv4(),
+    id: "ml-warriors-2025",
     title: "ML Warriors",
     organizer: "TechNova",
     dates: "June 15-17, 2025",
@@ -508,7 +508,7 @@ export const hackathonsData = [
     description: "Tackle real-world machine learning challenges and compete for glory and prizes. Mentorship from industry experts."
   },
   {
-    id: uuidv4(),
+    id: "blockchain-blitz-2025",
     title: "Blockchain Blitz",
     organizer: "ChainLab",
     dates: "August 10-12, 2025",
@@ -525,7 +525,7 @@ export const hackathonsData = [
     description: "A Web3-focused hackathon to build decentralized apps and protocols using blockchain technologies."
   },
   {
-    id: uuidv4(),
+    id: "greenhack-2025",
     title: "GreenHack 2025",
     organizer: "EcoTech Club",
     dates: "September 5-7, 2025",
@@ -542,7 +542,7 @@ export const hackathonsData = [
     description: "Use tech to solve sustainability problems — from climate change to waste management. Innovate for a better planet."
   },
   {
-    id: uuidv4(),
+    id: "hackxpress-2025",
     title: "HackXpress 2025",
     organizer: "DevLeague",
     dates: "April 28-30, 2025",
@@ -559,7 +559,7 @@ export const hackathonsData = [
     description: "Build anything innovative! HackXpress welcomes all ideas across domains. Create to impress."
   },
   {
-    id: uuidv4(),
+    id: "medihack-2025",
     title: "MediHack 2025",
     organizer: "HealthFirst Labs",
     dates: "October 1-3, 2025",
@@ -576,7 +576,7 @@ export const hackathonsData = [
     description: "Create innovations in medical technology to improve lives and support frontline workers and patients."
   },
   {
-    id: uuidv4(),
+    id: "campushack-2025",
     title: "CampusHack 2025",
     organizer: "EduHacks",
     dates: "June 20-22, 2025",
@@ -593,7 +593,7 @@ export const hackathonsData = [
     description: "CampusHack is an education-focused hackathon aimed at students solving campus-related issues."
   },
   {
-    id: uuidv4(),
+    id: "cryptohack-2025",
     title: "CryptoHack 2025",
     organizer: "BitVerse",
     dates: "August 25-27, 2025",
@@ -610,7 +610,7 @@ export const hackathonsData = [
     description: "A blockchain and security hackathon to build secure, scalable, and future-ready decentralized applications."
   },
   {
-    id: uuidv4(),
+    id: "designwave-2025",
     title: "DesignWave 2025",
     organizer: "Creative Minds",
     dates: "May 15-17, 2025",
@@ -819,4 +819,4 @@ export const testimonialsData = [
     image: "https://randomuser.me/api/portraits/women/62.jpg",
     text: "As a designer looking to collaborate with developers, HackXplore has been invaluable in finding hackathons where I can showcase my UX skills."
   }
-];
+]; 
