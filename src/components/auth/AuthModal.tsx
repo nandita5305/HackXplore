@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { SignUpForm } from "./SignUpForm";
 import { ProfileForm } from "./ProfileForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 type AuthView = "login" | "signup" | "profile";
 
@@ -33,9 +34,22 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
     onClose();
   };
 
+  const getTitleText = () => {
+    switch(currentView) {
+      case "login": return "Sign In";
+      case "signup": return "Sign Up";
+      case "profile": return "Complete Your Profile";
+      default: return "Authentication";
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md md:max-w-xl bg-transparent border-none shadow-none">
+        <DialogTitle>
+          <VisuallyHidden>{getTitleText()}</VisuallyHidden>
+        </DialogTitle>
+        
         {currentView === "login" && (
           <LoginForm
             onSuccess={handleSuccess}

@@ -10,8 +10,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-k
 
 // Log a warning if environment variables are missing
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.error('Supabase URL or Anon Key is missing. Please add them to your environment variables.');
-  console.warn('The app will load, but authentication and database features will not work correctly.');
+  console.warn('Supabase URL or Anon Key is missing. Please add them to your environment variables.');
+  console.warn('The app will run in demo mode with mock data until Supabase credentials are provided.');
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);

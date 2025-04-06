@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { InternshipCard } from "@/components/internships/InternshipCard";
@@ -28,6 +29,7 @@ export default function Internships() {
   
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const topRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     let results = allInternships;
@@ -68,6 +70,10 @@ export default function Internships() {
 
   const handleViewMore = () => {
     setShowAll(true);
+    // Scroll to top of the listings area
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleViewDetails = (id: string) => {
@@ -125,7 +131,7 @@ export default function Internships() {
               )}
               
               <div className="flex-1">
-                <div className="flex justify-between items-center mb-6">
+                <div ref={topRef} className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold">
                     {filteredInternships.length} {filteredInternships.length === 1 ? 'Internship' : 'Internships'}
                   </h2>
@@ -137,19 +143,7 @@ export default function Internships() {
                       {filteredInternships.map((internship) => (
                         <div key={internship.id} className="animate-float internship-card-container">
                           <InternshipCard 
-                            id={internship.id}
-                            title={internship.title}
-                            company={internship.company}
-                            location={internship.location}
-                            deadline={internship.deadline}
-                            duration={internship.duration}
-                            stipend={internship.stipend}
-                            imageUrl={internship.imageUrl}
-                            url={internship.url}
-                            description={internship.description}
-                            skills={internship.skills}
-                            isBookmarked={internship.isBookmarked}
-                            isRemote={internship.isRemote}
+                            {...internship}
                             onViewDetailsClick={() => handleViewDetails(internship.id)}
                           />
                         </div>

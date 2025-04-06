@@ -1,3 +1,4 @@
+
 export type UserSkill = 
   | "Frontend" 
   | "Backend" 
@@ -114,6 +115,8 @@ export interface HackathonCard {
   teamSize?: number;
   skills?: UserSkill[];
   isBookmarked?: boolean;
+  onViewDetailsClick?: () => void;
+  onFormTeamClick?: () => void;
 }
 
 export interface InternshipCard {
@@ -130,6 +133,7 @@ export interface InternshipCard {
   skills?: UserSkill[];
   isBookmarked?: boolean;
   isRemote?: boolean;
+  onViewDetailsClick?: () => void;
 }
 
 export interface Testimonial {

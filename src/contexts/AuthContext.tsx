@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Check if Supabase environment variables are set
 const isSupabaseConfigured = () => {
-  return import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+  return !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -30,9 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Initialize with mock data if Supabase is not configured
   useEffect(() => {
     if (!isSupabaseConfigured()) {
-      console.warn("Supabase is not configured - auth functions will not work");
+      console.warn("Supabase is not configured - running in demo mode");
       setLoading(false);
       return;
     }
@@ -100,8 +101,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     if (!isSupabaseConfigured()) {
-      console.error("Cannot sign up - Supabase is not configured");
-      return { error: new Error("Supabase is not configured") };
+      console.warn("Running in demo mode - creating mock account");
+      
+      // Create mock user and profile in demo mode
+      const mockUserId = `mock-${Date.now()}`;
+      const mockUser = {
+        id: mockUserId,
+        email: email,
+        name: "",
+        skills: [],
+        interests: [],
+        lookingFor: 'both' as const,
+        avatarUrl: `https://avatars.dicebear.com/api/initials/${email.charAt(0)}.svg`,
+      };
+      
+      // Set mock user and profile
+      setUser({ id: mockUserId, email: email } as SupabaseUser);
+      setProfile(mockUser);
+      
+      toast({
+        title: "Demo account created!",
+        description: "This is a demo account. Connect to Supabase for full functionality.",
+      });
+      
+      return { error: null };
     }
 
     try {
@@ -132,8 +155,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     if (!isSupabaseConfigured()) {
-      console.error("Cannot sign in - Supabase is not configured");
-      return { error: new Error("Supabase is not configured") };
+      console.warn("Running in demo mode - creating mock login");
+      
+      // Create mock user and profile in demo mode
+      const mockUserId = `mock-${Date.now()}`;
+      const mockUser = {
+        id: mockUserId,
+        email: email,
+        name: "Demo User",
+        skills: ["JavaScript", "React", "Frontend"],
+        interests: ["Web", "AI/ML"],
+        lookingFor: 'both' as const,
+        avatarUrl: `https://avatars.dicebear.com/api/initials/${email.charAt(0)}.svg`,
+      };
+      
+      // Set mock user and profile
+      setUser({ id: mockUserId, email: email } as SupabaseUser);
+      setProfile(mockUser);
+      
+      toast({
+        title: "Signed in with demo account",
+        description: "This is a demo account. Connect to Supabase for full functionality.",
+      });
+      
+      return { error: null };
     }
 
     try {
@@ -155,7 +200,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     if (!isSupabaseConfigured()) {
-      console.error("Cannot sign out - Supabase is not configured");
+      // Just clear local state in demo mode
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      
+      toast({
+        title: "Signed out from demo account",
+      });
+      
       return;
     }
 
@@ -170,8 +223,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (updates: Partial<User>) => {
-    if (!user || !isSupabaseConfigured()) {
-      console.error("Cannot update profile - User not logged in or Supabase not configured");
+    if (!isSupabaseConfigured()) {
+      // Update local state only in demo mode
+      if (profile) {
+        const updatedProfile = { ...profile, ...updates };
+        setProfile(updatedProfile);
+        
+        toast({
+          title: "Profile updated in demo mode",
+          description: "Connect to Supabase to save your profile permanently",
+        });
+      }
+      
+      return;
+    }
+
+    if (!user) {
+      console.error("Cannot update profile - User not logged in");
       return;
     }
 

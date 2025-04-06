@@ -32,23 +32,23 @@ export function MovingBubbles() {
 
     // Create bubbles
     const bubbles: Bubble[] = [];
-    const bubbleCount = Math.min(20, Math.max(5, Math.floor(window.innerWidth / 100)));
+    const bubbleCount = Math.min(30, Math.max(8, Math.floor(window.innerWidth / 80)));
     
     const colors = [
-      "rgba(103, 76, 215, 0.3)",
-      "rgba(80, 230, 230, 0.3)",
-      "rgba(150, 100, 255, 0.3)",
-      "rgba(70, 200, 255, 0.3)"
+      "rgba(103, 76, 215, 0.2)",  // Less transparent
+      "rgba(80, 230, 230, 0.2)",   // Less transparent
+      "rgba(150, 100, 255, 0.2)",  // Less transparent
+      "rgba(70, 200, 255, 0.2)"    // Less transparent
     ];
 
     for (let i = 0; i < bubbleCount; i++) {
       bubbles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 80 + 40,
+        size: Math.random() * 40 + 20, // Smaller bubbles (20-60px instead of 40-120px)
         speedX: (Math.random() - 0.5) * 0.5,
         speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.3 + 0.1,
+        opacity: Math.random() * 0.15 + 0.1, // Lower opacity range
         color: colors[Math.floor(Math.random() * colors.length)]
       });
     }

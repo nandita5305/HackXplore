@@ -7,14 +7,14 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
 import { InternshipCard } from "@/components/internships/InternshipCard";
-import { AIRecommendations } from "@/components/recommendations/AIRecommendations";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { PartnerSection } from "@/components/home/PartnerSection";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Search, LightbulbIcon, Users, Globe, Clock } from "lucide-react";
+import { ArrowRight, Search, LightbulbIcon, Users, Globe, Sparkles } from "lucide-react";
 import { hackathonsData, internshipsData, partnerLogosData } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState<string>("hackathons");
@@ -167,10 +167,31 @@ export default function Index() {
           </div>
         </section>
         
-        {/* AI Recommendations Section */}
+        {/* AI Recommendations Message (replacing the section) */}
         <section className="py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
-            <AIRecommendations />
+            <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 rounded-xl shadow-lg text-center py-12">
+              {/* Circular decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-xl -z-0 transform translate-x-8 -translate-y-8"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-0 transform -translate-x-8 translate-y-8 animate-float"></div>
+              
+              <CardContent className="relative z-10 max-w-3xl mx-auto">
+                <div className="flex items-center justify-center mb-4">
+                  <Sparkles className="h-8 w-8 text-secondary mr-3" />
+                  <h2 className="text-3xl font-bold">Personalized AI Recommendations</h2>
+                </div>
+                
+                <p className="text-xl text-muted-foreground mb-8">
+                  Sign in to get personalized AI recommendations based on your skills and interests.
+                </p>
+                
+                {!user && (
+                  <Button size="lg" className="gradient-button" onClick={openSignup}>
+                    Sign up for free
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </section>
         
