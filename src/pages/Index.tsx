@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -166,7 +165,7 @@ export default function Index() {
           </div>
         </section>
         
-        {/* AI Recommendations Message (replacing the section) */}
+        {/* AI Recommendations Message Section */}
         <section className="py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
             <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 rounded-xl shadow-lg text-center py-12">
