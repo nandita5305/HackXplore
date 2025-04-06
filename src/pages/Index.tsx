@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +10,7 @@ import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { PartnerSection } from "@/components/home/PartnerSection";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Search, LightbulbIcon, Users, Globe, Sparkles } from "lucide-react";
-import { hackathonsData, internshipsData, partnerLogosData } from "@/data/mockData";
+import { hackathonsData, internshipsData, partnerLogos } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +21,6 @@ export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Get featured items - limit to 3 for better display
   const featuredHackathons = hackathonsData.slice(0, 3);
   const featuredInternships = internshipsData.slice(0, 3);
 
@@ -76,7 +74,7 @@ export default function Index() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Search className="h-6 w-6 text-primary" />
+                  Search className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Centralized Discovery</h3>
                 <p className="text-muted-foreground">
@@ -86,7 +84,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <LightbulbIcon className="h-6 w-6 text-primary" />
+                  LightbulbIcon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">AI Recommendations</h3>
                 <p className="text-muted-foreground">
@@ -96,7 +94,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-primary" />
+                  Users className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Team Formation</h3>
                 <p className="text-muted-foreground">
@@ -106,7 +104,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Globe className="h-6 w-6 text-primary" />
+                  Globe className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Global Opportunities</h3>
                 <p className="text-muted-foreground">
@@ -171,7 +169,6 @@ export default function Index() {
         <section className="py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
             <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 rounded-xl shadow-lg text-center py-12">
-              {/* Circular decorative elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-xl -z-0 transform translate-x-8 -translate-y-8"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-0 transform -translate-x-8 translate-y-8 animate-float"></div>
               
@@ -206,7 +203,7 @@ export default function Index() {
             </div>
             
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-              {partnerLogosData.map((partner) => (
+              {partnerLogos.map((partner) => (
                 <a 
                   key={partner.id} 
                   href={partner.url} 

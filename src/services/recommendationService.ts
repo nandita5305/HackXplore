@@ -1,4 +1,3 @@
-
 import { HackathonCard, HackathonType, UserSkill } from "@/types";
 
 // Type for filtering hackathons
@@ -78,7 +77,32 @@ export const filterHackathons = (hackathons: HackathonCard[], filters: Hackathon
   });
 };
 
-// Get hackathon recommendations based on user profile
+// For backward compatibility with other components
+export const filterInternships = (internships: any[], filters: any): any[] => {
+  return internships.filter(internship => {
+    // Filter by skills
+    if (filters.skills && filters.skills.length > 0 && internship.skills) {
+      const internshipSkills = Array.isArray(internship.skills) 
+        ? internship.skills 
+        : [internship.skills];
+        
+      const hasMatchingSkill = filters.skills.some((skill: string) => 
+        internshipSkills.includes(skill)
+      );
+      
+      if (!hasMatchingSkill) return false;
+    }
+    
+    // Filter by remote preference
+    if (filters.isRemote !== undefined && internship.isRemote !== filters.isRemote) {
+      return false;
+    }
+    
+    return true;
+  });
+};
+
+// Get hackathon recommendations based on user profile - renamed for consistency
 export const getRecommendedHackathons = (
   hackathons: HackathonCard[],
   userSkills: UserSkill[] = [],
@@ -131,6 +155,10 @@ export const getRecommendedHackathons = (
     .slice(0, 5)
     .map(({ score, ...hackathon }) => hackathon);
 };
+
+// Aliases for backward compatibility
+export const getHackathonRecommendations = getRecommendedHackathons;
+export const getInternshipRecommendations = getRecommendedInternships;
 
 // Get internship recommendations based on user profile
 export const getRecommendedInternships = (
