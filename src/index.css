@@ -5,44 +5,48 @@
 
 @layer base {
   :root {
-    --background: 228 35% 7%;
-    --foreground: 210 40% 98%;
-
-    --card: 228 30% 10%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 228 30% 10%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 263 70% 50%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 180 70% 47%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 228 30% 15%;
-    --muted-foreground: 215.4 16.3% 70%;
-
-    --accent: 228 30% 15%;
-    --accent-foreground: 210 40% 98%;
-
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.75rem;
+  }
 
-    --border: 228 30% 18%;
-    --input: 228 30% 18%;
-    --ring: 263 70% 50%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 228 35% 7%;
-    --sidebar-foreground: 240 5.3% 80%;
-    --sidebar-primary: 263 70% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 228 30% 20%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
   }
 }
 
@@ -50,98 +54,29 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 }
 
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(103, 76, 215, 0.1);
-  pointer-events: none;
-}
-
-/* Animated background effect */
-.animated-bg {
-  position: relative;
-  overflow: hidden;
-}
-
-.animated-bg::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(103, 76, 215, 0.1) 0%, rgba(17, 22, 38, 0) 70%);
-  animation: rotate 30s linear infinite;
-  z-index: 0;
-}
-
-@keyframes rotate {
-  0% {
-    transform: rotate(0deg);
+@layer utilities {
+  .gradient-button {
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white;
   }
-  100% {
-    transform: rotate(360deg);
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-ripple {
+    animation: ripple 0.7s cubic-bezier(0, 0, 0.2, 1);
   }
 }
 
-/* Glass effect card */
-.glass-card {
-  background: rgba(30, 34, 53, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(103, 76, 215, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-/* Animated gradient button */
-.gradient-button {
-  background-size: 200% 200%;
-  background-image: linear-gradient(45deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 100%);
-  animation: gradient 5s ease infinite;
-}
-
-/* Card glow effects - made uniform across all card types */
-.hackathon-card-container, 
-.internship-card-container,
-.team-card-container {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: var(--radius);
-  will-change: transform;
-  animation: float 6s ease-in-out infinite;
-}
-
-.hackathon-card-container:hover, 
-.internship-card-container:hover,
-.team-card-container:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 0 25px rgba(103, 76, 215, 0.3);
-}
-
-/* Glow effect on hover - uniform across all card types */
-.hackathon-card-container:hover::before,
-.internship-card-container:hover::before,
-.team-card-container:hover::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: calc(var(--radius) + 2px);
-  padding: 2px;
-  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));
-  -webkit-mask: 
-     linear-gradient(#fff 0 0) content-box, 
-     linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 1;
-  z-index: -1;
-}
-
-/* Floating animation for cards */
 @keyframes float {
   0% {
     transform: translateY(0px);
@@ -154,64 +89,30 @@
   }
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Staggered float animations */
-.float-delay-1 {
-  animation-delay: 0.5s;
-}
-.float-delay-2 {
-  animation-delay: 1s;
-}
-.float-delay-3 {
-  animation-delay: 1.5s;
-}
-
-/* Pulse slow animation */
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Ripple effect for buttons */
 @keyframes ripple {
-  0% {
-    transform: scale(0);
+  from {
     opacity: 0.5;
+    transform: scale(0);
   }
-  100% {
-    transform: scale(2.5);
+  to {
     opacity: 0;
+    transform: scale(3);
   }
 }
 
-.animate-ripple {
-  animation: ripple 1s linear;
+/* Make floating bubbles more uniform and less transparent */
+.moving-bubble {
+  opacity: 0.25 !important;
+  max-width: 80px !important;
+  max-height: 80px !important;
 }
 
-/* Highlight for active tab */
-.active-tab {
-  @apply bg-primary text-white;
+/* Make hackathon cards and team forms consistent in styling */
+.hackathon-card, .internship-card, .team-card {
+  @apply rounded-xl border border-primary/20 hover:shadow-md transition-all duration-300;
+}
+
+/* Ensure the scroll behavior for "View More" actions */
+html {
+  scroll-behavior: smooth !important;
 }

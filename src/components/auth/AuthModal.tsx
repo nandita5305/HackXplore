@@ -46,26 +46,30 @@ export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-xl bg-transparent border-none shadow-none">
+      <DialogContent className="sm:max-w-md md:max-w-xl bg-transparent border-none shadow-none p-0 max-h-[90vh] overflow-hidden">
         <DialogTitle>
           <VisuallyHidden>{getTitleText()}</VisuallyHidden>
         </DialogTitle>
         
-        {currentView === "login" && (
-          <LoginForm
-            onSuccess={handleSuccess}
-            onSwitchToSignUp={() => setView("signup")}
-          />
-        )}
-        {currentView === "signup" && (
-          <SignUpForm
-            onSuccess={handleSuccess}
-            onSwitchToLogin={() => setView("login")}
-          />
-        )}
-        {currentView === "profile" && (
-          <ProfileForm onComplete={handleProfileComplete} />
-        )}
+        <ScrollArea className="max-h-[80vh]">
+          <div className="p-4">
+            {currentView === "login" && (
+              <LoginForm
+                onSuccess={handleSuccess}
+                onSwitchToSignUp={() => setView("signup")}
+              />
+            )}
+            {currentView === "signup" && (
+              <SignUpForm
+                onSuccess={handleSuccess}
+                onSwitchToLogin={() => setView("login")}
+              />
+            )}
+            {currentView === "profile" && (
+              <ProfileForm onComplete={handleProfileComplete} />
+            )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

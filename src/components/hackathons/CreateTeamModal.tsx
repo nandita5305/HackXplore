@@ -119,7 +119,7 @@ export function CreateTeamModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-xl relative overflow-hidden">
+      <DialogContent className="sm:max-w-md md:max-w-xl bg-background relative overflow-hidden max-h-[90vh]">
         {/* Circular decorative elements */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-xl"></div>
         <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-secondary/20 rounded-full blur-lg"></div>
@@ -131,8 +131,8 @@ export function CreateTeamModal({
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[70vh]">
-          <form onSubmit={handleSubmit} className="space-y-6 px-1 py-2">
+        <ScrollArea className="max-h-[60vh] pr-4">
+          <form onSubmit={handleSubmit} className="space-y-6 py-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="team-name">Team Name</Label>
@@ -233,7 +233,7 @@ export function CreateTeamModal({
           </form>
         </ScrollArea>
         
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button type="button" variant="outline" onClick={onClose} className="rounded-full">
             Cancel
           </Button>

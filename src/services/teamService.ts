@@ -13,66 +13,90 @@ export function useTeams() {
 
   // Function to fetch all teams for a hackathon
   const fetchTeamsByHackathon = async (hackathonId: string) => {
-    const { data, error } = await supabase
-      .from("teams")
-      .select("*")
-      .eq("hackathon_id", hackathonId);
-
-    if (error) {
-      throw error;
+    // For demo purposes
+    if (process.env.NODE_ENV === 'development' || !supabase) {
+      const storedTeams = localStorage.getItem('hackathon_teams') || '[]';
+      const teams = JSON.parse(storedTeams);
+      return teams.filter((team: any) => team.hackathon_id === hackathonId);
     }
 
-    return data || [];
+    try {
+      const { data, error } = await supabase
+        .from("teams")
+        .select("*")
+        .eq("hackathon_id", hackathonId);
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+      return [];
+    }
   };
 
   // Function to fetch teams that the user is part of
   const fetchUserTeams = async () => {
     if (!user) return [];
 
-    // Get teams where user is the creator
-    const { data: createdTeams, error: createdError } = await supabase
-      .from("teams")
-      .select("*")
-      .eq("creator_id", user.id);
-
-    if (createdError) {
-      throw createdError;
+    // For demo purposes
+    if (process.env.NODE_ENV === 'development' || !supabase) {
+      const storedTeams = localStorage.getItem('hackathon_teams') || '[]';
+      const teams = JSON.parse(storedTeams);
+      return teams.filter((team: any) => team.creator_id === user.id);
     }
 
-    // Get team memberships for the user
-    const { data: memberships, error: membershipError } = await supabase
-      .from("team_members")
-      .select("team_id, status")
-      .eq("user_id", user.id)
-      .eq("status", "accepted");
+    try {
+      // Get teams where user is the creator
+      const { data: createdTeams, error: createdError } = await supabase
+        .from("teams")
+        .select("*")
+        .eq("creator_id", user.id);
 
-    if (membershipError) {
-      throw membershipError;
-    }
+      if (createdError) {
+        throw createdError;
+      }
 
-    // If no memberships, return just the created teams
-    if (!memberships.length) {
-      return createdTeams || [];
-    }
+      // Get team memberships for the user
+      const { data: memberships, error: membershipError } = await supabase
+        .from("team_members")
+        .select("team_id, status")
+        .eq("user_id", user.id)
+        .eq("status", "accepted");
 
-    // Get teams where user is a member
-    const { data: memberTeams, error: memberTeamsError } = await supabase
-      .from("teams")
-      .select("*")
-      .in(
-        "id",
-        memberships.map((m) => m.team_id)
+      if (membershipError) {
+        throw membershipError;
+      }
+
+      // If no memberships, return just the created teams
+      if (!memberships.length) {
+        return createdTeams || [];
+      }
+
+      // Get teams where user is a member
+      const { data: memberTeams, error: memberTeamsError } = await supabase
+        .from("teams")
+        .select("*")
+        .in(
+          "id",
+          memberships.map((m) => m.team_id)
+        );
+
+      if (memberTeamsError) {
+        throw memberTeamsError;
+      }
+
+      // Combine created teams and teams where user is a member
+      const allTeams = [...(createdTeams || []), ...(memberTeams || [])];
+      return allTeams.filter(
+        (team, index, self) => index === self.findIndex((t) => t.id === team.id)
       );
-
-    if (memberTeamsError) {
-      throw memberTeamsError;
+    } catch (error) {
+      console.error("Error fetching user teams:", error);
+      return [];
     }
-
-    // Combine created teams and teams where user is a member
-    const allTeams = [...(createdTeams || []), ...(memberTeams || [])];
-    return allTeams.filter(
-      (team, index, self) => index === self.findIndex((t) => t.id === team.id)
-    );
   };
 
   // Query to get teams for a specific hackathon
@@ -119,18 +143,33 @@ export function useTeams() {
         creator_id: user.id,
         max_members: maxMembers,
         is_open: true,
+        created_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase.from("teams").insert(newTeam).select();
+      // For demo purposes
+      if (process.env.NODE_ENV === 'development' || !supabase) {
+        const storedTeams = localStorage.getItem('hackathon_teams') || '[]';
+        const teams = JSON.parse(storedTeams);
+        teams.push(newTeam);
+        localStorage.setItem('hackathon_teams', JSON.stringify(teams));
+        return newTeam;
+      }
 
-      if (error) throw error;
-      return data[0];
+      try {
+        const { data, error } = await supabase.from("teams").insert(newTeam).select();
+
+        if (error) throw error;
+        return data[0];
+      } catch (error) {
+        console.error("Error creating team:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       toast({
         title: "Team created",
-        description: `Your team ${data.name} has been created successfully`,
+        description: `Your team "${data.name}" has been created successfully`,
       });
     },
     onError: (error) => {
@@ -153,15 +192,30 @@ export function useTeams() {
         team_id: teamId,
         user_id: user.id,
         status: "pending",
+        created_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
-        .from("team_members")
-        .insert(newMembership)
-        .select();
+      // For demo purposes
+      if (process.env.NODE_ENV === 'development' || !supabase) {
+        const storedMemberships = localStorage.getItem('team_members') || '[]';
+        const memberships = JSON.parse(storedMemberships);
+        memberships.push(newMembership);
+        localStorage.setItem('team_members', JSON.stringify(memberships));
+        return newMembership;
+      }
 
-      if (error) throw error;
-      return data[0];
+      try {
+        const { data, error } = await supabase
+          .from("team_members")
+          .insert(newMembership)
+          .select();
+
+        if (error) throw error;
+        return data[0];
+      } catch (error) {
+        console.error("Error joining team:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
@@ -180,90 +234,70 @@ export function useTeams() {
     },
   });
 
-  // Mutation to update team status (open/closed)
-  const updateTeamStatusMutation = useMutation({
-    mutationFn: async ({ teamId, isOpen }: { teamId: string; isOpen: boolean }) => {
-      if (!user) throw new Error("User not authenticated");
-
-      const { data, error } = await supabase
-        .from("teams")
-        .update({ is_open: isOpen })
-        .eq("id", teamId)
-        .eq("creator_id", user.id) // Only the creator can update
-        .select();
-
-      if (error) throw error;
-      return data[0];
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["teams"] });
-      toast({
-        title: `Team ${data.is_open ? "opened" : "closed"}`,
-        description: `Your team is now ${
-          data.is_open ? "open for new members" : "closed to new members"
-        }`,
-      });
-    },
-    onError: (error) => {
-      console.error("Failed to update team status:", error);
-      toast({
-        title: "Failed to update team",
-        description: "There was an error updating your team status",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Function to check if user is in a team for a hackathon
   const isUserInTeam = async (hackathonId: string) => {
     if (!user) return false;
 
-    // Check if user created any teams for this hackathon
-    const { data: createdTeams, error: createdError } = await supabase
-      .from("teams")
-      .select("id")
-      .eq("creator_id", user.id)
-      .eq("hackathon_id", hackathonId);
+    // For demo purposes
+    if (process.env.NODE_ENV === 'development' || !supabase) {
+      const storedTeams = localStorage.getItem('hackathon_teams') || '[]';
+      const teams = JSON.parse(storedTeams);
+      return teams.some((team: any) => 
+        team.hackathon_id === hackathonId && team.creator_id === user.id
+      );
+    }
 
-    if (createdError) {
-      console.error("Error checking created teams:", createdError);
+    try {
+      // Check if user created any teams for this hackathon
+      const { data: createdTeams, error: createdError } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("creator_id", user.id)
+        .eq("hackathon_id", hackathonId);
+
+      if (createdError) {
+        console.error("Error checking created teams:", createdError);
+        return false;
+      }
+
+      if (createdTeams && createdTeams.length > 0) {
+        return true;
+      }
+
+      // Check if user is a member of any team for this hackathon
+      const { data: teams, error: teamsError } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("hackathon_id", hackathonId);
+
+      if (teamsError) {
+        console.error("Error checking teams:", teamsError);
+        return false;
+      }
+
+      if (!teams || teams.length === 0) {
+        return false;
+      }
+
+      const teamIds = teams.map(team => team.id);
+
+      const { data: memberships, error: membershipError } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id)
+        .eq("status", "accepted")
+        .in("team_id", teamIds);
+
+      if (membershipError) {
+        console.error("Error checking team memberships:", membershipError);
+        return false;
+      }
+
+      return memberships && memberships.length > 0;
+    } catch (error) {
+      console.error("Error checking if user is in team:", error);
       return false;
     }
-
-    if (createdTeams && createdTeams.length > 0) {
-      return true;
-    }
-
-    // Check if user is a member of any team for this hackathon
-    const { data: teams, error: teamsError } = await supabase
-      .from("teams")
-      .select("id")
-      .eq("hackathon_id", hackathonId);
-
-    if (teamsError) {
-      console.error("Error checking teams:", teamsError);
-      return false;
-    }
-
-    if (!teams || teams.length === 0) {
-      return false;
-    }
-
-    const teamIds = teams.map(team => team.id);
-
-    const { data: memberships, error: membershipError } = await supabase
-      .from("team_members")
-      .select("team_id")
-      .eq("user_id", user.id)
-      .eq("status", "accepted")
-      .in("team_id", teamIds);
-
-    if (membershipError) {
-      console.error("Error checking team memberships:", membershipError);
-      return false;
-    }
-
-    return memberships && memberships.length > 0;
   };
 
   return {
@@ -271,10 +305,8 @@ export function useTeams() {
     useUserTeams,
     createTeam: createTeamMutation.mutate,
     joinTeam: joinTeamMutation.mutate,
-    updateTeamStatus: updateTeamStatusMutation.mutate,
     isCreatingTeam: createTeamMutation.isPending,
     isJoiningTeam: joinTeamMutation.isPending,
-    isUpdatingTeam: updateTeamStatusMutation.isPending,
     isUserInTeam,
   };
 }

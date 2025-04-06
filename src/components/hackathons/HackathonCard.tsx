@@ -74,7 +74,7 @@ export function HackathonCard({
               </div>
             </div>
             {/* Animated circular pulse background */}
-            <div className="absolute -right-24 -top-24 w-48 h-48 bg-primary/20 rounded-full blur-2xl animate-pulse-slow"></div>
+            <div className="absolute -right-24 -top-24 w-48 h-48 bg-primary/10 rounded-full blur-2xl animate-pulse-slow"></div>
           </div>
         </div>
         
@@ -175,12 +175,14 @@ export function HackathonCard({
         defaultView="login"
       />
       
-      <CreateTeamModal
-        isOpen={isTeamModalOpen}
-        onClose={() => setIsTeamModalOpen(false)}
-        hackathonId={id}
-        hackathonTitle={title}
-      />
+      {isTeamModalOpen && (
+        <CreateTeamModal
+          isOpen={isTeamModalOpen}
+          onClose={() => setIsTeamModalOpen(false)}
+          hackathonId={id}
+          hackathonTitle={title}
+        />
+      )}
     </>
   );
 }
