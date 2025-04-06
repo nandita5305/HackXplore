@@ -15,6 +15,7 @@ import { Loader2, Sparkles, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -150,61 +151,19 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         <CardTitle>Sign Up</CardTitle>
         <CardDescription>Create your HackXplore account</CardDescription>
       </CardHeader>
-      <CardContent>
-        {currentStep === 1 ? (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} className="bg-background/50" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} className="bg-background/50" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="dob"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} className="bg-background/50" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <ScrollArea className="max-h-[70vh]">
+        <CardContent>
+          {currentStep === 1 ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                        <Input placeholder="John Doe" {...field} className="bg-background/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -213,28 +172,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                 
                 <FormField
                   control={form.control}
-                  name="confirmPassword"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="githubUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub URL (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://github.com/username" {...field} className="bg-background/50" />
+                        <Input placeholder="your.email@example.com" {...field} className="bg-background/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -243,175 +186,235 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                 
                 <FormField
                   control={form.control}
-                  name="linkedinUrl"
+                  name="dob"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>LinkedIn URL (Optional)</FormLabel>
+                      <FormLabel>Date of Birth</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://linkedin.com/in/username" {...field} className="bg-background/50" />
+                        <Input type="date" {...field} className="bg-background/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              
-              <Button type="submit" className="w-full gradient-button" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  "Continue"
-                )}
-              </Button>
-            </form>
-          </Form>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex justify-center mb-4">
-              <div className="relative group">
-                <Avatar className="w-24 h-24 border-4 border-primary/20">
-                  <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="bg-primary/20 text-xl">
-                    {form.getValues().name?.charAt(0) || "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <Button 
-                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
-                  onClick={() => setAvatarUrl(generateRandomAvatar())}
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            <Tabs defaultValue="skills">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="skills">Your Skills</TabsTrigger>
-                <TabsTrigger value="interests">Your Interests</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="skills" className="mt-4">
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Select the skills you have (choose all that apply)
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {skillsOptions.map((skill) => {
-                      const isSelected = selectedSkills.includes(skill as UserSkill);
-                      return (
-                        <Badge
-                          key={skill}
-                          variant={isSelected ? "default" : "outline"}
-                          className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                          onClick={() => toggleSkill(skill as UserSkill)}
-                        >
-                          {skill}
-                        </Badge>
-                      );
-                    })}
-                  </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="interests" className="mt-4">
-                <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Select the areas you're interested in
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {interestOptions.map((interest) => {
-                      const isSelected = selectedInterests.includes(interest as HackathonType);
-                      return (
-                        <Badge
-                          key={interest}
-                          variant={isSelected ? "default" : "outline"}
-                          className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                          onClick={() => toggleInterest(interest as HackathonType)}
-                        >
-                          {interest}
-                        </Badge>
-                      );
-                    })}
-                  </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="githubUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>GitHub URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://github.com/username" {...field} className="bg-background/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="linkedinUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>LinkedIn URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://linkedin.com/in/username" {...field} className="bg-background/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </TabsContent>
-            </Tabs>
-            
-            <div className="space-y-3">
-              <p className="text-sm font-medium">What are you looking for?</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={lookingFor === 'hackathons' ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setLookingFor('hackathons')}
-                >
-                  Hackathons
-                </Badge>
-                <Badge
-                  variant={lookingFor === 'internships' ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setLookingFor('internships')}
-                >
-                  Internships
-                </Badge>
-                <Badge
-                  variant={lookingFor === 'both' ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setLookingFor('both')}
-                >
-                  Both
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="pt-4">
-              {selectedSkills.length > 0 && selectedInterests.length > 0 ? (
-                <div className="bg-secondary/10 p-3 rounded-md mb-4 border border-primary/20">
-                  <div className="flex items-center text-primary mb-2">
-                    <Sparkles className="h-4 w-4 mr-2 text-secondary" />
-                    <p className="text-sm font-medium">AI Recommendation</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Based on your skills and interests, we'll recommend {lookingFor === 'hackathons' ? 'hackathons' : lookingFor === 'internships' ? 'internships' : 'opportunities'} that match your profile.
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-4">
-                  Select skills and interests to get personalized recommendations.
-                </p>
-              )}
-              
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setCurrentStep(1)}
-                  disabled={isLoading}
-                >
-                  Back
-                </Button>
-                <Button 
-                  className="flex-1 gradient-button"
-                  onClick={completeProfile}
-                  disabled={isLoading || selectedSkills.length === 0 || selectedInterests.length === 0}
-                >
+                
+                <Button type="submit" className="w-full gradient-button" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      Creating Account...
                     </>
                   ) : (
-                    "Complete Profile"
+                    "Continue"
                   )}
                 </Button>
+              </form>
+            </Form>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex justify-center mb-4">
+                <div className="relative group">
+                  <Avatar className="w-24 h-24 border-4 border-primary/20">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback className="bg-primary/20 text-xl">
+                      {form.getValues().name?.charAt(0) || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Button 
+                    className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                    onClick={() => setAvatarUrl(generateRandomAvatar())}
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <Tabs defaultValue="skills">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="skills">Your Skills</TabsTrigger>
+                  <TabsTrigger value="interests">Your Interests</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="skills" className="mt-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Select the skills you have (choose all that apply)
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {skillsOptions.map((skill) => {
+                        const isSelected = selectedSkills.includes(skill as UserSkill);
+                        return (
+                          <Badge
+                            key={skill}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
+                            onClick={() => toggleSkill(skill as UserSkill)}
+                          >
+                            {skill}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="interests" className="mt-4">
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Select the areas you're interested in
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {interestOptions.map((interest) => {
+                        const isSelected = selectedInterests.includes(interest as HackathonType);
+                        return (
+                          <Badge
+                            key={interest}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
+                            onClick={() => toggleInterest(interest as HackathonType)}
+                          >
+                            {interest}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+              
+              <div className="space-y-3">
+                <p className="text-sm font-medium">What are you looking for?</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant={lookingFor === 'hackathons' ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => setLookingFor('hackathons')}
+                  >
+                    Hackathons
+                  </Badge>
+                  <Badge
+                    variant={lookingFor === 'internships' ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => setLookingFor('internships')}
+                  >
+                    Internships
+                  </Badge>
+                  <Badge
+                    variant={lookingFor === 'both' ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => setLookingFor('both')}
+                  >
+                    Both
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="pt-4">
+                {selectedSkills.length > 0 && selectedInterests.length > 0 ? (
+                  <div className="bg-secondary/10 p-3 rounded-md mb-4 border border-primary/20">
+                    <div className="flex items-center text-primary mb-2">
+                      <Sparkles className="h-4 w-4 mr-2 text-secondary" />
+                      <p className="text-sm font-medium">AI Recommendation</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Based on your skills and interests, we'll recommend {lookingFor === 'hackathons' ? 'hackathons' : lookingFor === 'internships' ? 'internships' : 'opportunities'} that match your profile.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select skills and interests to get personalized recommendations.
+                  </p>
+                )}
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setCurrentStep(1)}
+                    disabled={isLoading}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    className="flex-1 gradient-button"
+                    onClick={completeProfile}
+                    disabled={isLoading || selectedSkills.length === 0 || selectedInterests.length === 0}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Complete Profile"
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </CardContent>
+          )}
+        </CardContent>
+      </ScrollArea>
       
       {currentStep === 1 && (
         <CardFooter className="flex flex-col space-y-4">

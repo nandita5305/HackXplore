@@ -6,6 +6,7 @@ import { SignUpForm } from "./SignUpForm";
 import { ProfileForm } from "./ProfileForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type AuthView = "login" | "signup" | "profile";
 

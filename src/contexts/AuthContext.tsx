@@ -1,311 +1,280 @@
+import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { User, UserProfile } from "@/types";
+import { UserSkill, HackathonType } from "@/types";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User as SupabaseUser, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { User } from '@/types';
-
-type AuthContextType = {
-  user: SupabaseUser | null;
-  profile: User | null;
-  session: Session | null;
-  loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+interface AuthContextType {
+  user: User | null;
+  profile: UserProfile | null;
+  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<User>) => Promise<void>;
-};
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
+  isLoading: boolean;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Check if Supabase environment variables are set
-const isSupabaseConfigured = () => {
-  return !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
-};
+// Demo mode constants
+const DEMO_USER_ID = "demo-user-123";
+const DEMO_USER_EMAIL = "demo@hackxplore.com";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [profile, setProfile] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize with mock data if Supabase is not configured
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      console.warn("Supabase is not configured - running in demo mode");
-      setLoading(false);
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+        });
+        fetchUserProfile(session.user.id);
+      } else {
+        // Check if we should activate demo mode
+        checkAndActivateDemoMode();
+      }
+      setIsLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+          });
+          fetchUserProfile(session.user.id);
+        } else {
+          setUser(null);
+          setProfile(null);
+          // Check if we should activate demo mode
+          checkAndActivateDemoMode();
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const checkAndActivateDemoMode = () => {
+    // Check if Supabase URL or key is missing (indicating we're in demo mode)
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - Supabase credentials missing");
+      activateDemoMode();
+    }
+  };
+
+  const activateDemoMode = () => {
+    // Set a demo user with mock data
+    setUser({
+      id: DEMO_USER_ID,
+      email: DEMO_USER_EMAIL,
+    });
+
+    // Set a demo profile
+    setProfile({
+      name: "Demo User",
+      skills: ["React", "JavaScript", "TypeScript", "Node.js"] as UserSkill[],
+      interests: ["Web Development", "AI/ML", "Mobile"] as HackathonType[],
+      lookingFor: "both",
+      avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
+      githubUrl: "https://github.com/demo-user",
+      linkedinUrl: "https://linkedin.com/in/demo-user",
+    });
+  };
+
+  const fetchUserProfile = async (userId: string) => {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - skipping actual profile fetch");
       return;
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Fetch user profile when user changes
-  useEffect(() => {
-    async function getProfile() {
-      if (!user || !isSupabaseConfigured()) {
-        setProfile(null);
+      if (error) {
+        console.error("Error fetching user profile:", error);
         return;
       }
 
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-        } else if (data) {
-          // Transform database profile to app User type
-          setProfile({
-            id: data.id,
-            email: user.email || '',
-            name: data.name || '',
-            skills: data.skills as any || [],
-            interests: data.interests as any || [],
-            preferredRole: data.preferred_role || undefined,
-            lookingFor: (data.looking_for as 'hackathons' | 'internships' | 'both') || 'both',
-            bio: data.bio || undefined,
-            githubUrl: data.github_url || undefined,
-            linkedinUrl: data.linkedin_url || undefined,
-            portfolioUrl: data.portfolio_url || undefined,
-            avatarUrl: data.avatar_url || undefined,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+      if (data) {
+        setProfile({
+          name: data.name,
+          skills: data.skills || [],
+          interests: data.interests || [],
+          lookingFor: data.looking_for || "both",
+          avatarUrl: data.avatar_url,
+          githubUrl: data.github_url,
+          linkedinUrl: data.linkedin_url,
+        });
       }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
     }
-
-    getProfile();
-  }, [user]);
+  };
 
   const signUp = async (email: string, password: string) => {
-    if (!isSupabaseConfigured()) {
-      console.warn("Running in demo mode - creating mock account");
-      
-      // Create mock user and profile in demo mode
-      const mockUserId = `mock-${Date.now()}`;
-      const mockUser = {
-        id: mockUserId,
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - simulating signup");
+      // Simulate the signup process in demo mode
+      setUser({
+        id: DEMO_USER_ID,
         email: email,
-        name: "",
-        skills: [],
-        interests: [],
-        lookingFor: 'both' as const,
-        avatarUrl: `https://avatars.dicebear.com/api/initials/${email.charAt(0)}.svg`,
-      };
-      
-      // Set mock user and profile
-      setUser({ id: mockUserId, email: email } as SupabaseUser);
-      setProfile(mockUser);
-      
-      toast({
-        title: "Demo account created!",
-        description: "This is a demo account. Connect to Supabase for full functionality.",
       });
-      
       return { error: null };
     }
 
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
-      
-      if (!error) {
-        toast({
-          title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
-        });
-        
-        // Create initial profile
-        if (user) {
-          await supabase.from('profiles').insert({
-            id: user.id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        }
-      }
-      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
       return { error };
     } catch (error) {
-      console.error('Error signing up:', error);
-      return { error };
+      console.error("Error signing up:", error);
+      return { error: error as Error };
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseConfigured()) {
-      console.warn("Running in demo mode - creating mock login");
-      
-      // Create mock user and profile in demo mode
-      const mockUserId = `mock-${Date.now()}`;
-      const mockUser = {
-        id: mockUserId,
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - simulating signin");
+      // Simulate the signin process in demo mode
+      setUser({
+        id: DEMO_USER_ID,
         email: email,
-        name: "Demo User",
-        skills: ["JavaScript", "React", "Frontend"],
-        interests: ["Web", "AI/ML"],
-        lookingFor: 'both' as const,
-        avatarUrl: `https://avatars.dicebear.com/api/initials/${email.charAt(0)}.svg`,
-      };
-      
-      // Set mock user and profile
-      setUser({ id: mockUserId, email: email } as SupabaseUser);
-      setProfile(mockUser);
-      
-      toast({
-        title: "Signed in with demo account",
-        description: "This is a demo account. Connect to Supabase for full functionality.",
       });
-      
+      // Set a demo profile
+      setProfile({
+        name: "Demo User",
+        skills: ["React", "JavaScript", "TypeScript", "Node.js"] as UserSkill[],
+        interests: ["Web Development", "AI/ML", "Mobile"] as HackathonType[],
+        lookingFor: "both",
+        avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
+        githubUrl: "https://github.com/demo-user",
+        linkedinUrl: "https://linkedin.com/in/demo-user",
+      });
       return { error: null };
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (!error) {
-        toast({
-          title: "Signed in successfully!",
-          description: "Welcome back to HackXplore",
-        });
-      }
-      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       return { error };
     } catch (error) {
-      console.error('Error signing in:', error);
-      return { error };
+      console.error("Error signing in:", error);
+      return { error: error as Error };
     }
   };
 
   const signOut = async () => {
-    if (!isSupabaseConfigured()) {
-      // Just clear local state in demo mode
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - simulating signout");
+      // Clear the user and profile states in demo mode
       setUser(null);
       setProfile(null);
-      setSession(null);
-      
-      toast({
-        title: "Signed out from demo account",
-      });
-      
       return;
     }
 
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Signed out successfully",
-      });
+      setUser(null);
+      setProfile(null);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
-  const updateProfile = async (updates: Partial<User>) => {
-    if (!isSupabaseConfigured()) {
-      // Update local state only in demo mode
-      if (profile) {
-        const updatedProfile = { ...profile, ...updates };
-        setProfile(updatedProfile);
-        
-        toast({
-          title: "Profile updated in demo mode",
-          description: "Connect to Supabase to save your profile permanently",
-        });
-      }
-      
-      return;
-    }
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    if (!user) return;
 
-    if (!user) {
-      console.error("Cannot update profile - User not logged in");
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.log("Running in demo mode - simulating profile update");
+      // Update the profile in demo mode
+      setProfile(prevProfile => {
+        if (!prevProfile) {
+          // If we don't have a profile yet, create a new one with the provided data
+          return {
+            name: profileData.name || "Demo User",
+            skills: profileData.skills || [] as UserSkill[],
+            interests: profileData.interests || [] as HackathonType[],
+            lookingFor: profileData.lookingFor || "both",
+            avatarUrl: profileData.avatarUrl || "https://avatars.dicebear.com/api/initials/DU.svg",
+            githubUrl: profileData.githubUrl || "",
+            linkedinUrl: profileData.linkedinUrl || "",
+          };
+        }
+        // Otherwise update the existing profile
+        return {
+          ...prevProfile,
+          ...profileData,
+        };
+      });
       return;
     }
 
     try {
-      // Transform app User type to database profile
-      const dbUpdates = {
-        name: updates.name,
-        avatar_url: updates.avatarUrl,
-        skills: updates.skills,
-        interests: updates.interests,
-        preferred_role: updates.preferredRole,
-        looking_for: updates.lookingFor,
-        bio: updates.bio,
-        github_url: updates.githubUrl,
-        linkedin_url: updates.linkedinUrl,
-        portfolio_url: updates.portfolioUrl,
+      const updates = {
+        user_id: user.id,
+        name: profileData.name,
+        skills: profileData.skills,
+        interests: profileData.interests,
+        looking_for: profileData.lookingFor,
+        avatar_url: profileData.avatarUrl,
+        github_url: profileData.githubUrl,
+        linkedin_url: profileData.linkedinUrl,
         updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
-        .from('profiles')
-        .update(dbUpdates)
-        .eq('id', user.id);
+        .from("profiles")
+        .upsert(updates, { onConflict: "user_id" });
 
       if (error) {
         throw error;
       }
 
-      // Update local profile state
-      if (profile) {
-        setProfile({
-          ...profile,
-          ...updates,
-        });
-      }
-
-      toast({
-        title: "Profile updated successfully",
+      // Update the profile state with the new data
+      setProfile(prevProfile => {
+        if (!prevProfile) return profileData as UserProfile;
+        return { ...prevProfile, ...profileData };
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Error updating profile",
-        variant: "destructive",
-      });
+      console.error("Error updating profile:", error);
+      throw error;
     }
   };
 
   const value = {
     user,
     profile,
-    session,
-    loading,
     signUp,
     signIn,
     signOut,
     updateProfile,
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};

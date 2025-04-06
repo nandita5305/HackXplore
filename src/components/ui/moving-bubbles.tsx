@@ -1,55 +1,65 @@
 
 import { useEffect, useRef } from "react";
 
-interface Bubble {
-  x: number;
-  y: number;
-  size: number;
-  speedX: number;
-  speedY: number;
-  opacity: number;
-  color: string;
+interface BubbleProps {
+  numBubbles?: number;
+  minSize?: number;
+  maxSize?: number;
+  minSpeed?: number;
+  maxSpeed?: number;
+  colors?: string[];
+  opacity?: number;
 }
 
-export function MovingBubbles() {
+export function MovingBubbles({
+  numBubbles = 20,
+  minSize = 20,
+  maxSize = 60,
+  minSpeed = 0.5,
+  maxSpeed = 2,
+  colors = ['#674cd7', '#33ccff', '#9b87f5'],
+  opacity = 0.2,
+}: BubbleProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to match window
+    // Set canvas to full screen
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
 
+    // Initial resize
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+
+    // Listen for window resize
+    window.addEventListener('resize', resizeCanvas);
 
     // Create bubbles
-    const bubbles: Bubble[] = [];
-    const bubbleCount = Math.min(30, Math.max(8, Math.floor(window.innerWidth / 80)));
-    
-    const colors = [
-      "rgba(103, 76, 215, 0.2)",  // Less transparent
-      "rgba(80, 230, 230, 0.2)",   // Less transparent
-      "rgba(150, 100, 255, 0.2)",  // Less transparent
-      "rgba(70, 200, 255, 0.2)"    // Less transparent
-    ];
+    const bubbles: {
+      x: number;
+      y: number;
+      radius: number;
+      color: string;
+      speedX: number;
+      speedY: number;
+    }[] = [];
 
-    for (let i = 0; i < bubbleCount; i++) {
+    for (let i = 0; i < numBubbles; i++) {
+      const radius = Math.random() * (maxSize - minSize) + minSize;
       bubbles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 40 + 20, // Smaller bubbles (20-60px instead of 40-120px)
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.15 + 0.1, // Lower opacity range
-        color: colors[Math.floor(Math.random() * colors.length)]
+        radius,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedX: (Math.random() - 0.5) * (maxSpeed - minSpeed) + minSpeed,
+        speedY: (Math.random() - 0.5) * (maxSpeed - minSpeed) + minSpeed,
       });
     }
 
@@ -57,19 +67,24 @@ export function MovingBubbles() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      bubbles.forEach(bubble => {
+      // Update and draw bubbles
+      bubbles.forEach((bubble) => {
         // Move bubble
         bubble.x += bubble.speedX;
         bubble.y += bubble.speedY;
 
-        // Bounce off edges
-        if (bubble.x < 0 || bubble.x > canvas.width) bubble.speedX *= -1;
-        if (bubble.y < 0 || bubble.y > canvas.height) bubble.speedY *= -1;
+        // Bounce off walls
+        if (bubble.x < bubble.radius || bubble.x > canvas.width - bubble.radius) {
+          bubble.speedX *= -1;
+        }
+        if (bubble.y < bubble.radius || bubble.y > canvas.height - bubble.radius) {
+          bubble.speedY *= -1;
+        }
 
         // Draw bubble
         ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
-        ctx.fillStyle = bubble.color;
+        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bubble.color + Math.floor(opacity * 255).toString(16).padStart(2, '0');
         ctx.fill();
       });
 
@@ -78,10 +93,11 @@ export function MovingBubbles() {
 
     animate();
 
+    // Cleanup
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, [numBubbles, minSize, maxSize, minSpeed, maxSpeed, colors, opacity]);
 
   return (
     <canvas

@@ -20,6 +20,7 @@ import { UserSkill } from "@/types";
 import { skillsOptions } from "@/data/mockData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -130,128 +131,131 @@ export function CreateTeamModal({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="team-name">Team Name</Label>
-              <Input
-                id="team-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter a name for your team"
-                required
-                className="border-primary/20 bg-background/50 focus:border-primary"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="team-description">Description</Label>
-              <Textarea
-                id="team-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your project idea or what you're looking for in teammates"
-                required
-                rows={4}
-                className="border-primary/20 bg-background/50 focus:border-primary"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label>Skills Needed</Label>
-                <Button 
-                  type="button" 
-                  size="sm" 
-                  variant="outline"
-                  onClick={suggestSkills}
-                  disabled={aiSuggesting}
-                  className="text-xs rounded-full flex items-center"
-                >
-                  {aiSuggesting ? (
-                    <>
-                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                      Suggesting...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-1 h-3 w-3 text-secondary" />
-                      AI Suggest
-                    </>
-                  )}
-                </Button>
+        <ScrollArea className="max-h-[70vh]">
+          <form onSubmit={handleSubmit} className="space-y-6 px-1 py-2">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="team-name">Team Name</Label>
+                <Input
+                  id="team-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter a name for your team"
+                  required
+                  className="border-primary/20 bg-background/50 focus:border-primary"
+                />
               </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {skillsOptions.map((skill) => {
-                  const isSelected = selectedSkills.includes(skill as UserSkill);
-                  return (
-                    <Badge
-                      key={skill}
-                      variant={isSelected ? "default" : "outline"}
-                      className={`cursor-pointer rounded-full ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                      onClick={() => toggleSkill(skill as UserSkill)}
-                    >
-                      {skill}
-                    </Badge>
-                  );
-                })}
+              
+              <div className="space-y-2">
+                <Label htmlFor="team-description">Description</Label>
+                <Textarea
+                  id="team-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe your project idea or what you're looking for in teammates"
+                  required
+                  rows={4}
+                  className="border-primary/20 bg-background/50 focus:border-primary"
+                />
               </div>
-              {selectedSkills.length === 0 && (
-                <p className="text-sm text-destructive">
-                  Please select at least one skill
-                </p>
-              )}
-            </div>
-            
-            <div className="space-y-2 pt-2">
-              <div className="flex justify-between">
-                <Label htmlFor="max-members" className="flex items-center">
-                  <Users className="mr-2 h-4 w-4" />
-                  Maximum Team Size
-                </Label>
-                <span className="text-sm text-muted-foreground">{maxMembers} members</span>
-              </div>
-              <Slider
-                id="max-members"
-                min={2}
-                max={8}
-                step={1}
-                value={[maxMembers]}
-                onValueChange={(value) => setMaxMembers(value[0])}
-                className="py-4"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>2</span>
-                <span>4</span>
-                <span>6</span>
-                <span>8</span>
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} className="rounded-full">
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isCreatingTeam || name.trim() === "" || description.trim() === "" || selectedSkills.length === 0}
-              className="rounded-full relative overflow-hidden group"
-            >
-              <span className="relative z-10">
-                {isCreatingTeam ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Team"
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Skills Needed</Label>
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline"
+                    onClick={suggestSkills}
+                    disabled={aiSuggesting}
+                    className="text-xs rounded-full flex items-center"
+                  >
+                    {aiSuggesting ? (
+                      <>
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        Suggesting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-1 h-3 w-3 text-secondary" />
+                        AI Suggest
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {skillsOptions.map((skill) => {
+                    const isSelected = selectedSkills.includes(skill as UserSkill);
+                    return (
+                      <Badge
+                        key={skill}
+                        variant={isSelected ? "default" : "outline"}
+                        className={`cursor-pointer rounded-full ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
+                        onClick={() => toggleSkill(skill as UserSkill)}
+                      >
+                        {skill}
+                      </Badge>
+                    );
+                  })}
+                </div>
+                {selectedSkills.length === 0 && (
+                  <p className="text-sm text-destructive">
+                    Please select at least one skill
+                  </p>
                 )}
-              </span>
-              <span className="absolute inset-0 rounded-full bg-white/10 group-hover:animate-ripple"></span>
-            </Button>
-          </DialogFooter>
-        </form>
+              </div>
+              
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="max-members" className="flex items-center">
+                    <Users className="mr-2 h-4 w-4" />
+                    Maximum Team Size
+                  </Label>
+                  <span className="text-sm text-muted-foreground">{maxMembers} members</span>
+                </div>
+                <Slider
+                  id="max-members"
+                  min={2}
+                  max={8}
+                  step={1}
+                  value={[maxMembers]}
+                  onValueChange={(value) => setMaxMembers(value[0])}
+                  className="py-4"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>2</span>
+                  <span>4</span>
+                  <span>6</span>
+                  <span>8</span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ScrollArea>
+        
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} className="rounded-full">
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            onClick={handleSubmit}
+            disabled={isCreatingTeam || name.trim() === "" || description.trim() === "" || selectedSkills.length === 0}
+            className="rounded-full relative overflow-hidden group"
+          >
+            <span className="relative z-10">
+              {isCreatingTeam ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
+                  Creating...
+                </>
+              ) : (
+                "Create Team"
+              )}
+            </span>
+            <span className="absolute inset-0 rounded-full bg-white/10 group-hover:animate-ripple"></span>
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

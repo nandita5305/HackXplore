@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
@@ -35,6 +36,7 @@ export default function Hackathons() {
   
   const { user, profile } = useAuth();
   const isMobile = useIsMobile();
+  const listTopRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     let results = allHackathons;
@@ -75,6 +77,10 @@ export default function Hackathons() {
 
   const handleViewMore = () => {
     setShowAll(true);
+    // Scroll to top of the list
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleFormTeam = (hackathon: HackathonCardType) => {
@@ -88,7 +94,7 @@ export default function Hackathons() {
   
   return (
     <>
-      <MovingBubbles />
+      <MovingBubbles numBubbles={15} opacity={0.1} minSize={10} maxSize={40} />
       <Navbar />
       
       <main className="flex-1">
@@ -101,6 +107,14 @@ export default function Hackathons() {
               <p className="text-muted-foreground text-lg">
                 Find hackathons from various platforms, filter based on your preferences, and build your next project.
               </p>
+              
+              {!user && (
+                <div className="mt-6 p-4 bg-secondary/10 rounded-lg border border-secondary/20">
+                  <p className="text-sm">
+                    Sign in to get personalized AI recommendations based on your skills and interests.
+                  </p>
+                </div>
+              )}
             </div>
             
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8 relative">
@@ -139,7 +153,7 @@ export default function Hackathons() {
                 <HackathonFilters onFilterChange={handleFilterChange} />
               )}
               
-              <div className="flex-1">
+              <div className="flex-1" ref={listTopRef}>
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold">
                     {filteredHackathons.length} {filteredHackathons.length === 1 ? 'Hackathon' : 'Hackathons'}
@@ -168,7 +182,6 @@ export default function Hackathons() {
                             teamSize={hackathon.teamSize}
                             skills={hackathon.skills}
                             isBookmarked={hackathon.isBookmarked}
-                            onFormTeamClick={() => handleFormTeam(hackathon)}
                           />
                         </div>
                       ))}
@@ -226,7 +239,7 @@ export default function Hackathons() {
           isOpen={isTeamModalOpen}
           onClose={() => setIsTeamModalOpen(false)}
           hackathonId={selectedHackathon.id}
-          userSkills={profile?.skills || []}
+          hackathonTitle={selectedHackathon.title}
         />
       )}
     </>
