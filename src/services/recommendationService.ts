@@ -77,7 +77,7 @@ export const filterHackathons = (hackathons: HackathonCard[], filters: Hackathon
   });
 };
 
-// For backward compatibility with other components
+// Filter internships based on provided filters
 export const filterInternships = (internships: any[], filters: any): any[] => {
   return internships.filter(internship => {
     // Filter by skills
@@ -102,7 +102,7 @@ export const filterInternships = (internships: any[], filters: any): any[] => {
   });
 };
 
-// Get hackathon recommendations based on user profile - renamed for consistency
+// Get hackathon recommendations based on user profile
 export const getRecommendedHackathons = (
   hackathons: HackathonCard[],
   userSkills: UserSkill[] = [],
@@ -156,7 +156,7 @@ export const getRecommendedHackathons = (
     .map(({ score, ...hackathon }) => hackathon);
 };
 
-// Aliases for backward compatibility
+// Backward compatibility aliases - defined after the main functions
 export const getHackathonRecommendations = getRecommendedHackathons;
 export const getInternshipRecommendations = getRecommendedInternships;
 
