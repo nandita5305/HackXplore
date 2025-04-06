@@ -1,3 +1,4 @@
+
 // Add or update the User type to include id and email fields
 export interface User {
   id: string;
@@ -81,4 +82,33 @@ export interface HackathonCard {
   teamSize: number;
   skills: UserSkill[];
   description: string;
+  isBookmarked?: boolean;
+}
+
+// Add InternshipCard interface
+export interface InternshipCard {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  deadline: string;
+  duration: string;
+  stipend: string;
+  imageUrl: string;
+  url: string;
+  description: string;
+  skills: UserSkill[];
+  isRemote: boolean;
+}
+
+// Add Team interface for teamService
+export interface Team {
+  id: string;
+  hackathonId: string;
+  name: string;
+  description: string;
+  skillsNeeded: UserSkill[];
+  members: string[];
+  createdBy: string;
+  createdAt: string;
 }

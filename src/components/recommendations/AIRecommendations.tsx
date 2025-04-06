@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
@@ -5,7 +6,7 @@ import { InternshipCard } from "@/components/internships/InternshipCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hackathonsData, internshipsData } from "@/data/mockData";
-import { HackathonType, UserSkill } from "@/types";
+import { HackathonCard as HackathonCardType, InternshipCard as InternshipCardType } from "@/types";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { getRecommendedHackathons, getRecommendedInternships } from "@/services/recommendationService";
@@ -13,15 +14,15 @@ import { getRecommendedHackathons, getRecommendedInternships } from "@/services/
 export function AIRecommendations() {
   const [activeTab, setActiveTab] = useState<string>("hackathons");
   const { user } = useAuth();
-  const [recommendedHackathons, setRecommendedHackathons] = useState<HackathonCard[]>([]);
-  const [recommendedInternships, setRecommendedInternships] = useState<any[]>([]);
+  const [recommendedHackathons, setRecommendedHackathons] = useState<HackathonCardType[]>([]);
+  const [recommendedInternships, setRecommendedInternships] = useState<InternshipCardType[]>([]);
   
   useEffect(() => {
     if (user) {
-      const hackathons = getRecommendedHackathons(hackathonsData, user.skills, user.interests);
+      const hackathons = getRecommendedHackathons(hackathonsData as HackathonCardType[], user.skills, user.interests);
       setRecommendedHackathons(hackathons);
       
-      const internships = getRecommendedInternships(internshipsData, user.skills);
+      const internships = getRecommendedInternships(internshipsData as InternshipCardType[], user.skills);
       setRecommendedInternships(internships);
     }
   }, [user]);

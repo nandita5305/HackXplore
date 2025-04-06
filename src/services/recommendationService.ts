@@ -1,3 +1,4 @@
+
 import { HackathonCard, HackathonType, UserSkill } from "@/types";
 
 // Type for filtering hackathons
@@ -102,6 +103,45 @@ export const filterInternships = (internships: any[], filters: any): any[] => {
   });
 };
 
+// Get internship recommendations based on user profile
+// Define this function before it's referenced in getHackathonRecommendations
+export const getRecommendedInternships = (
+  internships: any[],
+  userSkills: UserSkill[] = []
+): any[] => {
+  if (!userSkills.length) {
+    return internships.slice(0, 3); // Return first 3 if no user skills
+  }
+  
+  return internships
+    .map(internship => {
+      let score = 0;
+      
+      // Score based on matching skills
+      if (internship.skills && userSkills.length) {
+        const internshipSkills = Array.isArray(internship.skills) 
+          ? internship.skills.map(s => s as UserSkill) 
+          : [internship.skills as UserSkill];
+          
+        userSkills.forEach(skill => {
+          if (internshipSkills.includes(skill)) {
+            score += 2;
+          }
+        });
+      }
+      
+      // Boost score for remote internships (might be preferred)
+      if (internship.isRemote) {
+        score += 1;
+      }
+      
+      return { ...internship, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(({ score, ...internship }) => internship);
+};
+
 // Get hackathon recommendations based on user profile
 export const getRecommendedHackathons = (
   hackathons: HackathonCard[],
@@ -159,41 +199,3 @@ export const getRecommendedHackathons = (
 // Backward compatibility aliases - defined after the main functions
 export const getHackathonRecommendations = getRecommendedHackathons;
 export const getInternshipRecommendations = getRecommendedInternships;
-
-// Get internship recommendations based on user profile
-export const getRecommendedInternships = (
-  internships: any[],
-  userSkills: UserSkill[] = []
-): any[] => {
-  if (!userSkills.length) {
-    return internships.slice(0, 3); // Return first 3 if no user skills
-  }
-  
-  return internships
-    .map(internship => {
-      let score = 0;
-      
-      // Score based on matching skills
-      if (internship.skills && userSkills.length) {
-        const internshipSkills = Array.isArray(internship.skills) 
-          ? internship.skills.map(s => s as UserSkill) 
-          : [internship.skills as UserSkill];
-          
-        userSkills.forEach(skill => {
-          if (internshipSkills.includes(skill)) {
-            score += 2;
-          }
-        });
-      }
-      
-      // Boost score for remote internships (might be preferred)
-      if (internship.isRemote) {
-        score += 1;
-      }
-      
-      return { ...internship, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map(({ score, ...internship }) => internship);
-};
