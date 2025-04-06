@@ -105,6 +105,66 @@
   animation: gradient 5s ease infinite;
 }
 
+/* Card glow effects */
+.hackathon-card-container, .internship-card-container {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius);
+  will-change: transform;
+}
+
+.hackathon-card-container:hover, .internship-card-container:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 25px rgba(103, 76, 215, 0.3);
+}
+
+/* Glow effect on hover */
+.hackathon-card-container:hover::before, .internship-card-container:hover::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius) + 2px);
+  padding: 2px;
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 1;
+  z-index: -1;
+}
+
+/* Floating animation for cards */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse slow animation */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -115,4 +175,9 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+/* Highlight for active tab */
+.active-tab {
+  @apply bg-primary text-white;
 }

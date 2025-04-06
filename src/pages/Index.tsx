@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AnimatedBackground } from "@/components/ui/animated-background";
+import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
@@ -10,19 +10,33 @@ import { InternshipCard } from "@/components/internships/InternshipCard";
 import { AIRecommendations } from "@/components/recommendations/AIRecommendations";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { PartnerSection } from "@/components/home/PartnerSection";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Search, LightbulbIcon, Users, Globe, Clock } from "lucide-react";
 import { hackathonsData, internshipsData, partnerLogosData } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState<string>("hackathons");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
-  // Get featured items
-  const featuredHackathons = hackathonsData.slice(0, 4);
-  const featuredInternships = internshipsData.slice(0, 4);
+  // Get featured items - limit to 3 for better display
+  const featuredHackathons = hackathonsData.slice(0, 3);
+  const featuredInternships = internshipsData.slice(0, 3);
+
+  const openSignup = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsAuthModalOpen(false);
+  };
   
   return (
-    <AnimatedBackground>
+    <>
+      <MovingBubbles />
       <Navbar />
       
       <main>
@@ -42,7 +56,7 @@ export default function Index() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="lg" variant="outline" className="hover:bg-primary/10 hover:text-primary">
                 <Link to="/internships">Discover Internships</Link>
               </Button>
             </div>
@@ -60,7 +74,7 @@ export default function Index() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10">
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                   <Search className="h-6 w-6 text-primary" />
                 </div>
@@ -70,7 +84,7 @@ export default function Index() {
                 </p>
               </div>
               
-              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10">
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                   <LightbulbIcon className="h-6 w-6 text-primary" />
                 </div>
@@ -80,7 +94,7 @@ export default function Index() {
                 </p>
               </div>
               
-              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10">
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
@@ -90,7 +104,7 @@ export default function Index() {
                 </p>
               </div>
               
-              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10">
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                   <Globe className="h-6 w-6 text-primary" />
                 </div>
@@ -114,29 +128,37 @@ export default function Index() {
                 onValueChange={setActiveTab}
                 className="w-full md:w-auto mt-4 md:mt-0"
               >
-                <TabsList className="grid w-full md:w-auto grid-cols-2">
-                  <TabsTrigger value="hackathons">Hackathons</TabsTrigger>
-                  <TabsTrigger value="internships">Internships</TabsTrigger>
+                <TabsList className="grid w-full md:w-auto grid-cols-2 bg-primary/10">
+                  <TabsTrigger value="hackathons" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                    Hackathons
+                  </TabsTrigger>
+                  <TabsTrigger value="internships" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+                    Internships
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
             
             {activeTab === "hackathons" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredHackathons.map((hackathon) => (
-                  <HackathonCard key={hackathon.id} {...hackathon} />
+                  <div key={hackathon.id} className="hackathon-card-container animate-float">
+                    <HackathonCard {...hackathon} />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredInternships.map((internship) => (
-                  <InternshipCard key={internship.id} {...internship} />
+                  <div key={internship.id} className="internship-card-container animate-float">
+                    <InternshipCard {...internship} />
+                  </div>
                 ))}
               </div>
             )}
             
             <div className="flex justify-center mt-10">
-              <Button asChild>
+              <Button asChild className="gradient-button">
                 <Link to={activeTab === "hackathons" ? "/hackathons" : "/internships"}>
                   View More <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -169,7 +191,7 @@ export default function Index() {
                   href={partner.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="grayscale hover:grayscale-0 transition-all duration-300"
+                  className="grayscale hover:grayscale-0 transition-all duration-300 hover:scale-110"
                 >
                   <img 
                     src={partner.logo} 
@@ -197,25 +219,22 @@ export default function Index() {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
               Create your profile today and get personalized recommendations for hackathons and internships.
             </p>
-            <Button asChild size="lg" className="gradient-button">
-              <Link to="/hackathons">Get Started Now</Link>
-            </Button>
+            {!user && (
+              <Button size="lg" className="gradient-button" onClick={openSignup}>
+                Get Started Now
+              </Button>
+            )}
           </div>
         </section>
       </main>
       
       <Footer />
-    </AnimatedBackground>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={closeModal} 
+        defaultView="signup"
+      />
+    </>
   );
 }
-// src/types/index.ts
-export type UserSkill = "Frontend" | "Backend" | "UI/UX" | "ML/AI" | "DevOps" | "Mobile";
-
-export type HackathonType =
-  | "Web"
-  | "AI"
-  | "Blockchain"
-  | "Fintech"
-  | "Health"
-  | "EdTech";
-

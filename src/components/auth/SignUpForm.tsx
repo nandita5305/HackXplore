@@ -8,18 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckboxItem } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
 
 const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   confirmPassword: z.string(),
+  dob: z.string().optional(),
+  githubUrl: z.string().url().optional().or(z.literal("")),
+  linkedinUrl: z.string().url().optional().or(z.literal("")),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -37,16 +41,27 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<HackathonType[]>([]);
   const [lookingFor, setLookingFor] = useState<'hackathons' | 'internships' | 'both'>('both');
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
+      dob: "",
+      githubUrl: "",
+      linkedinUrl: "",
     },
   });
+
+  const generateRandomAvatar = () => {
+    // Use a placeholder avatar service for demo purposes
+    const randomSeed = Math.floor(Math.random() * 1000);
+    return `https://avatars.dicebear.com/api/initials/${randomSeed}.svg`;
+  };
 
   const toggleSkill = (skill: UserSkill) => {
     setSelectedSkills(prev => 
@@ -77,6 +92,9 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           variant: "destructive",
         });
       } else {
+        if (!avatarUrl) {
+          setAvatarUrl(generateRandomAvatar());
+        }
         // Move to next step after successful signup
         setCurrentStep(2);
       }
@@ -95,10 +113,16 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     setIsLoading(true);
     
     try {
+      const values = form.getValues();
+      
       await updateProfile({
+        name: values.name,
+        githubUrl: values.githubUrl,
+        linkedinUrl: values.linkedinUrl,
         skills: selectedSkills,
         interests: selectedInterests,
         lookingFor,
+        avatarUrl: avatarUrl,
       });
       
       toast({
@@ -129,7 +153,21 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
       <CardContent>
         {currentStep === 1 ? (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} className="bg-background/50" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -143,33 +181,82 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
-                name="password"
+                name="dob"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Date of Birth</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                      <Input type="date" {...field} className="bg-background/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} className="bg-background/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="githubUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GitHub URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://github.com/username" {...field} className="bg-background/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="linkedinUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>LinkedIn URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://linkedin.com/in/username" {...field} className="bg-background/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <Button type="submit" className="w-full gradient-button" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,6 +270,23 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           </Form>
         ) : (
           <div className="space-y-6">
+            <div className="flex justify-center mb-4">
+              <div className="relative group">
+                <Avatar className="w-24 h-24 border-4 border-primary/20">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="bg-primary/20 text-xl">
+                    {form.getValues().name?.charAt(0) || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <Button 
+                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                  onClick={() => setAvatarUrl(generateRandomAvatar())}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
             <Tabs defaultValue="skills">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="skills">Your Skills</TabsTrigger>
@@ -290,7 +394,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                   Back
                 </Button>
                 <Button 
-                  className="flex-1"
+                  className="flex-1 gradient-button"
                   onClick={completeProfile}
                   disabled={isLoading || selectedSkills.length === 0 || selectedInterests.length === 0}
                 >

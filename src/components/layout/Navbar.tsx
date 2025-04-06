@@ -10,8 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, BookmarkIcon, UserIcon, LogOut, Menu, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Search, BookmarkIcon, UserIcon, LogOut, Menu, X, Home } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -22,11 +22,13 @@ export function Navbar() {
   const [authModalView, setAuthModalView] = useState<"login" | "signup">("login");
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
-      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
+      const path = location.pathname.includes("intern") ? "/internships" : "/hackathons";
+      navigate(`${path}?search=${encodeURIComponent(search.trim())}`);
     }
   };
 
@@ -45,6 +47,10 @@ export function Navbar() {
     navigate("/");
   };
 
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-16 items-center justify-between">
@@ -56,7 +62,35 @@ export function Navbar() {
           </Link>
         </div>
         
-        <div className="hidden md:flex items-center justify-center flex-1 mx-4">
+        <div className="hidden md:flex items-center justify-center gap-4 flex-1 mx-4">
+          <nav className="flex items-center space-x-4">
+            <Link to="/">
+              <Button 
+                variant={isActive("/") ? "default" : "ghost"} 
+                className={isActive("/") ? "gradient-button" : "hover:bg-primary/10 hover:text-primary"}
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+            <Link to="/hackathons">
+              <Button 
+                variant={isActive("/hackathons") ? "default" : "ghost"}
+                className={isActive("/hackathons") ? "gradient-button" : "hover:bg-primary/10 hover:text-primary"}
+              >
+                Hackathons
+              </Button>
+            </Link>
+            <Link to="/internships">
+              <Button 
+                variant={isActive("/internships") ? "default" : "ghost"}
+                className={isActive("/internships") ? "gradient-button" : "hover:bg-primary/10 hover:text-primary"}
+              >
+                Internships
+              </Button>
+            </Link>
+          </nav>
+          
           <form onSubmit={handleSearch} className="relative w-full max-w-lg">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -70,13 +104,6 @@ export function Navbar() {
         </div>
         
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/hackathons">
-            <Button variant="ghost">Hackathons</Button>
-          </Link>
-          <Link to="/internships">
-            <Button variant="ghost">Internships</Button>
-          </Link>
-          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -89,17 +116,24 @@ export function Navbar() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-md border-primary/20">
+                <div className="flex items-center justify-start p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    {profile?.name && <p className="font-medium">{profile.name}</p>}
+                    {user.email && <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>}
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/bookmarks")}>
+                <DropdownMenuItem onClick={() => navigate("/bookmarks")} className="cursor-pointer">
                   <BookmarkIcon className="mr-2 h-4 w-4" />
                   <span>Bookmarks</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
                 </DropdownMenuItem>
@@ -107,8 +141,8 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={openLogin}>Sign In</Button>
-              <Button onClick={openSignup}>Sign Up</Button>
+              <Button variant="ghost" onClick={openLogin} className="hover:bg-primary/10 hover:text-primary">Sign In</Button>
+              <Button onClick={openSignup} className="gradient-button">Sign Up</Button>
             </div>
           )}
         </div>
@@ -122,7 +156,7 @@ export function Navbar() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="flex flex-col">
+            <SheetContent side="right" className="flex flex-col bg-card/95 backdrop-blur-md">
               <div className="flex flex-col space-y-4 mt-4">
                 <form onSubmit={handleSearch} className="relative w-full">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -135,6 +169,12 @@ export function Navbar() {
                   />
                 </form>
                 
+                <Link to="/">
+                  <Button variant="ghost" className="w-full justify-start">
+                    <Home className="mr-2 h-4 w-4" />
+                    Home
+                  </Button>
+                </Link>
                 <Link to="/hackathons">
                   <Button variant="ghost" className="w-full justify-start">Hackathons</Button>
                 </Link>
@@ -164,7 +204,7 @@ export function Navbar() {
                 ) : (
                   <div className="flex flex-col gap-2">
                     <Button onClick={openLogin} className="w-full">Sign In</Button>
-                    <Button onClick={openSignup} variant="default" className="w-full">Sign Up</Button>
+                    <Button onClick={openSignup} variant="default" className="w-full gradient-button">Sign Up</Button>
                   </div>
                 )}
               </div>

@@ -4,18 +4,21 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { InternshipCard } from "@/components/internships/InternshipCard";
 import { InternshipFilters } from "@/components/internships/InternshipFilters";
-import { AnimatedBackground } from "@/components/ui/animated-background";
+import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, ArrowDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { internshipsData } from "@/data/mockData";
 import { InternshipCard as InternshipCardType, UserSkill } from "@/types";
 import { filterInternships } from "@/services/recommendationService";
+import { useNavigate } from "react-router-dom";
 
 export default function Internships() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredInternships, setFilteredInternships] = useState<InternshipCardType[]>(internshipsData);
+  const [filteredInternships, setFilteredInternships] = useState<InternshipCardType[]>(internshipsData.slice(0, 6));
+  const [allInternships, setAllInternships] = useState<InternshipCardType[]>(internshipsData);
+  const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
     skills: [] as UserSkill[],
     isRemote: undefined as boolean | undefined,
@@ -25,10 +28,11 @@ export default function Internships() {
   });
   
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   // Apply filters when they change
   useEffect(() => {
-    let results = internshipsData;
+    let results = allInternships;
     
     // Apply search filter
     if (searchQuery) {
@@ -51,19 +55,34 @@ export default function Internships() {
       location: filters.location,
     });
     
-    setFilteredInternships(results);
-  }, [searchQuery, filters]);
+    if (!showAll) {
+      // Only show first 6 internships if not showing all
+      setFilteredInternships(results.slice(0, 6));
+    } else {
+      setFilteredInternships(results);
+    }
+  }, [searchQuery, filters, allInternships, showAll]);
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Search is applied automatically in useEffect
   };
   
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
   };
+
+  const handleViewMore = () => {
+    setShowAll(true);
+  };
+
+  const handleViewDetails = (id: string) => {
+    navigate(`/internships/${id}`);
+  };
   
   return (
-    <AnimatedBackground>
+    <>
+      <MovingBubbles />
       <Navbar />
       
       <main className="flex-1">
@@ -79,15 +98,18 @@ export default function Internships() {
             </div>
             
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative overflow-hidden rounded-full shadow-lg">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search internships by title, company, or location..."
-                  className="pl-10"
+                  className="pl-12 pr-4 py-6 border-primary/20 bg-background/50 backdrop-blur-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {/* Animated circle effects */}
+                <div className="absolute -left-10 -top-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
+                <div className="absolute -right-10 -bottom-10 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
               </div>
             </form>
           </div>
@@ -120,10 +142,26 @@ export default function Internships() {
                 </div>
                 
                 {filteredInternships.length > 0 ? (
-                  <div className="space-y-6">
-                    {filteredInternships.map((internship) => (
-                      <InternshipCard key={internship.id} {...internship} />
-                    ))}
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredInternships.map((internship) => (
+                        <div key={internship.id} className="animate-float internship-card-container">
+                          <InternshipCard 
+                            {...internship} 
+                            onViewDetails={() => handleViewDetails(internship.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {!showAll && filteredInternships.length >= 6 && (
+                      <div className="flex justify-center mt-8">
+                        <Button onClick={handleViewMore} className="flex items-center gap-2 gradient-button">
+                          Load More
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-16 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/10">
@@ -131,16 +169,19 @@ export default function Internships() {
                     <p className="text-muted-foreground mb-6">
                       Try adjusting your filters or search query
                     </p>
-                    <Button onClick={() => {
-                      setSearchQuery("");
-                      setFilters({
-                        skills: [],
-                        isRemote: undefined,
-                        stipendMin: 0,
-                        stipendMax: 10000,
-                        location: "",
-                      });
-                    }}>
+                    <Button 
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilters({
+                          skills: [],
+                          isRemote: undefined,
+                          stipendMin: 0,
+                          stipendMax: 10000,
+                          location: "",
+                        });
+                      }}
+                      className="rounded-full gradient-button"
+                    >
                       Reset Filters
                     </Button>
                   </div>
@@ -152,6 +193,6 @@ export default function Internships() {
       </main>
       
       <Footer />
-    </AnimatedBackground>
+    </>
   );
 }

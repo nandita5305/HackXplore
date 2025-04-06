@@ -1,47 +1,37 @@
-
 export type UserSkill = 
-  | "JavaScript" 
-  | "Python" 
-  | "Java" 
-  | "C++" 
-  | "React" 
-  | "Angular" 
-  | "Vue" 
-  | "Node.js" 
-  | "Express" 
-  | "Django" 
-  | "Flask" 
-  | "TensorFlow" 
-  | "PyTorch" 
-  | "AI/ML" 
-  | "Blockchain" 
-  | "Web3" 
-  | "Cloud Computing" 
-  | "DevOps" 
-  | "Mobile Development" 
-  | "UI/UX Design" 
-  | "Game Development" 
-  | "Cybersecurity" 
-  | "Data Science" 
-  | "Backend" 
   | "Frontend" 
-  | "Fullstack";
+  | "Backend" 
+  | "UI/UX" 
+  | "ML/AI" 
+  | "DevOps" 
+  | "Mobile" 
+  | "IoT"
+  | "Solidity"
+  | "CSS"
+  | "SQL"
+  | "Figma"
+  | "Adobe XD"
+  | "Network Security"
+  | "React Native"
+  | "Unity"
+  | "3D Modeling"
+  | "Database"
+  | "Docker"
+  | "Kubernetes"
+  | "AWS"
+  | "AR/VR"
+  | "C#"
+  | "Embedded Systems";
 
-export type HackathonType = 
-  | "Web Development" 
-  | "Mobile Development" 
-  | "AI/ML" 
-  | "Blockchain" 
-  | "Web3" 
-  | "Game Development" 
-  | "IoT" 
-  | "Fintech" 
-  | "Healthtech" 
-  | "EdTech" 
-  | "Social Impact" 
-  | "Open Innovation";
-
-export type HackathonMode = "online" | "in-person" | "hybrid";
+export type HackathonType =
+  | "Web"
+  | "AI"
+  | "Blockchain"
+  | "Fintech"
+  | "Health"
+  | "EdTech"
+  | "Cybersecurity"
+  | "Data Science";
 
 export interface User {
   id: string;
@@ -50,12 +40,13 @@ export interface User {
   skills: UserSkill[];
   interests: HackathonType[];
   preferredRole?: string;
-  lookingFor: "hackathons" | "internships" | "both";
+  lookingFor: 'hackathons' | 'internships' | 'both';
   bio?: string;
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
   avatarUrl?: string;
+  dob?: string;
 }
 
 export interface Team {

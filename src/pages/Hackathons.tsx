@@ -4,19 +4,24 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
 import { HackathonFilters } from "@/components/hackathons/HackathonFilters";
-import { AnimatedBackground } from "@/components/ui/animated-background";
+import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Search } from "lucide-react";
+import { Search, ArrowDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { hackathonsData } from "@/data/mockData";
 import { HackathonCard as HackathonCardType, HackathonType, UserSkill } from "@/types";
 import { filterHackathons } from "@/services/recommendationService";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
 
 export default function Hackathons() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredHackathons, setFilteredHackathons] = useState<HackathonCardType[]>(hackathonsData);
+  const [filteredHackathons, setFilteredHackathons] = useState<HackathonCardType[]>(hackathonsData.slice(0, 6));
+  const [allHackathons, setAllHackathons] = useState<HackathonCardType[]>(hackathonsData);
+  const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
     types: [] as HackathonType[],
     mode: "all",
@@ -25,12 +30,16 @@ export default function Hackathons() {
     timeframe: "all",
     skills: [] as UserSkill[],
   });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [selectedHackathon, setSelectedHackathon] = useState<HackathonCardType | null>(null);
   
+  const { user, profile } = useAuth();
   const isMobile = useIsMobile();
   
   // Apply filters when they change
   useEffect(() => {
-    let results = hackathonsData;
+    let results = allHackathons;
     
     // Apply search filter
     if (searchQuery) {
@@ -53,19 +62,39 @@ export default function Hackathons() {
       skills: filters.skills,
     });
     
-    setFilteredHackathons(results);
-  }, [searchQuery, filters]);
+    if (!showAll) {
+      // Only show first 6 hackathons if not showing all
+      setFilteredHackathons(results.slice(0, 6));
+    } else {
+      setFilteredHackathons(results);
+    }
+  }, [searchQuery, filters, allHackathons, showAll]);
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Search is applied automatically in useEffect
   };
   
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
   };
+
+  const handleViewMore = () => {
+    setShowAll(true);
+  };
+
+  const handleFormTeam = (hackathon: HackathonCardType) => {
+    setSelectedHackathon(hackathon);
+    if (!user) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsTeamModalOpen(true);
+    }
+  };
   
   return (
-    <AnimatedBackground>
+    <>
+      <MovingBubbles />
       <Navbar />
       
       <main className="flex-1">
@@ -129,10 +158,26 @@ export default function Hackathons() {
                 </div>
                 
                 {filteredHackathons.length > 0 ? (
-                  <div className="space-y-6">
-                    {filteredHackathons.map((hackathon) => (
-                      <HackathonCard key={hackathon.id} {...hackathon} />
-                    ))}
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredHackathons.map((hackathon) => (
+                        <div key={hackathon.id} className="animate-float hackathon-card-container">
+                          <HackathonCard 
+                            {...hackathon} 
+                            onFormTeam={() => handleFormTeam(hackathon)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {!showAll && filteredHackathons.length >= 6 && (
+                      <div className="flex justify-center mt-8">
+                        <Button onClick={handleViewMore} className="flex items-center gap-2 gradient-button">
+                          Load More
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-16 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/10">
@@ -152,7 +197,7 @@ export default function Hackathons() {
                           skills: [],
                         });
                       }}
-                      className="rounded-full"
+                      className="rounded-full gradient-button"
                     >
                       Reset Filters
                     </Button>
@@ -165,6 +210,21 @@ export default function Hackathons() {
       </main>
       
       <Footer />
-    </AnimatedBackground>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        defaultView="login"
+      />
+      
+      {selectedHackathon && (
+        <CreateTeamModal
+          isOpen={isTeamModalOpen}
+          onClose={() => setIsTeamModalOpen(false)}
+          hackathon={selectedHackathon}
+          userSkills={profile?.skills || []}
+        />
+      )}
+    </>
   );
 }
