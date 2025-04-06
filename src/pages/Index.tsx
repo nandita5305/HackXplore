@@ -192,35 +192,6 @@ export default function Index() {
           </div>
         </section>
         
-        {/* Partner Logos Section */}
-        <section className="py-16">
-          <div className="container">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Our Partners</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                We aggregate opportunities from these and other platforms to give you a seamless experience.
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-              {partnerLogos.map((partner) => (
-                <a 
-                  key={partner.id} 
-                  href={partner.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="grayscale hover:grayscale-0 transition-all duration-300 hover:scale-110"
-                >
-                  <img 
-                    src={partner.logo} 
-                    alt={partner.name} 
-                    className="h-12 md:h-16 object-contain" 
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
         
         {/* Testimonials Section */}
         <TestimonialSection />
