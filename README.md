@@ -1,4 +1,4 @@
-# 🌌 HackXplore — Discover Hackathons & Internships in One Place
+# 🌌 HackXplore — Discover Hackathons & Internships in One Place    
 
 **Tired of missing out on exciting hackathons and internships?**  
 **HackXplore** brings them all together — from Devfolio , Unstop, DoraHacks, Hack2Skill, Devpost, and Internshala — so you never miss an opportunity again.
