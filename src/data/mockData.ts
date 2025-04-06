@@ -33,7 +33,7 @@ export const skillsOptions = [
   "Solidity",
 ] as const;
 
-export const interestsOptions = [
+export const interestOptions = [
   "Web Development",
   "Mobile App Development",
   "AI & Machine Learning",
@@ -56,6 +56,8 @@ export const interestsOptions = [
   "Sustainable Development",
 ] as const;
 
+export const interestsOptions = interestOptions;
+
 export const hackathonsData = [
   {
     id: "future-innovators-2024",
@@ -63,6 +65,7 @@ export const hackathonsData = [
     organizer: "Tech Innovators Inc.",
     dates: "November 8-10, 2024",
     endDate: "2024-11-10",
+    startDate: "2024-11-08",
     location: "New York, NY",
     imageUrl: "https://images.unsplash.com/photo-1519389950473-47a04ca0ecd8?q=80&w=2070&auto=format&fit=crop",
     url: "https://techinnovators.com/hackathon2024",
@@ -79,6 +82,7 @@ export const hackathonsData = [
     organizer: "CodeFest Global",
     dates: "December 1-3, 2024",
     endDate: "2024-12-03",
+    startDate: "2024-12-01",
     location: "Online",
     imageUrl: "https://images.unsplash.com/photo-1588508065120-2c5d3381a5ca?q=80&w=2070&auto=format&fit=crop",
     url: "https://codefestglobal.com",
@@ -95,6 +99,7 @@ export const hackathonsData = [
     organizer: "AI Innovators",
     dates: "October 20-22, 2024",
     endDate: "2024-10-22",
+    startDate: "2024-10-20",
     location: "San Francisco, CA",
     imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop",
     url: "https://aiinnovators.com/challenge2024",
@@ -111,6 +116,7 @@ export const hackathonsData = [
     organizer: "AppDev Inc.",
     dates: "November 15-17, 2024",
     endDate: "2024-11-17",
+    startDate: "2024-11-15",
     location: "Los Angeles, CA",
     imageUrl: "https://images.unsplash.com/photo-1555059386-419ac3517510?q=80&w=1974&auto=format&fit=crop",
     url: "https://appdevinc.com/hackathon2024",
@@ -121,12 +127,13 @@ export const hackathonsData = [
     skills: ["React Native", "Swift", "Kotlin", "UI/UX Design"],
     description: "Create the next big mobile app and win amazing prizes. Open to all skill levels and platforms."
   },
-    {
+  {
     id: "dora-hack-ai-2025",
     title: "DoraHacks AI Summit 2025",
     organizer: "DoraHacks",
     dates: "August 15-17, 2025",
     endDate: "2025-08-17",
+    startDate: "2025-08-15",
     location: "San Francisco, CA",
     imageUrl: "https://images.unsplash.com/photo-1591696331111-ef9586a5b17a?q=80&w=2070&auto=format&fit=crop",
     url: "https://dorahacks.io/ai-summit-2025",
@@ -143,6 +150,7 @@ export const hackathonsData = [
     organizer: "DevTown",
     dates: "June 10-12, 2025",
     endDate: "2025-06-12",
+    startDate: "2025-06-10",
     location: "Bangalore, India",
     imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop",
     url: "https://devtown.in/codefest-2025",
@@ -159,6 +167,7 @@ export const hackathonsData = [
     organizer: "DoraHacks",
     dates: "September 5-7, 2025",
     endDate: "2025-09-07",
+    startDate: "2025-09-05",
     location: "Online",
     imageUrl: "https://images.unsplash.com/photo-1639762681057-408e52192e55?q=80&w=2070&auto=format&fit=crop",
     url: "https://dorahacks.io/web3-challenge",
@@ -175,6 +184,7 @@ export const hackathonsData = [
     organizer: "DevTown",
     dates: "July 20-22, 2025",
     endDate: "2025-07-22",
+    startDate: "2025-07-20",
     location: "Delhi, India",
     imageUrl: "https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=1974&auto=format&fit=crop",
     url: "https://devtown.in/app-jam-2025",
@@ -342,5 +352,40 @@ export const partnerLogos = [
     name: "Intel",
     logo: "https://logos-world.net/wp-content/uploads/2020/07/Intel-Logo-700x394.png",
     url: "https://intel.com"
+  }
+];
+
+export const testimonialsData = [
+  {
+    id: "testimonial-1",
+    name: "Alex Johnson",
+    role: "Computer Science Student",
+    company: "Stanford University",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    text: "HackXplore helped me find my first hackathon, which led to an internship at a top tech company. The platform's recommendations were spot-on!"
+  },
+  {
+    id: "testimonial-2",
+    name: "Sarah Chen",
+    role: "Software Engineer",
+    company: "Google",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+    text: "I was looking for opportunities to enhance my skills, and HackXplore connected me with perfect hackathons that matched my experience level."
+  },
+  {
+    id: "testimonial-3",
+    name: "Marcus Williams",
+    role: "Data Science Intern",
+    company: "Amazon",
+    image: "https://randomuser.me/api/portraits/men/22.jpg",
+    text: "The AI recommendations feature is amazing! It found me an internship that perfectly aligned with my career goals in data science."
+  },
+  {
+    id: "testimonial-4",
+    name: "Priya Patel",
+    role: "UX Designer",
+    company: "Figma",
+    image: "https://randomuser.me/api/portraits/women/62.jpg",
+    text: "As a designer looking to collaborate with developers, HackXplore has been invaluable in finding hackathons where I can showcase my UX skills."
   }
 ];

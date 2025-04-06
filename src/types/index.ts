@@ -1,5 +1,35 @@
 
 export type UserSkill = 
+  | "JavaScript"
+  | "Python"
+  | "React"
+  | "Node.js"
+  | "HTML"
+  | "CSS"
+  | "Java"
+  | "C++"
+  | "C#"
+  | "TypeScript"
+  | "Vue.js"
+  | "Angular"
+  | "SQL"
+  | "MongoDB"
+  | "AWS"
+  | "Azure"
+  | "Docker"
+  | "Kubernetes"
+  | "Git"
+  | "Figma"
+  | "UI/UX Design"
+  | "Project Management"
+  | "Communication"
+  | "Problem Solving"
+  | "Leadership"
+  | "Data Analysis"
+  | "Machine Learning"
+  | "AI"
+  | "Blockchain"
+  | "Solidity"
   | "Frontend" 
   | "Backend" 
   | "UI/UX" 
@@ -7,63 +37,77 @@ export type UserSkill =
   | "DevOps" 
   | "Mobile" 
   | "IoT"
-  | "Solidity"
-  | "CSS"
-  | "SQL"
-  | "Figma"
   | "Adobe XD"
   | "Network Security"
   | "React Native"
   | "Unity"
   | "3D Modeling"
   | "Database"
-  | "Docker"
-  | "Kubernetes"
-  | "AWS"
   | "AR/VR"
-  | "C#"
   | "Embedded Systems"
-  | "JavaScript"
-  | "Python"
-  | "Java"
-  | "C++"
-  | "React"
-  | "Angular"
-  | "Vue"
-  | "Node.js"
   | "Express"
   | "Django"
   | "Flask"
   | "TensorFlow"
   | "PyTorch"
   | "AI/ML"
-  | "Blockchain"
   | "Web3"
   | "Cloud Computing"
   | "Mobile Development"
-  | "UI/UX Design"
   | "Game Development"
   | "Cybersecurity"
   | "Data Science"
-  | "Fullstack";
+  | "Fullstack"
+  | ".NET"
+  | "Swift"
+  | "Kotlin"
+  | "iOS Development"
+  | "macOS Development"
+  | "Software Development"
+  | "Computer Architecture"
+  | "Objective-C"
+  | "Flutter";
 
 export type HackathonType =
+  | "Web Development"
+  | "Mobile App Development"
+  | "AI & Machine Learning"
+  | "Blockchain Technology"
+  | "Data Science"
+  | "Cybersecurity"
+  | "Cloud Computing"
+  | "Game Development"
+  | "UI/UX Design"
+  | "E-commerce"
+  | "Social Media"
+  | "FinTech"
+  | "HealthTech"
+  | "EdTech"
+  | "IoT (Internet of Things)"
+  | "AR/VR"
+  | "Robotics"
+  | "Space Exploration"
+  | "Renewable Energy"
+  | "Sustainable Development"
   | "Web"
   | "AI"
   | "Blockchain"
   | "Fintech"
   | "Health"
-  | "EdTech"
   | "Cybersecurity"
-  | "Data Science"
   | "Web3"
   | "AI/ML"
   | "IoT"
   | "Open Innovation"
-  | "Web Development"
   | "Mobile Development"
   | "Social Impact"
-  | "Healthtech";
+  | "Healthtech"
+  | "Mobile"
+  | "UX/UI"
+  | "App Development"
+  | "Machine Learning"
+  | "DeFi"
+  | "Open Source";
 
 export type HackathonMode = 
   | "online"
@@ -73,11 +117,11 @@ export type HackathonMode =
 export interface User {
   id: string;
   email: string;
-  name: string;
-  skills: UserSkill[];
-  interests: HackathonType[];
+  name?: string;
+  skills?: UserSkill[];
+  interests?: HackathonType[];
   preferredRole?: string;
-  lookingFor: 'hackathons' | 'internships' | 'both';
+  lookingFor?: 'hackathons' | 'internships' | 'both';
   bio?: string;
   githubUrl?: string;
   linkedinUrl?: string;
@@ -85,6 +129,9 @@ export interface User {
   avatarUrl?: string;
   dob?: string;
 }
+
+// Alias UserProfile to User for backward compatibility
+export type UserProfile = User;
 
 export interface Team {
   id: string;
@@ -107,13 +154,13 @@ export interface HackathonCard {
   startDate: string;
   endDate: string;
   organizer: string;
-  mode: HackathonMode;
+  mode: HackathonMode | string;
   description?: string;
   location?: string;
   prizePool?: string;
-  type?: HackathonType[];
+  type?: HackathonType[] | string[];
   teamSize?: number;
-  skills?: UserSkill[];
+  skills?: UserSkill[] | string[];
   isBookmarked?: boolean;
   onViewDetailsClick?: () => void;
   onFormTeamClick?: () => void;
@@ -130,7 +177,7 @@ export interface InternshipCard {
   imageUrl: string;
   url: string;
   description?: string;
-  skills?: UserSkill[];
+  skills?: UserSkill[] | string[];
   isBookmarked?: boolean;
   isRemote?: boolean;
   onViewDetailsClick?: () => void;
@@ -146,8 +193,9 @@ export interface Testimonial {
 }
 
 export interface PartnerLogo {
-  id: string;
+  id?: string;
   name: string;
   logo: string;
   url: string;
 }
+
