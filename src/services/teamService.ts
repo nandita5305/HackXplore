@@ -13,22 +13,26 @@ const mockTeams: Team[] = [
     name: "Innovation Squad",
     hackathonId: "future-innovators-2024",
     description: "Looking for creative thinkers to build an AI-powered solution for healthcare.",
-    skills: ["React", "Python", "AI/ML"],
+    skillsNeeded: ["React", "Python", "AI/ML"] as UserSkill[],
     creator: "user1",
     members: ["user1", "user2"],
     maxMembers: 4,
     isOpen: true,
+    createdBy: "user1",
+    createdAt: new Date().toISOString()
   },
   {
     id: "team2",
     name: "Blockchain Builders",
     hackathonId: "dora-hacks-web3-2025",
     description: "Building a decentralized app for sustainable development tracking.",
-    skills: ["Solidity", "React", "Node.js"],
+    skillsNeeded: ["Solidity", "React", "Node.js"] as UserSkill[],
     creator: "user3",
     members: ["user3"],
     maxMembers: 5,
     isOpen: true,
+    createdBy: "user3",
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -82,16 +86,18 @@ export function useTeams() {
       // Simulate API call
       return new Promise<Team>((resolve) => {
         setTimeout(() => {
-          const team = {
+          const team: Team = {
             id: `team${mockTeams.length + 1}`,
             name: newTeam.name,
             hackathonId: newTeam.hackathonId,
             description: newTeam.description,
-            skills: newTeam.skillsNeeded,
+            skillsNeeded: newTeam.skillsNeeded,
             creator: userId || "anonymous",
             members: userId ? [userId] : [],
             maxMembers: newTeam.maxMembers,
             isOpen: true,
+            createdBy: userId || "anonymous",
+            createdAt: new Date().toISOString()
           };
           mockTeams.push(team);
           resolve(team);

@@ -55,6 +55,9 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
     });
   };
 
+  // Use skillsNeeded property or fall back to skills for backward compatibility
+  const skills = team.skillsNeeded || team.skills || [];
+
   return (
     <>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-primary/10">
@@ -91,7 +94,7 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
           <p className="text-sm mb-4">{team.description}</p>
           
           <div className="flex flex-wrap gap-2 mb-3">
-            {team.skills.map((skill) => (
+            {skills.map((skill) => (
               <Badge key={skill} className="rounded-full bg-primary/20 text-primary">
                 {skill}
               </Badge>

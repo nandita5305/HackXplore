@@ -109,6 +109,10 @@ export interface Team {
   description: string;
   skillsNeeded: UserSkill[];
   members: string[];
-  createdBy: string;
-  createdAt: string;
+  creator: string;
+  maxMembers: number;
+  isOpen: boolean;
+  skills?: UserSkill[]; // For backward compatibility
+  createdBy?: string; // For backward compatibility
+  createdAt?: string; // For backward compatibility
 }

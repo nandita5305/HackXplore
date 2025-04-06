@@ -119,7 +119,7 @@ export function CreateTeamModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-xl bg-background relative overflow-hidden max-h-[90vh]">
+      <DialogContent className="sm:max-w-md md:max-w-xl bg-background fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-primary/20 relative overflow-hidden max-h-[90vh]">
         {/* Circular decorative elements */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-xl"></div>
         <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-secondary/20 rounded-full blur-lg"></div>
