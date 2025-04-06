@@ -18,6 +18,11 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Check if Supabase environment variables are set
+const isSupabaseConfigured = () => {
+  return import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
@@ -26,6 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      console.warn("Supabase is not configured - auth functions will not work");
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -48,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile when user changes
   useEffect(() => {
     async function getProfile() {
-      if (!user) {
+      if (!user || !isSupabaseConfigured()) {
         setProfile(null);
         return;
       }
@@ -88,6 +99,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) {
+      console.error("Cannot sign up - Supabase is not configured");
+      return { error: new Error("Supabase is not configured") };
+    }
+
     try {
       const { error } = await supabase.auth.signUp({ email, password });
       
@@ -115,6 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) {
+      console.error("Cannot sign in - Supabase is not configured");
+      return { error: new Error("Supabase is not configured") };
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
@@ -133,6 +154,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured()) {
+      console.error("Cannot sign out - Supabase is not configured");
+      return;
+    }
+
     try {
       await supabase.auth.signOut();
       toast({
@@ -144,7 +170,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (updates: Partial<User>) => {
-    if (!user) return;
+    if (!user || !isSupabaseConfigured()) {
+      console.error("Cannot update profile - User not logged in or Supabase not configured");
+      return;
+    }
 
     try {
       // Transform app User type to database profile
