@@ -21,7 +21,30 @@ export type UserSkill =
   | "AWS"
   | "AR/VR"
   | "C#"
-  | "Embedded Systems";
+  | "Embedded Systems"
+  | "JavaScript"
+  | "Python"
+  | "Java"
+  | "C++"
+  | "React"
+  | "Angular"
+  | "Vue"
+  | "Node.js"
+  | "Express"
+  | "Django"
+  | "Flask"
+  | "TensorFlow"
+  | "PyTorch"
+  | "AI/ML"
+  | "Blockchain"
+  | "Web3"
+  | "Cloud Computing"
+  | "Mobile Development"
+  | "UI/UX Design"
+  | "Game Development"
+  | "Cybersecurity"
+  | "Data Science"
+  | "Fullstack";
 
 export type HackathonType =
   | "Web"
@@ -31,7 +54,20 @@ export type HackathonType =
   | "Health"
   | "EdTech"
   | "Cybersecurity"
-  | "Data Science";
+  | "Data Science"
+  | "Web3"
+  | "AI/ML"
+  | "IoT"
+  | "Open Innovation"
+  | "Web Development"
+  | "Mobile Development"
+  | "Social Impact"
+  | "Healthtech";
+
+export type HackathonMode = 
+  | "online"
+  | "in-person"
+  | "hybrid";
 
 export interface User {
   id: string;

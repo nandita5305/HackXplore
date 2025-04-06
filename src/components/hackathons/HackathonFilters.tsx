@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox, CheckboxItem, CheckboxGroup } from "@/components/ui/checkbox";
+import { CheckboxItem } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
@@ -80,20 +79,26 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium mb-3">Hackathon Type</h3>
-        <CheckboxGroup
-          value={selectedTypes}
-          onValueChange={(values) => setSelectedTypes(values as HackathonType[])}
-          className="grid grid-cols-1 gap-2"
-        >
+        <div className="grid grid-cols-1 gap-2">
           {interestOptions.map((type) => (
             <div key={type} className="flex items-center space-x-2">
-              <CheckboxItem id={`type-${type}`} value={type} />
+              <CheckboxItem
+                id={`type-${type}`}
+                checked={selectedTypes.includes(type)}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedTypes([...selectedTypes, type]);
+                  } else {
+                    setSelectedTypes(selectedTypes.filter((t) => t !== type));
+                  }
+                }}
+              />
               <Label htmlFor={`type-${type}`} className="text-sm font-normal">
                 {type}
               </Label>
             </div>
           ))}
-        </CheckboxGroup>
+        </div>
       </div>
       
       <Separator />
@@ -291,20 +296,26 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
               <h3 className="text-lg font-medium">Hackathon Type</h3>
             </CollapsibleTrigger>
             <CollapsibleContent className="p-2 space-y-2">
-              <CheckboxGroup
-                value={selectedTypes}
-                onValueChange={(values) => setSelectedTypes(values as HackathonType[])}
-                className="grid grid-cols-1 gap-2"
-              >
+              <div className="grid grid-cols-1 gap-2">
                 {interestOptions.map((type) => (
                   <div key={type} className="flex items-center space-x-2">
-                    <CheckboxItem id={`type-${type}`} value={type} />
+                    <CheckboxItem
+                      id={`type-${type}`}
+                      checked={selectedTypes.includes(type)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedTypes([...selectedTypes, type]);
+                        } else {
+                          setSelectedTypes(selectedTypes.filter((t) => t !== type));
+                        }
+                      }}
+                    />
                     <Label htmlFor={`type-${type}`} className="text-sm font-normal">
                       {type}
                     </Label>
                   </div>
                 ))}
-              </CheckboxGroup>
+              </div>
             </CollapsibleContent>
           </Collapsible>
           

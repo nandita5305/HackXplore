@@ -28,4 +28,42 @@ const CheckboxItem = React.forwardRef<
 ))
 CheckboxItem.displayName = "Checkbox"
 
-export { CheckboxItem }
+// Export both the original name and the new name for backward compatibility
+const Checkbox = CheckboxItem;
+
+// Create a CheckboxGroup component to contain multiple checkboxes
+interface CheckboxGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string[];
+  onValueChange: (value: string[]) => void;
+  className?: string;
+}
+
+const CheckboxGroup = React.forwardRef<
+  HTMLDivElement,
+  CheckboxGroupProps
+>(({ value, onValueChange, className, children, ...props }, ref) => {
+  // Create a context to manage checkbox group state
+  const CheckboxGroupContext = React.createContext<{
+    value: string[];
+    onValueChange: (value: string[]) => void;
+  }>({
+    value: [],
+    onValueChange: () => {},
+  });
+
+  return (
+    <CheckboxGroupContext.Provider value={{ value, onValueChange }}>
+      <div ref={ref} className={cn("space-y-2", className)} {...props}>
+        {React.Children.map(children, (child) => {
+          if (!React.isValidElement(child)) return child;
+          
+          // Add the CheckboxGroupContext to the child props
+          return React.cloneElement(child);
+        })}
+      </div>
+    </CheckboxGroupContext.Provider>
+  );
+});
+CheckboxGroup.displayName = "CheckboxGroup";
+
+export { Checkbox, CheckboxItem, CheckboxGroup }

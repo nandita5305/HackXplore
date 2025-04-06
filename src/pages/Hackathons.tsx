@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -37,11 +36,9 @@ export default function Hackathons() {
   const { user, profile } = useAuth();
   const isMobile = useIsMobile();
   
-  // Apply filters when they change
   useEffect(() => {
     let results = allHackathons;
     
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       results = results.filter(
@@ -52,7 +49,6 @@ export default function Hackathons() {
       );
     }
     
-    // Apply other filters
     results = filterHackathons(results, {
       types: filters.types,
       mode: filters.mode as any,
@@ -63,7 +59,6 @@ export default function Hackathons() {
     });
     
     if (!showAll) {
-      // Only show first 6 hackathons if not showing all
       setFilteredHackathons(results.slice(0, 6));
     } else {
       setFilteredHackathons(results);
@@ -72,7 +67,6 @@ export default function Hackathons() {
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is applied automatically in useEffect
   };
   
   const handleFilterChange = (newFilters: any) => {
@@ -119,7 +113,6 @@ export default function Hackathons() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                {/* Animated circle effects */}
                 <div className="absolute -left-10 -top-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
                 <div className="absolute -right-10 -bottom-10 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
               </div>
@@ -128,13 +121,11 @@ export default function Hackathons() {
         </section>
         
         <section className="py-8 md:py-12 relative">
-          {/* Decorative circles */}
           <div className="absolute top-1/4 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
           <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
           
           <div className="container">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Filters - Mobile View */}
               {isMobile && (
                 <div className="w-full mb-4">
                   <HackathonFilters
@@ -144,12 +135,10 @@ export default function Hackathons() {
                 </div>
               )}
               
-              {/* Filters - Desktop View */}
               {!isMobile && (
                 <HackathonFilters onFilterChange={handleFilterChange} />
               )}
               
-              {/* Hackathon List */}
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold">
@@ -163,8 +152,23 @@ export default function Hackathons() {
                       {filteredHackathons.map((hackathon) => (
                         <div key={hackathon.id} className="animate-float hackathon-card-container">
                           <HackathonCard 
-                            {...hackathon} 
-                            onFormTeam={() => handleFormTeam(hackathon)}
+                            id={hackathon.id}
+                            title={hackathon.title}
+                            url={hackathon.url}
+                            imageUrl={hackathon.imageUrl}
+                            dates={hackathon.dates}
+                            startDate={hackathon.startDate}
+                            endDate={hackathon.endDate}
+                            organizer={hackathon.organizer}
+                            mode={hackathon.mode}
+                            description={hackathon.description}
+                            location={hackathon.location}
+                            prizePool={hackathon.prizePool}
+                            type={hackathon.type}
+                            teamSize={hackathon.teamSize}
+                            skills={hackathon.skills}
+                            isBookmarked={hackathon.isBookmarked}
+                            onFormTeamClick={() => handleFormTeam(hackathon)}
                           />
                         </div>
                       ))}
@@ -221,7 +225,7 @@ export default function Hackathons() {
         <CreateTeamModal
           isOpen={isTeamModalOpen}
           onClose={() => setIsTeamModalOpen(false)}
-          hackathon={selectedHackathon}
+          hackathonId={selectedHackathon.id}
           userSkills={profile?.skills || []}
         />
       )}

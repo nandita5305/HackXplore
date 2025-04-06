@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox, CheckboxItem, CheckboxGroup } from "@/components/ui/checkbox";
+import { CheckboxItem } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -159,7 +158,6 @@ export function InternshipFilters({ onFilterChange, isMobile = false }: Internsh
     </div>
   );
 
-  // Render desktop or mobile version
   return isMobile ? (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -227,7 +225,6 @@ export function InternshipFilters({ onFilterChange, isMobile = false }: Internsh
           ) : null}
         </div>
         
-        {/* Collapsible sections for filters on desktop */}
         <div className="space-y-2">
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md hover:bg-muted">

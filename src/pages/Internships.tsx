@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -30,11 +29,9 @@ export default function Internships() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
-  // Apply filters when they change
   useEffect(() => {
     let results = allInternships;
     
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       results = results.filter(
@@ -46,7 +43,6 @@ export default function Internships() {
       );
     }
     
-    // Apply other filters
     results = filterInternships(results, {
       skills: filters.skills,
       isRemote: filters.isRemote,
@@ -56,7 +52,6 @@ export default function Internships() {
     });
     
     if (!showAll) {
-      // Only show first 6 internships if not showing all
       setFilteredInternships(results.slice(0, 6));
     } else {
       setFilteredInternships(results);
@@ -65,7 +60,6 @@ export default function Internships() {
   
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is applied automatically in useEffect
   };
   
   const handleFilterChange = (newFilters: any) => {
@@ -107,7 +101,6 @@ export default function Internships() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                {/* Animated circle effects */}
                 <div className="absolute -left-10 -top-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
                 <div className="absolute -right-10 -bottom-10 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
               </div>
@@ -118,7 +111,6 @@ export default function Internships() {
         <section className="py-8 md:py-12">
           <div className="container">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Filters - Mobile View */}
               {isMobile && (
                 <div className="w-full mb-4">
                   <InternshipFilters
@@ -128,12 +120,10 @@ export default function Internships() {
                 </div>
               )}
               
-              {/* Filters - Desktop View */}
               {!isMobile && (
                 <InternshipFilters onFilterChange={handleFilterChange} />
               )}
               
-              {/* Internship List */}
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold">
@@ -147,8 +137,20 @@ export default function Internships() {
                       {filteredInternships.map((internship) => (
                         <div key={internship.id} className="animate-float internship-card-container">
                           <InternshipCard 
-                            {...internship} 
-                            onViewDetails={() => handleViewDetails(internship.id)}
+                            id={internship.id}
+                            title={internship.title}
+                            company={internship.company}
+                            location={internship.location}
+                            deadline={internship.deadline}
+                            duration={internship.duration}
+                            stipend={internship.stipend}
+                            imageUrl={internship.imageUrl}
+                            url={internship.url}
+                            description={internship.description}
+                            skills={internship.skills}
+                            isBookmarked={internship.isBookmarked}
+                            isRemote={internship.isRemote}
+                            onViewDetailsClick={() => handleViewDetails(internship.id)}
                           />
                         </div>
                       ))}
