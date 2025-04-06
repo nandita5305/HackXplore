@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -7,13 +6,12 @@ import { AnimatedBackground } from "@/components/ui/animated-background";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
 import { TeamCard } from "@/components/teams/TeamCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
-import { ArrowLeft, Users, Calendar, MapPin, Award, Globe, ExternalLink } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import { hackathonsData } from "@/data/mockData";
 import { useTeams } from "@/services/teamService";
-import { HackathonCard as HackathonCardType } from "@/types";
+import { HackathonCard as HackathonCardType, Team } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function HackathonDetail() {
@@ -23,15 +21,14 @@ export default function HackathonDetail() {
   const [isUserInTeam, setIsUserInTeam] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  const { useHackathonTeams } = useTeams();
+  const { useHackathonTeams, isUserInTeam: checkUserInTeam } = useTeams();
   const { user } = useAuth();
   
-  const { data: teams, isLoading: isLoadingTeams } = 
-    useHackathonTeams(id || "");
+  const { data: teams, isLoading: isLoadingTeams } = useHackathonTeams(id || "");
   
   const relatedHackathons = hackathonsData
     .filter(h => h.id !== id && h.type && hackathon?.type && 
-      h.type.some(t => hackathon.type?.includes(t)))
+      h.type.some(t => hackathon.type?.includes(t as any)))
     .slice(0, 3);
   
   // Check if hackathon exists
@@ -49,22 +46,15 @@ export default function HackathonDetail() {
       if (!user || !id) return;
       
       try {
-        const userTeams = teams?.filter(team => {
-          // Check if user is the creator
-          if (team.creator_id === user.id) return true;
-          
-          // TODO: Check if user is a member (would need team_members table data)
-          return false;
-        });
-        
-        setIsUserInTeam(userTeams !== undefined && userTeams.length > 0);
+        const isInTeam = await checkUserInTeam(id);
+        setIsUserInTeam(isInTeam);
       } catch (error) {
         console.error("Error checking if user is in team:", error);
       }
     };
     
     checkUserTeam();
-  }, [user, id, teams]);
+  }, [user, id, checkUserInTeam]);
   
   if (isLoading) {
     return (
@@ -135,20 +125,10 @@ export default function HackathonDetail() {
             </div>
           ) : teams && teams.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.map((team) => (
+              {teams.map((team: Team) => (
                 <TeamCard 
                   key={team.id} 
-                  team={{
-                    id: team.id,
-                    name: team.name,
-                    hackathonId: team.hackathon_id,
-                    description: team.description,
-                    skills: team.skills_needed,
-                    creator: team.creator_id,
-                    members: [], // This would need to be populated from team_members table
-                    maxMembers: team.max_members,
-                    isOpen: team.is_open
-                  }}
+                  team={team}
                 />
               ))}
             </div>

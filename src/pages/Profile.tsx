@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -98,7 +97,6 @@ export default function Profile() {
           </div>
         ) : (
           <>
-            {/* Profile Header */}
             <div className="mb-12">
               <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
                 <CardContent className="p-6">
@@ -180,7 +178,6 @@ export default function Profile() {
               </Card>
             </div>
             
-            {/* Tabs for Teams and Bookmarks */}
             <Tabs defaultValue="teams">
               <TabsList className="mb-8 w-full md:w-auto">
                 <TabsTrigger value="teams">My Teams</TabsTrigger>
@@ -201,17 +198,7 @@ export default function Profile() {
                     {userTeams.map((team) => (
                       <TeamCard 
                         key={team.id} 
-                        team={{
-                          id: team.id,
-                          name: team.name,
-                          hackathonId: team.hackathon_id,
-                          description: team.description,
-                          skills: team.skills_needed,
-                          creator: team.creator_id,
-                          members: [], // This would need to be populated from team_members table
-                          maxMembers: team.max_members,
-                          isOpen: team.is_open
-                        }}
+                        team={team}
                       />
                     ))}
                   </div>

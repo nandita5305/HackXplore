@@ -20,7 +20,7 @@ interface TeamCardProps {
 
 export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: TeamCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { joinTeam, isJoiningTeam, updateTeamStatus, isUpdatingTeam } = useTeams();
   const { toast } = useToast();
   const isCreator = user?.id === team.creator;
@@ -32,6 +32,11 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
     }
     
     joinTeam(team.id);
+    
+    toast({
+      title: "Team joined",
+      description: "You have successfully joined the team.",
+    });
   };
   
   const handleToggleStatus = () => {
@@ -40,6 +45,13 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
     updateTeamStatus({
       teamId: team.id,
       isOpen: !team.isOpen,
+    });
+    
+    toast({
+      title: team.isOpen ? "Team closed" : "Team opened",
+      description: team.isOpen 
+        ? "Your team is now closed to new members." 
+        : "Your team is now open for new members.",
     });
   };
 

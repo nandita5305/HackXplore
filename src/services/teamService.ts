@@ -1,6 +1,6 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Team } from "@/types";
+import { Team, User, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 // This is a mock service for demonstration purposes
@@ -32,7 +32,8 @@ const mockTeams: Team[] = [
   }
 ];
 
-export function useTeamService() {
+// Rename the function to useTeams to match the imports in other components
+export function useTeams() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id;
@@ -43,7 +44,7 @@ export function useTeamService() {
       queryKey: ["teams", hackathonId],
       queryFn: async () => {
         // Simulate API call
-        return new Promise((resolve) => {
+        return new Promise<Team[]>((resolve) => {
           setTimeout(() => {
             resolve(mockTeams.filter(team => team.hackathonId === hackathonId));
           }, 800);
@@ -58,7 +59,7 @@ export function useTeamService() {
       queryKey: ["userTeams", userId],
       queryFn: async () => {
         // Simulate API call
-        return new Promise((resolve) => {
+        return new Promise<Team[]>((resolve) => {
           setTimeout(() => {
             if (!userId) resolve([]);
             resolve(mockTeams.filter(team => team.members.includes(userId || "")));
@@ -71,22 +72,35 @@ export function useTeamService() {
 
   // Create a new team
   const { mutate: createTeam, isPending: isCreatingTeam } = useMutation({
-    mutationFn: async (newTeam: Omit<Team, "id">) => {
+    mutationFn: async (newTeam: { 
+      name: string; 
+      hackathonId: string; 
+      description: string; 
+      skillsNeeded: UserSkill[];
+      maxMembers: number;
+    }) => {
       // Simulate API call
-      return new Promise((resolve) => {
+      return new Promise<Team>((resolve) => {
         setTimeout(() => {
           const team = {
-            ...newTeam,
             id: `team${mockTeams.length + 1}`,
+            name: newTeam.name,
+            hackathonId: newTeam.hackathonId,
+            description: newTeam.description,
+            skills: newTeam.skillsNeeded,
+            creator: userId || "anonymous",
+            members: userId ? [userId] : [],
+            maxMembers: newTeam.maxMembers,
+            isOpen: true,
           };
-          mockTeams.push(team as Team);
+          mockTeams.push(team);
           resolve(team);
         }, 800);
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      queryClient.invalidateQueries({ queryKey: ["userTeams", userId] });
     },
   });
 
@@ -94,7 +108,7 @@ export function useTeamService() {
   const { mutate: joinTeam, isPending: isJoiningTeam } = useMutation({
     mutationFn: async (teamId: string) => {
       // Simulate API call
-      return new Promise((resolve, reject) => {
+      return new Promise<Team>((resolve, reject) => {
         setTimeout(() => {
           const teamIndex = mockTeams.findIndex(t => t.id === teamId);
           if (teamIndex === -1) return reject(new Error("Team not found"));
@@ -115,7 +129,7 @@ export function useTeamService() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      queryClient.invalidateQueries({ queryKey: ["userTeams", userId] });
     },
   });
 
@@ -123,7 +137,7 @@ export function useTeamService() {
   const { mutate: updateTeamStatus, isPending: isUpdatingTeam } = useMutation({
     mutationFn: async ({ teamId, isOpen }: { teamId: string; isOpen: boolean }) => {
       // Simulate API call
-      return new Promise((resolve, reject) => {
+      return new Promise<Team>((resolve, reject) => {
         setTimeout(() => {
           const teamIndex = mockTeams.findIndex(t => t.id === teamId);
           if (teamIndex === -1) return reject(new Error("Team not found"));
@@ -138,7 +152,7 @@ export function useTeamService() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      queryClient.invalidateQueries({ queryKey: ["userTeams", userId] });
     },
   });
 
@@ -171,4 +185,5 @@ export function useTeamService() {
   };
 }
 
-export default useTeamService;
+// Add this line for backward compatibility, so we don't break other parts that might be using the old import syntax
+export { useTeams as default };
