@@ -2,28 +2,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 228 35% 7%;
+    --foreground: 210 40% 98%;
+
+    --card: 228 30% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 228 30% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 263 70% 50%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 180 70% 47%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 228 30% 15%;
+    --muted-foreground: 215.4 16.3% 70%;
+
+    --accent: 228 30% 15%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 228 30% 18%;
+    --input: 228 30% 18%;
+    --ring: 263 70% 50%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 228 35% 7%;
+    --sidebar-foreground: 240 5.3% 80%;
+    --sidebar-primary: 263 70% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 228 30% 20%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -31,141 +50,69 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
-/* Add custom animations */
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 0.3;
-  }
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(103, 76, 215, 0.2);
+  pointer-events: none;
 }
 
-@keyframes float {
+/* Animated background effect */
+.animated-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(103, 76, 215, 0.1) 0%, rgba(17, 22, 38, 0) 70%);
+  animation: rotate 30s linear infinite;
+  z-index: 0;
+}
+
+@keyframes rotate {
   0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
+    transform: rotate(0deg);
   }
   100% {
-    transform: translateY(0px);
+    transform: rotate(360deg);
   }
 }
 
-@keyframes ripple {
-  0% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
+/* Glass effect card */
+.glass-card {
+  background: rgba(30, 34, 53, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(103, 76, 215, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes card-glow {
-  0%, 100% {
-    box-shadow: 0 0 15px 0 rgba(155, 135, 245, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 25px 5px rgba(155, 135, 245, 0.6);
-  }
-}
-
-/* Enhanced glow effect for arrow key hover */
-@keyframes card-glow-intense {
-  0%, 100% {
-    box-shadow: 0 0 20px 5px rgba(155, 135, 245, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 30px 10px rgba(155, 135, 245, 0.8);
-  }
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-ripple {
-  animation: ripple 1s ease-out;
-}
-
-.animate-card-glow {
-  animation: card-glow 2s ease-in-out infinite;
-}
-
-/* Custom button styles */
+/* Animated gradient button */
 .gradient-button {
-  @apply bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:from-primary/80 hover:to-primary/60;
+  background-size: 200% 200%;
+  background-image: linear-gradient(45deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 100%);
+  animation: gradient 5s ease infinite;
 }
 
-/* Fix card widths in grids - making them wider */
-.hackathon-card-container, .internship-card-container {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Ensure proper modal positioning */
-.fixed-center {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 50;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-/* Card glow effects */
-.card-hover-effect:hover {
-  animation: card-glow 2s ease-in-out infinite;
-}
-
-.card-hover-effect:focus-within {
-  animation: card-glow-intense 1.5s ease-in-out infinite;
-}
-
-/* Arrow key focus effect */
-.card-hover-effect:focus-visible {
-  animation: card-glow-intense 1.5s ease-in-out infinite;
-  outline: none;
-}
-
-/* Purple theme elements */
-.purple-gradient {
-  background: linear-gradient(135deg, rgba(155, 135, 245, 0.2) 0%, rgba(126, 105, 171, 0.3) 100%);
-}
-
-.purple-glow {
-  box-shadow: 0 0 15px 0 rgba(155, 135, 245, 0.4);
-}
-
-/* Wider card styles */
-.wide-card {
-  width: 100%;
-  max-width: 800px;
-}
-
-/* Make cards responsive but wider */
-.hackathon-card, .internship-card, .team-card {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Enhanced input fields with purple glow */
-input:focus, textarea:focus, select:focus {
-  box-shadow: 0 0 0 2px rgba(155, 135, 245, 0.4);
-  border-color: rgba(155, 135, 245, 0.6);
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
