@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Sparkles, Upload } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
@@ -43,7 +44,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const [lookingFor, setLookingFor] = useState<'hackathons' | 'internships' | 'both'>('both');
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const { toast } = useToast();
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,13 +58,24 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     },
   });
 
-  const generateRandomAvatar = () => {
-    // Use a placeholder avatar service for demo purposes
-    const randomSeed = Math.floor(Math.random() * 1000);
-    return `https://avatars.dicebear.com/api/initials/${randomSeed}.svg`;
+  // Generate avatar when name changes
+  useEffect(() => {
+    const name = form.watch("name");
+    if (name && name.length >= 2) {
+      generateAvatar(name);
+    }
+  }, [form.watch("name")]);
 
-
-
+  const generateAvatar = (name: string) => {
+    // Use a variety of avatar styles for more diversity
+    const styles = ["adventurer", "adventurer-neutral", "big-ears", "big-smile", "bottts", "croodles", "micah", "miniavs", "personas", "pixel-art", "avataaars"];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+    
+    // Create a seed based on name and a random number to ensure uniqueness
+    const seed = `${name.trim().toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+    const newAvatarUrl = `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
+    
+    setAvatarUrl(newAvatarUrl);
   };
 
   const toggleSkill = (skill: UserSkill) => {
@@ -84,10 +96,10 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
+    
     try {
       const { error } = await signUp(values.email, values.password);
-
+      
       if (error) {
         toast({
           title: "Error signing up",
@@ -95,12 +107,17 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           variant: "destructive",
         });
       } else {
+        // If no avatar has been generated yet, generate one
         if (!avatarUrl) {
-          setAvatarUrl(generateRandomAvatar());
+          generateAvatar(values.name);
         }
-
+        
         // Move to next step after successful signup
         setCurrentStep(2);
+        toast({
+          title: "Account created!",
+          description: "Now let's complete your profile",
+        });
       }
     } catch (error) {
       toast({
@@ -115,10 +132,21 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
 
   async function completeProfile() {
     setIsLoading(true);
-
+    
     try {
       const values = form.getValues();
-
+      
+      // Ensure we have at least some skills and interests
+      if (selectedSkills.length === 0 || selectedInterests.length === 0) {
+        toast({
+          title: "Please select skills and interests",
+          description: "Select at least one skill and interest to continue",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
       await updateProfile({
         name: values.name,
         githubUrl: values.githubUrl,
@@ -128,12 +156,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         lookingFor,
         avatarUrl: avatarUrl,
       });
-
+      
       toast({
         title: "Profile created!",
-        description: "Welcome to HackXplore",
+        description: `Welcome to HackXplore, ${values.name}!`,
       });
-
+      
       if (onSuccess) {
         onSuccess();
       }
@@ -149,7 +177,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md border-primary/20 glass-card">
+    <Card className="w-full max-w-md border-primary/20 glass-card purple-gradient">
       <CardHeader>
         <CardTitle>Sign Up</CardTitle>
         <CardDescription>Create your HackXplore account</CardDescription>
@@ -159,6 +187,32 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           {currentStep === 1 ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="flex flex-col items-center mb-6">
+                  {avatarUrl && (
+                    <div className="relative mb-3">
+                      <Avatar className="h-24 w-24 border-4 border-primary/20">
+                        <AvatarImage src={avatarUrl} alt="Profile" />
+                        <AvatarFallback className="bg-primary/20 text-xl">
+                          {form.getValues().name?.charAt(0)?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <Button 
+                        type="button"
+                        size="sm"
+                        variant="outline" 
+                        className="absolute bottom-0 right-0 rounded-full size-8 p-0"
+                        onClick={() => generateAvatar(form.getValues().name)}
+                        title="Generate new avatar"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Enter your name to generate a unique profile image
+                  </p>
+                </div>
+                
                 <FormField
                   control={form.control}
                   name="name"
@@ -172,7 +226,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="email"
@@ -186,7 +240,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="dob"
@@ -200,7 +254,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     </FormItem>
                   )}
                 />
-
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -215,7 +269,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                       </FormItem>
                     )}
                   />
-
+                  
                   <FormField
                     control={form.control}
                     name="confirmPassword"
@@ -230,7 +284,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     )}
                   />
                 </div>
-
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -245,7 +299,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                       </FormItem>
                     )}
                   />
-
+                  
                   <FormField
                     control={form.control}
                     name="linkedinUrl"
@@ -260,7 +314,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     )}
                   />
                 </div>
-
+                
                 <Button type="submit" className="w-full gradient-button" disabled={isLoading}>
                   {isLoading ? (
                     <>
@@ -278,26 +332,32 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
               <div className="flex justify-center mb-4">
                 <div className="relative group">
                   <Avatar className="w-24 h-24 border-4 border-primary/20">
-                    <AvatarImage src={avatarUrl} />
+                    <AvatarImage src={avatarUrl} alt="Profile" />
                     <AvatarFallback className="bg-primary/20 text-xl">
                       {form.getValues().name?.charAt(0) || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <Button 
-                    className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
-                    onClick={() => setAvatarUrl(generateRandomAvatar())}
+                    className="absolute bottom-0 right-0 rounded-full size-8 p-0"
+                    onClick={() => generateAvatar(form.getValues().name)}
+                    variant="outline"
                   >
-                    <Upload className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-
+              
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-medium">{form.getValues().name}</h3>
+                <p className="text-sm text-muted-foreground">{form.getValues().email}</p>
+              </div>
+              
               <Tabs defaultValue="skills">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="skills">Your Skills</TabsTrigger>
-                  <TabsTrigger value="interests">Your Interests</TabsTrigger>
+                  <TabsTrigger value="skills" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Your Skills</TabsTrigger>
+                  <TabsTrigger value="interests" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Your Interests</TabsTrigger>
                 </TabsList>
-
+                
                 <TabsContent value="skills" className="mt-4">
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
@@ -318,9 +378,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                         );
                       })}
                     </div>
+                    {selectedSkills.length === 0 && (
+                      <p className="text-xs text-destructive">Please select at least one skill</p>
+                    )}
                   </div>
                 </TabsContent>
-
+                
                 <TabsContent value="interests" className="mt-4">
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
@@ -341,10 +404,13 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                         );
                       })}
                     </div>
+                    {selectedInterests.length === 0 && (
+                      <p className="text-xs text-destructive">Please select at least one interest</p>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
-
+              
               <div className="space-y-3">
                 <p className="text-sm font-medium">What are you looking for?</p>
                 <div className="flex flex-wrap gap-2">
@@ -371,27 +437,26 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                   </Badge>
                 </div>
               </div>
-
+              
               <div className="pt-4">
                 {selectedSkills.length > 0 && selectedInterests.length > 0 ? (
                   <div className="bg-secondary/10 p-3 rounded-md mb-4 border border-primary/20">
                     <div className="flex items-center text-primary mb-2">
-                      <Sparkles className="h-4 w-4 mr-2 text-secondary" />
-                      <p className="text-sm font-medium">AI Recommendation</p>
+                      <p className="text-sm font-medium">Profile Preview</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Based on your skills and interests, we'll recommend {lookingFor === 'hackathons' ? 'hackathons' : lookingFor === 'internships' ? 'internships' : 'opportunities'} that match your profile.
-
-
-
+                      {form.getValues().name}, interested in {selectedInterests.slice(0, 2).join(", ")}
+                      {selectedInterests.length > 2 ? " and more" : ""}.
+                      Skilled in {selectedSkills.slice(0, 2).join(", ")}
+                      {selectedSkills.length > 2 ? " and more" : ""}.
                     </p>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground mb-4">
-                    Select skills and interests to get personalized recommendations.
+                    Select skills and interests to complete your profile.
                   </p>
                 )}
-
+                
                 <div className="flex gap-3">
                   <Button 
                     variant="outline" 
@@ -421,7 +486,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           )}
         </CardContent>
       </ScrollArea>
-
+      
       {currentStep === 1 && (
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-muted-foreground">
