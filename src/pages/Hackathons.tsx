@@ -19,7 +19,7 @@ import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
 
 export default function Hackathons() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredHackathons, setFilteredHackathons] = useState<HackathonCardType[]>(hackathonsData.slice(0, 6));
+  const [filteredHackathons, setFilteredHackathons] = useState<HackathonCardType[]>(hackathonsData.slice(0, 9));
   const [allHackathons, setAllHackathons] = useState<HackathonCardType[]>(hackathonsData);
   const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
@@ -34,7 +34,7 @@ export default function Hackathons() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [selectedHackathon, setSelectedHackathon] = useState<HackathonCardType | null>(null);
   
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const listTopRef = useRef<HTMLDivElement>(null);
   
@@ -61,7 +61,7 @@ export default function Hackathons() {
     });
     
     if (!showAll) {
-      setFilteredHackathons(results.slice(0, 6));
+      setFilteredHackathons(results.slice(0, 9));
     } else {
       setFilteredHackathons(results);
     }
@@ -92,12 +92,16 @@ export default function Hackathons() {
     }
   };
   
+  const handleViewDetails = (id: string) => {
+    window.location.href = `/hackathons/${id}`;
+  };
+  
   return (
     <>
       <MovingBubbles numBubbles={15} opacity={0.1} minSize={10} maxSize={40} />
       <Navbar />
       
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <section className="py-10 md:py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-10">
@@ -105,7 +109,7 @@ export default function Hackathons() {
                 Discover Hackathons
               </h1>
               <p className="text-muted-foreground text-lg">
-                Find hackathons from various platforms, filter based on your preferences, and build your next project.
+                Find hackathons from various platforms like DoraHacks and DevTown, filter based on your preferences, and build your next project.
               </p>
               
               {!user && (
@@ -166,28 +170,16 @@ export default function Hackathons() {
                       {filteredHackathons.map((hackathon) => (
                         <div key={hackathon.id} className="animate-float hackathon-card-container">
                           <HackathonCard 
-                            id={hackathon.id}
-                            title={hackathon.title}
-                            url={hackathon.url}
-                            imageUrl={hackathon.imageUrl}
-                            dates={hackathon.dates}
-                            startDate={hackathon.startDate}
-                            endDate={hackathon.endDate}
-                            organizer={hackathon.organizer}
-                            mode={hackathon.mode}
-                            description={hackathon.description}
-                            location={hackathon.location}
-                            prizePool={hackathon.prizePool}
-                            type={hackathon.type}
-                            teamSize={hackathon.teamSize}
-                            skills={hackathon.skills}
-                            isBookmarked={hackathon.isBookmarked}
+                            {...hackathon}
+                            onViewDetails={() => handleViewDetails(hackathon.id)}
+                            onFormTeam={() => handleFormTeam(hackathon)}
+                            source={hackathon.source}
                           />
                         </div>
                       ))}
                     </div>
                     
-                    {!showAll && filteredHackathons.length >= 6 && (
+                    {!showAll && filteredHackathons.length >= 9 && (
                       <div className="flex justify-center mt-8">
                         <Button onClick={handleViewMore} className="flex items-center gap-2 gradient-button">
                           Load More

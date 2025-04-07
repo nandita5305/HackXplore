@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Lock, Unlock, UserPlus } from "lucide-react";
-import { Team, User } from "@/types";
+import { Team, User, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -133,7 +133,7 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
           )}
           
           {team.isOpen && !isCreator && team.members.length < team.maxMembers && (
-            <Button onClick={handleJoinTeam} disabled={isJoiningTeam}>
+            <Button onClick={handleJoinTeam} disabled={isJoiningTeam} className="gradient-button">
               {isJoiningTeam ? "Joining..." : "Join Team"}
               <UserPlus className="h-4 w-4 ml-2" />
             </Button>

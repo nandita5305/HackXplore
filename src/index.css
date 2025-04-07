@@ -116,3 +116,25 @@
     background-position: 0% 50%;
   }
 }
+
+/* Dialog center positioning fix */
+.dialog-center {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Source badge */
+.source-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  backdrop-filter: blur(4px);
+  background: rgba(30, 34, 53, 0.7);
+}

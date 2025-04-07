@@ -40,7 +40,7 @@ export function CreateTeamModal({
   const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
   const [maxMembers, setMaxMembers] = useState(4);
   const { createTeam, isCreatingTeam } = useTeams();
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [aiSuggesting, setAiSuggesting] = useState(false);
 
@@ -92,9 +92,9 @@ export function CreateTeamModal({
     
     // Simulate AI processing
     setTimeout(() => {
-      if (profile && profile.skills) {
+      if (user && user.skills) {
         // Get complementary skills (ones the user doesn't have)
-        const userSkills = profile.skills;
+        const userSkills = user.skills;
         const complementarySkills = skillsOptions
           .filter(skill => !userSkills.includes(skill as UserSkill))
           .slice(0, 4) as UserSkill[];
@@ -119,7 +119,7 @@ export function CreateTeamModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-xl bg-background fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-primary/20 relative overflow-hidden max-h-[90vh]">
+      <DialogContent className="sm:max-w-md md:max-w-xl bg-background fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-primary/20 relative overflow-hidden max-h-[85vh] z-50">
         {/* Circular decorative elements */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-xl"></div>
         <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-secondary/20 rounded-full blur-lg"></div>
@@ -241,7 +241,7 @@ export function CreateTeamModal({
             type="submit" 
             onClick={handleSubmit}
             disabled={isCreatingTeam || name.trim() === "" || description.trim() === "" || selectedSkills.length === 0}
-            className="rounded-full relative overflow-hidden group"
+            className="rounded-full relative overflow-hidden group gradient-button"
           >
             <span className="relative z-10">
               {isCreatingTeam ? (

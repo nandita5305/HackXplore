@@ -42,7 +42,13 @@ export type UserSkill =
   | "Machine Learning"
   | "AI"
   | "Blockchain"
-  | "Solidity";
+  | "Solidity"
+  | "Unity"
+  | "C"
+  | "Web3.js"
+  | "TensorFlow"
+  | "3D Modeling"
+  | "Arduino";
 
 export type HackathonType =
   | "Web Development"
@@ -64,7 +70,8 @@ export type HackathonType =
   | "Robotics"
   | "Space Exploration"
   | "Renewable Energy"
-  | "Sustainable Development";
+  | "Sustainable Development"
+  | "Hardware";
 
 export interface HackathonCard {
   id: string;
@@ -83,6 +90,7 @@ export interface HackathonCard {
   skills: UserSkill[];
   description: string;
   isBookmarked?: boolean;
+  source?: string;
 }
 
 // Add InternshipCard interface

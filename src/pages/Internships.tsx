@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Internships() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredInternships, setFilteredInternships] = useState<InternshipCardType[]>(internshipsData.slice(0, 6));
+  const [filteredInternships, setFilteredInternships] = useState<InternshipCardType[]>(internshipsData.slice(0, 9));
   const [allInternships, setAllInternships] = useState<InternshipCardType[]>(internshipsData);
   const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
@@ -54,7 +54,7 @@ export default function Internships() {
     });
     
     if (!showAll) {
-      setFilteredInternships(results.slice(0, 6));
+      setFilteredInternships(results.slice(0, 9));
     } else {
       setFilteredInternships(results);
     }
@@ -85,7 +85,7 @@ export default function Internships() {
       <MovingBubbles />
       <Navbar />
       
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         <section className="py-10 md:py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-10">
@@ -93,7 +93,7 @@ export default function Internships() {
                 Find Internships
               </h1>
               <p className="text-muted-foreground text-lg">
-                Discover internship opportunities that match your skills and interests.
+                Discover internship opportunities from DoraHacks, DevTown, and more that match your skills and interests.
               </p>
             </div>
             
@@ -150,7 +150,7 @@ export default function Internships() {
                       ))}
                     </div>
                     
-                    {!showAll && filteredInternships.length >= 6 && (
+                    {!showAll && filteredInternships.length >= 9 && (
                       <div className="flex justify-center mt-8">
                         <Button onClick={handleViewMore} className="flex items-center gap-2 gradient-button">
                           Load More

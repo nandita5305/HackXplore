@@ -1,5 +1,7 @@
 import { UserSkill, HackathonType } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
+import { doraHacksData, devTownData, additionalInternships } from "./additionalData";
+
 export const skillsOptions = [
   "JavaScript",
   "Python",
@@ -58,7 +60,7 @@ export const interestOptions = [
 
 export const interestsOptions = interestOptions;
 
-export const hackathonsData = [
+export const hackathonsData: HackathonCard[] = [
   {
     id: uuidv4(),
     title: 'Sui Overflow 2025',
@@ -319,10 +321,12 @@ export const hackathonsData = [
     description: 'Build innovative web applications and compete for glory in this exciting hackathon.',
     teamSize: 3,
     skills: ['JavaScript', 'React', 'Node.js', 'UI/UX Design']
-  }
+  },
+  ...doraHacksData,
+  ...devTownData
 ];
 
-export const internshipsData = [
+export const internshipsData: InternshipCard[] = [
   {
     id: "google-ai-intern-2024",
     title: "AI Research Intern, Summer 2024",
@@ -434,7 +438,8 @@ export const internshipsData = [
     isRemote: false,
     skills: ["C++", "Software Development", "Computer Architecture", "Embedded Systems"],
     description: "Develop software solutions for Intel's hardware products. Contribute to the company's innovation efforts."
-  }
+  },
+  ...additionalInternships
 ];
 
 export const partnerLogos = [
@@ -513,4 +518,4 @@ export const testimonialsData = [
     image: "https://randomuser.me/api/portraits/women/62.jpg",
     text: "As a designer looking to collaborate with developers, HackXplore has been invaluable in finding hackathons where I can showcase my UX skills."
   }
-]; 
+];
