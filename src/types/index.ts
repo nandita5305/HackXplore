@@ -84,7 +84,7 @@ export type HackathonType =
   | "Sustainable Development"
   | "Hardware";
 
-// Update HackathonCard interface to fix build errors
+// Define HackathonCard interface for the data structure
 export interface HackathonCard {
   id: string;
   title: string;
@@ -105,9 +105,29 @@ export interface HackathonCard {
   source?: string;
 }
 
-// Creating a HackathonCardProps interface that extends HackathonCard but with optional description
-export interface HackathonCardProps extends Omit<HackathonCard, 'description'> {
+// Creating HackathonCardProps that extends HackathonCard with optional description
+export interface HackathonCardProps {
+  id: string;
+  title: string;
+  organizer: string;
+  dates: string;
+  endDate: string;
+  startDate: string;
+  location: string;
+  imageUrl: string;
+  url: string;
+  mode: "online" | "in-person" | "hybrid";
+  type: HackathonType[];
+  prizePool: string;
+  teamSize: number;
+  skills: UserSkill[];
   description?: string;
+  isBookmarked?: boolean;
+  source?: string;
+  onBookmarkToggle?: () => void;
+  onViewDetails?: () => void;
+  onFormTeam?: () => void;
+  isDetailed?: boolean;
 }
 
 // Update InternshipCard interface to include isBookmarked

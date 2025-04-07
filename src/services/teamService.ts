@@ -13,7 +13,7 @@ const mockTeams: Team[] = [
     name: "Innovation Squad",
     hackathonId: "future-innovators-2024",
     description: "Looking for creative thinkers to build an AI-powered solution for healthcare.",
-    skillsNeeded: ["React", "Python", "AI/ML"] as UserSkill[],
+    skillsNeeded: ["React", "Python", "AI"] as UserSkill[],
     creator: "user1",
     members: ["user1", "user2"],
     maxMembers: 4,
@@ -138,6 +138,38 @@ export function useTeams() {
       queryClient.invalidateQueries({ queryKey: ["userTeams", userId] });
     },
   });
+  
+  // Leave a team
+  const { mutate: leaveTeam, isPending: isLeavingTeam } = useMutation({
+    mutationFn: async (teamId: string) => {
+      // Simulate API call
+      return new Promise<Team>((resolve, reject) => {
+        setTimeout(() => {
+          const teamIndex = mockTeams.findIndex(t => t.id === teamId);
+          if (teamIndex === -1) return reject(new Error("Team not found"));
+          
+          const team = mockTeams[teamIndex];
+          
+          if (userId && team.members.includes(userId)) {
+            // Don't let the creator leave
+            if (team.creator === userId) {
+              return reject(new Error("Team creator cannot leave the team"));
+            }
+            
+            // Remove the user from members
+            team.members = team.members.filter(id => id !== userId);
+            mockTeams[teamIndex] = team;
+          }
+          
+          resolve(team);
+        }, 800);
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["userTeams", userId] });
+    },
+  });
 
   // Update team status (open/closed)
   const { mutate: updateTeamStatus, isPending: isUpdatingTeam } = useMutation({
@@ -183,9 +215,11 @@ export function useTeams() {
     useUserTeams,
     createTeam,
     joinTeam,
+    leaveTeam,
     updateTeamStatus,
     isCreatingTeam,
     isJoiningTeam,
+    isLeavingTeam,
     isUpdatingTeam,
     isUserInTeam,
   };

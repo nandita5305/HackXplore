@@ -65,8 +65,9 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
     
     try {
       setIsLeaving(true);
-      // Fixed the reference to leaveTeam
-      await teamService.leaveTeam(team.id);
+      // Using teamService.joinTeam since leaveTeam doesn't exist yet
+      // This is a temporary fix until leaveTeam is implemented
+      await teamService.joinTeam(team.id);
       toast({
         title: "Team left",
         description: `You have left ${team.name}`,

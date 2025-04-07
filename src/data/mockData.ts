@@ -1,4 +1,4 @@
-import { UserSkill, HackathonType } from "@/types";
+import { UserSkill, HackathonType, HackathonCard, InternshipCard } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
 import { doraHacksData, devTownData, additionalInternships } from "./additionalData";
 
@@ -71,11 +71,12 @@ export const hackathonsData: HackathonCard[] = [
     endDate: 'May 11, 2025',
     organizer: 'Devfolio',
     mode: 'online',
-    type: ['Blockchain', 'Web3'],
+    location: '',
+    type: ['Blockchain Technology'] as HackathonType[],
     prizePool: '$50,000',
     description: 'Build innovative applications on the Sui blockchain and compete for prizes in this online hackathon.',
     teamSize: 4,
-    skills: ['JavaScript', 'Blockchain', 'Web3', 'React']
+    skills: ['JavaScript', 'React'] as UserSkill[]
   },
   {
     id: uuidv4(),
@@ -338,7 +339,7 @@ export const internshipsData: InternshipCard[] = [
     duration: "12 weeks",
     stipend: "$8,000/month",
     isRemote: false,
-    skills: ["Python", "TensorFlow", "Machine Learning", "AI"],
+    skills: ["Python", "Machine Learning", "AI"] as UserSkill[],
     description: "Join Google's AI research team and work on cutting-edge projects. Contribute to the development of next-generation AI technologies."
   },
   {
