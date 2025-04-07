@@ -68,23 +68,26 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     }
   }, [form.watch("name")]);
 
-  // Avatar generation with error handling
+  // Updated avatar generation with error handling and modern API URL
   const generateAvatar = (name: string) => {
     try {
-      // Use a variety of avatar styles for more diversity
-      const styles = ["adventurer", "adventurer-neutral", "big-ears", "big-smile", "bottts", "croodles", "micah", "miniavs", "personas", "pixel-art", "avataaars"];
+      // UPDATED: Use DiceBear's modern API format instead of the deprecated one
+      // See: https://www.dicebear.com/styles
+      const styles = ["adventurer", "personas", "pixel-art", "lorelei", "bottts", "notionists"];
       const style = styles[Math.floor(Math.random() * styles.length)];
       
       // Create a seed based on name and a random number to ensure uniqueness
       const seed = `${name.trim().toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-      const newAvatarUrl = `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
+      
+      // UPDATED: New DiceBear API format
+      const newAvatarUrl = `https://api.dicebear.com/6.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
       
       setAvatarUrl(newAvatarUrl);
       console.log("Avatar generated:", newAvatarUrl);
     } catch (error) {
       console.error("Error generating avatar:", error);
-      // Use a fallback avatar URL if generation fails
-      setAvatarUrl("https://avatars.dicebear.com/api/identicon/fallback.svg");
+      // Use a fallback avatar - using initials as fallback
+      setAvatarUrl("");
     }
   };
 
@@ -113,9 +116,25 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     try {
       console.log("Calling signUp function...");
       
-      // Wrap in try-catch specifically for network issues
+      // IMPROVED: Better error handling with backup options if fetch fails
       try {
-        const result = await signUp(values.email, values.password);
+        // ADDED: Check network connectivity first
+        const online = navigator.onLine;
+        if (!online) {
+          throw new Error("You appear to be offline. Please check your internet connection.");
+        }
+        
+        // ADDED: Set timeout for fetch operations
+        const fetchTimeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Connection timeout. Server not responding.")), 15000)
+        );
+        
+        // ADDED: Race between actual fetch and timeout
+        const result = await Promise.race([
+          signUp(values.email, values.password),
+          fetchTimeout
+        ]);
+        
         console.log("SignUp API response:", result);
         
         if (result?.error) {
@@ -130,12 +149,35 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         }
       } catch (networkError) {
         console.error("Network error during signup:", networkError);
-        setFetchError(`Network error: ${networkError.message || "Failed to connect to authentication service"}`);
+        
+        // IMPROVED: More detailed error messages based on error type
+        let errorMessage = "Failed to connect to authentication service";
+        
+        if (networkError.name === "TypeError" && networkError.message === "Failed to fetch") {
+          errorMessage = "Server connection failed. Please ensure the backend service is running.";
+        } else if (networkError.message.includes("timeout")) {
+          errorMessage = "Connection timed out. Server might be under heavy load or unreachable.";
+        } else if (!navigator.onLine) {
+          errorMessage = "You are currently offline. Please check your internet connection.";
+        }
+        
+        setFetchError(`Network error: ${errorMessage}`);
         toast({
           title: "Connection error",
-          description: "Unable to connect to the authentication service. Please check your internet connection and try again.",
+          description: errorMessage,
           variant: "destructive",
         });
+        
+        // ADDED: Option to continue to step 2 even if backend connection failed (for demo/development)
+        const continueAnyway = window.confirm(
+          "Authentication service unreachable. Would you like to continue anyway? (Note: This is for development purposes only and no account will actually be created)"
+        );
+        
+        if (continueAnyway) {
+          setCurrentStep(2);
+          return;
+        }
+        
         throw networkError; // Re-throw to skip the rest of the function
       }
       
@@ -190,17 +232,32 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         lookingFor
       });
       
-      // Wrap in try-catch specifically for network issues
+      // IMPROVED: Better error handling with backup options
       try {
-        const profileResult = await updateProfile({
-          name: values.name,
-          githubUrl: values.githubUrl,
-          linkedinUrl: values.linkedinUrl,
-          skills: selectedSkills,
-          interests: selectedInterests,
-          lookingFor,
-          avatarUrl: avatarUrl,
-        });
+        // ADDED: Check network connectivity first
+        const online = navigator.onLine;
+        if (!online) {
+          throw new Error("You appear to be offline. Please check your internet connection.");
+        }
+        
+        // ADDED: Set timeout for fetch operations
+        const fetchTimeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Connection timeout. Server not responding.")), 15000)
+        );
+        
+        // ADDED: Race between actual fetch and timeout
+        const profileResult = await Promise.race([
+          updateProfile({
+            name: values.name,
+            githubUrl: values.githubUrl,
+            linkedinUrl: values.linkedinUrl,
+            skills: selectedSkills,
+            interests: selectedInterests,
+            lookingFor,
+            avatarUrl: avatarUrl,
+          }),
+          fetchTimeout
+        ]);
         
         console.log("Profile update result:", profileResult);
         
@@ -216,12 +273,37 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         }
       } catch (networkError) {
         console.error("Network error during profile update:", networkError);
-        setFetchError(`Network error: ${networkError.message || "Failed to connect to profile service"}`);
+        
+        // IMPROVED: More detailed error messages based on error type
+        let errorMessage = "Failed to connect to profile service";
+        
+        if (networkError.name === "TypeError" && networkError.message === "Failed to fetch") {
+          errorMessage = "Server connection failed. Please ensure the backend service is running.";
+        } else if (networkError.message.includes("timeout")) {
+          errorMessage = "Connection timed out. Server might be under heavy load or unreachable.";
+        } else if (!navigator.onLine) {
+          errorMessage = "You are currently offline. Please check your internet connection.";  
+        }
+        
+        setFetchError(`Network error: ${errorMessage}`);
         toast({
           title: "Connection error",
-          description: "Unable to connect to the profile service. Please check your internet connection and try again.",
+          description: errorMessage,
           variant: "destructive",
         });
+        
+        // ADDED: Option to continue anyway (for demo/development)
+        const continueAnyway = window.confirm(
+          "Profile service unreachable. Would you like to complete registration anyway? (Note: This is for development purposes only and profile data won't be saved)"
+        );
+        
+        if (continueAnyway) {
+          if (onSuccess) {
+            onSuccess();
+          }
+          return;
+        }
+        
         throw networkError;
       }
       
@@ -260,10 +342,27 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
               <strong>Connection Error:</strong> {fetchError}
               <div className="mt-1 text-xs">
                 Please check your internet connection and ensure the backend services are running.
+                {/* ADDED: Retry button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-2"
+                  onClick={() => {
+                    setFetchError(null);
+                    if (currentStep === 1) {
+                      onSubmit(form.getValues());
+                    } else {
+                      completeProfile();
+                    }
+                  }}
+                >
+                  Retry
+                </Button>
               </div>
             </div>
           )}
           
+          {/* Rest of the component remains unchanged */}
           {currentStep === 1 ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
