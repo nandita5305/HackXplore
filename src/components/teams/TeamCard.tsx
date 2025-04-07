@@ -238,7 +238,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </Dialog>
+      </AlertDialog>
     </>
   );
 }
