@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, UserProfile } from "@/types";
-import { UserSkill, HackathonType } from "@/types";
 
 interface AuthContextType {
   user: User | null;
@@ -31,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser({
           id: session.user.id,
           email: session.user.email || "",
-        });
+        } as User);
         fetchUserProfile(session.user.id);
       } else {
         // Check if we should activate demo mode
@@ -46,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser({
             id: session.user.id,
             email: session.user.email || "",
-          });
+          } as User);
           fetchUserProfile(session.user.id);
         } else {
           setUser(null);
@@ -76,13 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser({
       id: DEMO_USER_ID,
       email: DEMO_USER_EMAIL,
-    });
+    } as User);
 
     // Set a demo profile
     setProfile({
       name: "Demo User",
-      skills: ["React", "JavaScript", "TypeScript", "Node.js"] as UserSkill[],
-      interests: ["Web Development", "AI/ML", "Mobile"] as HackathonType[],
+      skills: ["React", "JavaScript", "TypeScript", "Node.js"],
+      interests: ["Web Development", "AI/ML", "Mobile"],
       lookingFor: "both",
       avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
       githubUrl: "https://github.com/demo-user",
@@ -131,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({
         id: DEMO_USER_ID,
         email: email,
-      });
+      } as User);
       return { error: null };
     }
 
@@ -154,12 +153,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({
         id: DEMO_USER_ID,
         email: email,
-      });
+      } as User);
       // Set a demo profile
       setProfile({
-        name: "Demo User",
-        skills: ["React", "JavaScript", "TypeScript", "Node.js"] as UserSkill[],
-        interests: ["Web Development", "AI/ML", "Mobile"] as HackathonType[],
+        name: email.split('@')[0],
+        skills: ["React", "JavaScript", "TypeScript", "Node.js"],
+        interests: ["Web Development", "AI/ML", "Mobile"],
         lookingFor: "both",
         avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
         githubUrl: "https://github.com/demo-user",
@@ -208,9 +207,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!prevProfile) {
           // If we don't have a profile yet, create a new one with the provided data
           return {
-            name: profileData.name || "Demo User",
-            skills: profileData.skills || [] as UserSkill[],
-            interests: profileData.interests || [] as HackathonType[],
+            name: profileData.name || user.email.split('@')[0],
+            skills: profileData.skills || [],
+            interests: profileData.interests || [],
             lookingFor: profileData.lookingFor || "both",
             avatarUrl: profileData.avatarUrl || "https://avatars.dicebear.com/api/initials/DU.svg",
             githubUrl: profileData.githubUrl || "",

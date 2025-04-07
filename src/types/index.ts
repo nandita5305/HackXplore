@@ -1,15 +1,22 @@
 
-// Add or update the User type to include id and email fields
+// User type that matches what's expected by the application
 export interface User {
   id: string;
   email: string;
-  name: string;
-  skills: UserSkill[];
-  interests: HackathonType[];
-  lookingFor: "hackathons" | "internships" | "both";
-  avatarUrl: string;
-  githubUrl: string;
-  linkedinUrl: string;
+}
+
+// Separate UserProfile type for profile data
+export interface UserProfile {
+  name?: string;
+  skills?: UserSkill[];
+  interests?: HackathonType[];
+  lookingFor?: "hackathons" | "internships" | "both";
+  avatarUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  preferredRole?: string;
+  bio?: string;
 }
 
 export type UserSkill =

@@ -98,70 +98,70 @@ export function HackathonCard({
           )}
         </div>
         
-        <div className="lg:w-3/5">
-          <CardHeader className="p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-bold">{title}</h3>
-                <p className="text-muted-foreground text-sm">{organizer}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBookmarkClick}
-                className="h-8 w-8 rounded-full hover:bg-primary/10"
-              >
-                <BookmarkIcon
-                  className={`h-5 w-5 ${bookmarked ? "fill-primary text-primary" : ""}`}
-                />
-                <span className="sr-only">Bookmark</span>
-              </Button>
+        <CardHeader className="p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold">{title}</h3>
+              <p className="text-muted-foreground text-sm">{organizer}</p>
             </div>
-          </CardHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBookmarkClick}
+              className="h-8 w-8 rounded-full hover:bg-primary/10"
+            >
+              <BookmarkIcon
+                className={`h-5 w-5 ${bookmarked ? "fill-primary text-primary" : ""}`}
+              />
+              <span className="sr-only">Bookmark</span>
+            </Button>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-4 pt-0">
+          <div className="flex flex-wrap gap-2 mb-3">
+            <Badge variant="secondary" className="rounded-full capitalize">
+              {mode}
+            </Badge>
+          </div>
           
-          <CardContent className="p-4 pt-0">
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="secondary" className="rounded-full capitalize">
-                {mode}
-              </Badge>
+          <div className="space-y-2">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span>{dates}</span>
             </div>
             
-            <div className="space-y-2">
+            {location && (
               <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-2" />
-                <span>{dates}</span>
-              </div>
-              
-              {location && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  <span>{location}</span>
-                </div>
-              )}
-              
-              {prizePool && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Award className="h-4 w-4 mr-2" />
-                  <span>Prize pool: {prizePool}</span>
-                </div>
-              )}
-              
-              {teamSize && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>Team size: up to {teamSize}</span>
-                </div>
-              )}
-            </div>
-            
-            {isDetailed && description && (
-              <div className="mt-4">
-                <p className="text-sm">{description}</p>
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>{location}</span>
               </div>
             )}
-          </CardContent>
+            
+            {prizePool && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Award className="h-4 w-4 mr-2" />
+                <span>Prize pool: {prizePool}</span>
+              </div>
+            )}
+            
+            {teamSize && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="h-4 w-4 mr-2" />
+                <span>Team size: up to {teamSize}</span>
+              </div>
+            )}
+          </div>
           
-          <CardFooter className="p-4 pt-0 flex flex-wrap gap-2">
+          {isDetailed && description && (
+            <div className="mt-4">
+              <p className="text-sm">{description}</p>
+            </div>
+          )}
+        </CardContent>
+        
+        <CardFooter className="p-4 pt-0 flex flex-wrap gap-2 justify-between">
+          <div className="flex gap-2 flex-wrap">
             <Button asChild className="relative overflow-hidden group">
               <a href={url} target="_blank" rel="noopener noreferrer">
                 <span className="relative z-10 flex items-center">
@@ -179,14 +179,14 @@ export function HackathonCard({
             >
               Form Team
             </Button>
-            
-            {!isDetailed && (
-              <Button variant="ghost" asChild>
-                <Link to={`/hackathons/${id}`}>View Details</Link>
-              </Button>
-            )}
-          </CardFooter>
-        </div>
+          </div>
+          
+          {!isDetailed && (
+            <Button variant="ghost" asChild>
+              <Link to={`/hackathons/${id}`}>View Details</Link>
+            </Button>
+          )}
+        </CardFooter>
       </Card>
       
       <AuthModal

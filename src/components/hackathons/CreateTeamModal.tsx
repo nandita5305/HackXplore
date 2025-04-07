@@ -106,10 +106,15 @@ export function CreateTeamModal({
           description: "We've suggested skills that would complement your team based on your profile.",
         });
       } else {
+        const randomSkills = skillsOptions
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 4) as UserSkill[];
+          
+        setSelectedSkills(randomSkills);
+        
         toast({
-          title: "Cannot suggest skills",
-          description: "Please complete your profile with your skills first.",
-          variant: "destructive",
+          title: "Skills Suggested",
+          description: "We've suggested some skills that might be useful for your team.",
         });
       }
       
@@ -119,11 +124,7 @@ export function CreateTeamModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-xl bg-background fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-primary/20 relative overflow-hidden max-h-[85vh] z-50">
-        {/* Circular decorative elements */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-xl"></div>
-        <div className="absolute -bottom-12 -left-12 w-24 h-24 bg-secondary/20 rounded-full blur-lg"></div>
-        
+      <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background border border-primary/20 shadow-lg rounded-lg w-[90vw] max-w-xl max-h-[90vh] z-50">
         <DialogHeader>
           <DialogTitle>Create a new team</DialogTitle>
           <DialogDescription>

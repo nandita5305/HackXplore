@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, Lock, Unlock, UserPlus } from "lucide-react";
+import { Users, Lock, Unlock, UserPlus, Eye } from "lucide-react";
 import { Team, User, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
@@ -24,6 +24,7 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
   const { joinTeam, isJoiningTeam, updateTeamStatus, isUpdatingTeam } = useTeams();
   const { toast } = useToast();
   const isCreator = user?.id === team.creator;
+  const isMember = team.members.includes(user?.id || "");
   
   const handleJoinTeam = () => {
     if (!user) {
@@ -60,7 +61,7 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-primary/10">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-primary/10 w-full">
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
             <div>
@@ -76,6 +77,7 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
                 onClick={handleToggleStatus}
                 disabled={isUpdatingTeam}
                 className="h-8 w-8"
+                title={team.isOpen ? "Close Team" : "Open Team"}
               >
                 {team.isOpen ? (
                   <Unlock className="h-5 w-5" />
@@ -125,23 +127,32 @@ export function TeamCard({ team, hackathonTitle, members = [], onViewDetails }: 
           )}
         </CardContent>
         
-        <CardFooter className="p-4 pt-0 flex flex-wrap gap-2">
-          {onViewDetails && (
-            <Button variant="outline" onClick={onViewDetails}>
-              View Details
-            </Button>
-          )}
-          
-          {team.isOpen && !isCreator && team.members.length < team.maxMembers && (
-            <Button onClick={handleJoinTeam} disabled={isJoiningTeam} className="gradient-button">
-              {isJoiningTeam ? "Joining..." : "Join Team"}
-              <UserPlus className="h-4 w-4 ml-2" />
-            </Button>
-          )}
+        <CardFooter className="p-4 pt-0 flex justify-between">
+          <div className="flex gap-2">
+            {onViewDetails && (
+              <Button variant="outline" onClick={onViewDetails} className="flex items-center">
+                <Eye className="h-4 w-4 mr-2" />
+                View Details
+              </Button>
+            )}
+            
+            {team.isOpen && !isCreator && !isMember && team.members.length < team.maxMembers && (
+              <Button onClick={handleJoinTeam} disabled={isJoiningTeam} className="gradient-button">
+                {isJoiningTeam ? "Joining..." : "Join Team"}
+                <UserPlus className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
           
           {!team.isOpen && !isCreator && (
             <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/10">
               Team Closed
+            </Badge>
+          )}
+          
+          {isMember && (
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/10">
+              Your Team
             </Badge>
           )}
         </CardFooter>
