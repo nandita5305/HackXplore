@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Sparkles, Upload } from "lucide-react";
+import { Loader2, RefreshCw, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
@@ -59,9 +59,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   });
 
   const generateRandomAvatar = () => {
-    // Use a placeholder avatar service for demo purposes
-    const randomSeed = Math.floor(Math.random() * 1000);
-    return `https://avatars.dicebear.com/api/initials/${randomSeed}.svg`;
+    // Use a more modern avatar service for better profile images
+    const styles = ["avataaars", "micah", "bottts", "adventurer", "identicon"];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+    const name = form.getValues().name || "User";
+    const seed = `${name}-${Date.now()}`.replace(/\s+/g, '');
+    return `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
   };
 
   const toggleSkill = (skill: UserSkill) => {
@@ -93,9 +96,10 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
           variant: "destructive",
         });
       } else {
-        if (!avatarUrl) {
-          setAvatarUrl(generateRandomAvatar());
-        }
+        // Generate avatar immediately after signup
+        const newAvatarUrl = generateRandomAvatar();
+        setAvatarUrl(newAvatarUrl);
+        
         // Move to next step after successful signup
         setCurrentStep(2);
       }
@@ -128,7 +132,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
       
       toast({
         title: "Profile created!",
-        description: "Welcome to HackXplore",
+        description: `Welcome to HackXplore, ${values.name}!`,
       });
       
       if (onSuccess) {
@@ -146,7 +150,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md border-primary/20 glass-card">
+    <Card className="w-full max-w-md border-primary/20 glass-card purple-gradient">
       <CardHeader>
         <CardTitle>Sign Up</CardTitle>
         <CardDescription>Create your HackXplore account</CardDescription>
@@ -284,15 +288,15 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
                     onClick={() => setAvatarUrl(generateRandomAvatar())}
                   >
-                    <Upload className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               
               <Tabs defaultValue="skills">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="skills">Your Skills</TabsTrigger>
-                  <TabsTrigger value="interests">Your Interests</TabsTrigger>
+                  <TabsTrigger value="skills" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Your Skills</TabsTrigger>
+                  <TabsTrigger value="interests" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Your Interests</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="skills" className="mt-4">
@@ -373,16 +377,18 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                 {selectedSkills.length > 0 && selectedInterests.length > 0 ? (
                   <div className="bg-secondary/10 p-3 rounded-md mb-4 border border-primary/20">
                     <div className="flex items-center text-primary mb-2">
-                      <Sparkles className="h-4 w-4 mr-2 text-secondary" />
-                      <p className="text-sm font-medium">AI Recommendation</p>
+                      <p className="text-sm font-medium">Profile Preview</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Based on your skills and interests, we'll recommend {lookingFor === 'hackathons' ? 'hackathons' : lookingFor === 'internships' ? 'internships' : 'opportunities'} that match your profile.
+                      {form.getValues().name}, interested in {selectedInterests.slice(0, 2).join(", ")}
+                      {selectedInterests.length > 2 ? " and more" : ""}.
+                      Skilled in {selectedSkills.slice(0, 2).join(", ")}
+                      {selectedSkills.length > 2 ? " and more" : ""}.
                     </p>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground mb-4">
-                    Select skills and interests to get personalized recommendations.
+                    Select skills and interests to complete your profile.
                   </p>
                 )}
                 

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { User, UserProfile } from "@/types";
+import { User, UserProfile, UserSkill, HackathonType } from "@/types";
 
 interface AuthContextType {
   user: User | null;
@@ -13,10 +13,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Demo mode constants
-const DEMO_USER_ID = "demo-user-123";
-const DEMO_USER_EMAIL = "demo@hackxplore.com";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -32,9 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: session.user.email || "",
         } as User);
         fetchUserProfile(session.user.id);
-      } else {
-        // Check if we should activate demo mode
-        checkAndActivateDemoMode();
       }
       setIsLoading(false);
     });
@@ -50,8 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setUser(null);
           setProfile(null);
-          // Check if we should activate demo mode
-          checkAndActivateDemoMode();
         }
         setIsLoading(false);
       }
@@ -62,39 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const checkAndActivateDemoMode = () => {
-    // Check if Supabase URL or key is missing (indicating we're in demo mode)
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - Supabase credentials missing");
-      activateDemoMode();
-    }
-  };
-
-  const activateDemoMode = () => {
-    // Set a demo user with mock data
-    setUser({
-      id: DEMO_USER_ID,
-      email: DEMO_USER_EMAIL,
-    } as User);
-
-    // Set a demo profile
-    setProfile({
-      name: "Demo User",
-      skills: ["React", "JavaScript", "TypeScript", "Node.js"],
-      interests: ["Web Development", "AI/ML", "Mobile"],
-      lookingFor: "both",
-      avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
-      githubUrl: "https://github.com/demo-user",
-      linkedinUrl: "https://linkedin.com/in/demo-user",
-    });
-  };
-
   const fetchUserProfile = async (userId: string) => {
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - skipping actual profile fetch");
-      return;
-    }
-
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -116,6 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatarUrl: data.avatar_url,
           githubUrl: data.github_url,
           linkedinUrl: data.linkedin_url,
+          portfolioUrl: data.portfolio_url,
+          preferredRole: data.preferred_role,
+          bio: data.bio,
+        });
+        
+        // Update user with profile data for easier access
+        setUser(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            name: data.name,
+            skills: data.skills || [],
+            interests: data.interests || [],
+            avatarUrl: data.avatar_url,
+          };
         });
       }
     } catch (error) {
@@ -123,17 +97,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - simulating signup");
-      // Simulate the signup process in demo mode
-      setUser({
-        id: DEMO_USER_ID,
-        email: email,
-      } as User);
-      return { error: null };
-    }
+  const generateAvatarUrl = (name: string) => {
+    // Generate a unique avatar using a service like DiceBear
+    const seed = name.replace(/\s+/g, '').toLowerCase();
+    return `https://avatars.dicebear.com/api/avataaars/${seed}.svg`;
+  };
 
+  const signUp = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -147,26 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - simulating signin");
-      // Simulate the signin process in demo mode
-      setUser({
-        id: DEMO_USER_ID,
-        email: email,
-      } as User);
-      // Set a demo profile
-      setProfile({
-        name: email.split('@')[0],
-        skills: ["React", "JavaScript", "TypeScript", "Node.js"],
-        interests: ["Web Development", "AI/ML", "Mobile"],
-        lookingFor: "both",
-        avatarUrl: "https://avatars.dicebear.com/api/initials/DU.svg",
-        githubUrl: "https://github.com/demo-user",
-        linkedinUrl: "https://linkedin.com/in/demo-user",
-      });
-      return { error: null };
-    }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -180,14 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - simulating signout");
-      // Clear the user and profile states in demo mode
-      setUser(null);
-      setProfile(null);
-      return;
-    }
-
     try {
       await supabase.auth.signOut();
       setUser(null);
@@ -200,41 +142,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     if (!user) return;
 
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      console.log("Running in demo mode - simulating profile update");
-      // Update the profile in demo mode
-      setProfile(prevProfile => {
-        if (!prevProfile) {
-          // If we don't have a profile yet, create a new one with the provided data
-          return {
-            name: profileData.name || user.email.split('@')[0],
-            skills: profileData.skills || [],
-            interests: profileData.interests || [],
-            lookingFor: profileData.lookingFor || "both",
-            avatarUrl: profileData.avatarUrl || "https://avatars.dicebear.com/api/initials/DU.svg",
-            githubUrl: profileData.githubUrl || "",
-            linkedinUrl: profileData.linkedinUrl || "",
-          };
-        }
-        // Otherwise update the existing profile
-        return {
-          ...prevProfile,
-          ...profileData,
-        };
-      });
-      return;
-    }
-
     try {
+      // Generate avatar URL if name is provided but no avatar exists
+      let avatarUrl = profileData.avatarUrl;
+      if (profileData.name && !avatarUrl) {
+        avatarUrl = generateAvatarUrl(profileData.name);
+      }
+
       const updates = {
         user_id: user.id,
         name: profileData.name,
         skills: profileData.skills,
         interests: profileData.interests,
         looking_for: profileData.lookingFor,
-        avatar_url: profileData.avatarUrl,
+        avatar_url: avatarUrl,
         github_url: profileData.githubUrl,
         linkedin_url: profileData.linkedinUrl,
+        portfolio_url: profileData.portfolioUrl,
+        preferred_role: profileData.preferredRole,
+        bio: profileData.bio,
         updated_at: new Date().toISOString(),
       };
 
@@ -248,8 +174,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Update the profile state with the new data
       setProfile(prevProfile => {
-        if (!prevProfile) return profileData as UserProfile;
-        return { ...prevProfile, ...profileData };
+        if (!prevProfile) return {
+          ...profileData,
+          avatarUrl,
+        } as UserProfile;
+        
+        return { 
+          ...prevProfile, 
+          ...profileData,
+          avatarUrl: avatarUrl || prevProfile.avatarUrl 
+        };
+      });
+      
+      // Update user state as well to keep them in sync
+      setUser(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          name: profileData.name || prev.name,
+          skills: profileData.skills || prev.skills,
+          interests: profileData.interests || prev.interests,
+          avatarUrl: avatarUrl || prev.avatarUrl,
+        };
       });
     } catch (error) {
       console.error("Error updating profile:", error);

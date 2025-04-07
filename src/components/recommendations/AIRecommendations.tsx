@@ -13,19 +13,22 @@ import { getRecommendedHackathons, getRecommendedInternships } from "@/services/
 
 export function AIRecommendations() {
   const [activeTab, setActiveTab] = useState<string>("hackathons");
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [recommendedHackathons, setRecommendedHackathons] = useState<HackathonCardType[]>([]);
   const [recommendedInternships, setRecommendedInternships] = useState<InternshipCardType[]>([]);
   
   useEffect(() => {
-    if (user) {
-      const hackathons = getRecommendedHackathons(hackathonsData as HackathonCardType[], user.skills, user.interests);
+    if (user && profile) {
+      const userSkills = profile.skills || [];
+      const userInterests = profile.interests || [];
+      
+      const hackathons = getRecommendedHackathons(hackathonsData as HackathonCardType[], userSkills, userInterests);
       setRecommendedHackathons(hackathons);
       
-      const internships = getRecommendedInternships(internshipsData as InternshipCardType[], user.skills);
+      const internships = getRecommendedInternships(internshipsData as InternshipCardType[], userSkills);
       setRecommendedInternships(internships);
     }
-  }, [user]);
+  }, [user, profile]);
   
   if (!user) return null;
   

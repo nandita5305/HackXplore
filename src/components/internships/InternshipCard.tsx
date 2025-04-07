@@ -31,6 +31,7 @@ export function InternshipCard({
   isBookmarked,
   onBookmarkToggle,
   onViewDetailsClick,
+  source
 }: InternshipCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export function InternshipCard({
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col border-primary/10">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col border-primary/10 card-hover-effect wide-card">
         <div className="relative h-36 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70 z-10"></div>
           <img
@@ -62,6 +63,15 @@ export function InternshipCard({
               className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm border-none"
             >
               Remote
+            </Badge>
+          )}
+          
+          {source && (
+            <Badge 
+              variant="outline" 
+              className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm border-none text-xs font-normal"
+            >
+              {source}
             </Badge>
           )}
         </div>

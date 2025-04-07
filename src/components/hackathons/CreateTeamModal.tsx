@@ -1,26 +1,19 @@
 
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { Loader2, Users, Sparkles } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
 import { UserSkill } from "@/types";
-import { skillsOptions } from "@/data/mockData";
-import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Check, PlusCircle, X } from "lucide-react";
+import { skillsOptions } from "@/data/mockData";
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -29,234 +22,245 @@ interface CreateTeamModalProps {
   hackathonTitle: string;
 }
 
-export function CreateTeamModal({
-  isOpen,
-  onClose,
-  hackathonId,
-  hackathonTitle,
-}: CreateTeamModalProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
-  const [maxMembers, setMaxMembers] = useState(4);
-  const { createTeam, isCreatingTeam } = useTeams();
-  const { user } = useAuth();
+export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }: CreateTeamModalProps) {
+  const { user, profile } = useAuth();
+  const { createTeam } = useTeams();
   const { toast } = useToast();
-  const [aiSuggesting, setAiSuggesting] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  
+  const [teamName, setTeamName] = useState("");
+  const [description, setDescription] = useState("");
+  const [maxMembers, setMaxMembers] = useState(4);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [availableSkills, setAvailableSkills] = useState<UserSkill[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Initialize available skills and filter user's existing skills
+  useEffect(() => {
+    const allSkills = [...skillsOptions] as UserSkill[];
+    const userSkills = profile?.skills || [];
+    const filteredSkills = allSkills.filter(skill => !userSkills.includes(skill));
+    setAvailableSkills(filteredSkills.sort((a, b) => a.localeCompare(b)));
+  }, [profile?.skills]);
+  
+  // Get filtered skills based on search term
+  const getFilteredSkills = () => {
+    if (!searchTerm) return availableSkills;
     
-    if (!name.trim() || !description.trim() || selectedSkills.length === 0) {
+    return availableSkills.filter(skill => 
+      skill.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+  
+  const handleSelectSkill = (skill: UserSkill) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
+      setAvailableSkills(availableSkills.filter(s => s !== skill));
+    }
+    setSearchTerm("");
+  };
+  
+  const handleRemoveSkill = (skill: UserSkill) => {
+    setSelectedSkills(selectedSkills.filter(s => s !== skill));
+    setAvailableSkills([...availableSkills, skill].sort((a, b) => a.localeCompare(b)));
+  };
+  
+  const handleCreateTeam = async () => {
+    if (!user) return;
+    
+    if (!teamName.trim()) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields and select at least one skill needed.",
+        title: "Team name required",
+        description: "Please provide a name for your team",
         variant: "destructive",
       });
       return;
     }
     
-    createTeam({
-      name,
-      hackathonId,
-      description,
-      skillsNeeded: selectedSkills,
-      maxMembers,
-    });
-    
-    toast({
-      title: "Team created!",
-      description: "Your team has been created successfully. You can now invite others to join.",
-    });
-    
-    // Reset form
-    setName("");
-    setDescription("");
-    setSelectedSkills([]);
-    setMaxMembers(4);
-    
-    onClose();
-  };
-
-  const toggleSkill = (skill: UserSkill) => {
-    if (selectedSkills.includes(skill)) {
-      setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-    } else {
-      setSelectedSkills([...selectedSkills, skill]);
+    try {
+      setIsLoading(true);
+      
+      // Combine user skills and selected additional skills
+      const skillsNeeded = [...selectedSkills];
+      
+      await createTeam({
+        hackathonId,
+        name: teamName,
+        description: description || `Team for ${hackathonTitle}`,
+        skillsNeeded,
+        maxMembers,
+      });
+      
+      toast({
+        title: "Team created successfully",
+        description: `Your team '${teamName}' has been created for ${hackathonTitle}`,
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error("Error creating team:", error);
+      toast({
+        title: "Failed to create team",
+        description: "An error occurred while creating your team. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // AI suggestion for skills based on user profile
-  const suggestSkills = () => {
-    setAiSuggesting(true);
-    
-    // Simulate AI processing
-    setTimeout(() => {
-      if (user && user.skills) {
-        // Get complementary skills (ones the user doesn't have)
-        const userSkills = user.skills;
-        const complementarySkills = skillsOptions
-          .filter(skill => !userSkills.includes(skill as UserSkill))
-          .slice(0, 4) as UserSkill[];
-          
-        setSelectedSkills(complementarySkills);
-        
-        toast({
-          title: "AI Suggestion",
-          description: "We've suggested skills that would complement your team based on your profile.",
-        });
-      } else {
-        const randomSkills = skillsOptions
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 4) as UserSkill[];
-          
-        setSelectedSkills(randomSkills);
-        
-        toast({
-          title: "Skills Suggested",
-          description: "We've suggested some skills that might be useful for your team.",
-        });
-      }
-      
-      setAiSuggesting(false);
-    }, 1000);
-  };
-
+  
+  const filteredSkills = getFilteredSkills();
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background border border-primary/20 shadow-lg rounded-lg w-[90vw] max-w-xl max-h-[90vh] z-50">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Create a new team</DialogTitle>
+          <DialogTitle>Create a Team for {hackathonTitle}</DialogTitle>
           <DialogDescription>
-            Create a team for {hackathonTitle} and find teammates with the skills you need
+            Form a team to participate in this hackathon. Add team details and skills you're looking for.
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[60vh] pr-4">
-          <form onSubmit={handleSubmit} className="space-y-6 py-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="team-name">Team Name</Label>
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="teamName">Team Name</Label>
+              <Input
+                id="teamName"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="Enter team name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Team Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your team and project idea"
+                rows={3}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="maxMembers">Maximum Team Size</Label>
+              <div className="flex items-center space-x-4">
                 <Input
-                  id="team-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter a name for your team"
-                  required
-                  className="border-primary/20 bg-background/50 focus:border-primary"
+                  type="number"
+                  id="maxMembers"
+                  value={maxMembers}
+                  onChange={(e) => setMaxMembers(Number(e.target.value))}
+                  min={2}
+                  max={10}
+                  className="w-24"
                 />
+                <span className="text-sm text-muted-foreground">members (including you)</span>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-4">
+              <div>
+                <Label>Skills You're Looking For</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Select skills that you want other team members to have
+                </p>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="team-description">Description</Label>
-                <Textarea
-                  id="team-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your project idea or what you're looking for in teammates"
-                  required
-                  rows={4}
-                  className="border-primary/20 bg-background/50 focus:border-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label>Skills Needed</Label>
-                  <Button 
-                    type="button" 
-                    size="sm" 
-                    variant="outline"
-                    onClick={suggestSkills}
-                    disabled={aiSuggesting}
-                    className="text-xs rounded-full flex items-center"
-                  >
-                    {aiSuggesting ? (
-                      <>
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                        Suggesting...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-1 h-3 w-3 text-secondary" />
-                        AI Suggest
-                      </>
-                    )}
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {skillsOptions.map((skill) => {
-                    const isSelected = selectedSkills.includes(skill as UserSkill);
-                    return (
-                      <Badge
-                        key={skill}
-                        variant={isSelected ? "default" : "outline"}
-                        className={`cursor-pointer rounded-full ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                        onClick={() => toggleSkill(skill as UserSkill)}
-                      >
-                        {skill}
-                      </Badge>
-                    );
-                  })}
-                </div>
+              {/* Already selected skills */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedSkills.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="gap-1">
+                    {skill}
+                    <button
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="ml-1 rounded-full hover:bg-secondary/80 focus:outline-none"
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove {skill}</span>
+                    </button>
+                  </Badge>
+                ))}
+                
                 {selectedSkills.length === 0 && (
-                  <p className="text-sm text-destructive">
-                    Please select at least one skill
+                  <p className="text-sm text-muted-foreground italic">
+                    No skills selected yet
                   </p>
                 )}
               </div>
               
-              <div className="space-y-2 pt-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="max-members" className="flex items-center">
-                    <Users className="mr-2 h-4 w-4" />
-                    Maximum Team Size
-                  </Label>
-                  <span className="text-sm text-muted-foreground">{maxMembers} members</span>
+              {/* Skills search */}
+              <div className="space-y-2">
+                <Label htmlFor="skillSearch">Add Skills</Label>
+                <div className="relative">
+                  <Input
+                    id="skillSearch"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search for skills to add"
+                    className="pr-8"
+                  />
                 </div>
-                <Slider
-                  id="max-members"
-                  min={2}
-                  max={8}
-                  step={1}
-                  value={[maxMembers]}
-                  onValueChange={(value) => setMaxMembers(value[0])}
-                  className="py-4"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>2</span>
-                  <span>4</span>
-                  <span>6</span>
-                  <span>8</span>
-                </div>
+                
+                {searchTerm && filteredSkills.length > 0 && (
+                  <div className="bg-card border rounded-md mt-1 max-h-40 overflow-y-auto">
+                    {filteredSkills.map((skill) => (
+                      <button
+                        key={skill}
+                        onClick={() => handleSelectSkill(skill)}
+                        className="w-full px-3 py-2 text-left hover:bg-muted flex items-center justify-between"
+                      >
+                        <span>{skill}</span>
+                        <PlusCircle className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {searchTerm && filteredSkills.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No matching skills found
+                  </p>
+                )}
               </div>
             </div>
-          </form>
+            
+            <Separator />
+            
+            <div className="space-y-2">
+              <Label>Team Creator</Label>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{user?.name || user?.email}</p>
+                  <p className="text-xs text-muted-foreground">Team Leader</p>
+                </div>
+                <Badge variant="outline" className="ml-auto">
+                  <Check className="h-3 w-3 mr-1" />
+                  You
+                </Badge>
+              </div>
+            </div>
+          </div>
         </ScrollArea>
         
-        <DialogFooter className="mt-4">
-          <Button type="button" variant="outline" onClick={onClose} className="rounded-full">
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button 
-            type="submit" 
-            onClick={handleSubmit}
-            disabled={isCreatingTeam || name.trim() === "" || description.trim() === "" || selectedSkills.length === 0}
-            className="rounded-full relative overflow-hidden group gradient-button"
+            onClick={handleCreateTeam} 
+            disabled={!teamName.trim() || isLoading}
+            className="gradient-button"
           >
-            <span className="relative z-10">
-              {isCreatingTeam ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
-                  Creating...
-                </>
-              ) : (
-                "Create Team"
-              )}
-            </span>
-            <span className="absolute inset-0 rounded-full bg-white/10 group-hover:animate-ripple"></span>
+            {isLoading ? "Creating..." : "Create Team"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

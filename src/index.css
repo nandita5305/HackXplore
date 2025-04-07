@@ -69,6 +69,15 @@
   }
 }
 
+@keyframes card-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px 0 rgba(155, 135, 245, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px 5px rgba(155, 135, 245, 0.6);
+  }
+}
+
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
 }
@@ -79,6 +88,10 @@
 
 .animate-ripple {
   animation: ripple 1s ease-out;
+}
+
+.animate-card-glow {
+  animation: card-glow 2s ease-in-out infinite;
 }
 
 /* Custom button styles */
@@ -98,4 +111,29 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 50;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Card glow effects */
+.card-hover-effect:hover {
+  animation: card-glow 2s ease-in-out infinite;
+}
+
+/* Purple theme elements */
+.purple-gradient {
+  background: linear-gradient(135deg, rgba(155, 135, 245, 0.2) 0%, rgba(126, 105, 171, 0.3) 100%);
+}
+
+.purple-glow {
+  box-shadow: 0 0 15px 0 rgba(155, 135, 245, 0.4);
+}
+
+/* Wider card styles */
+.wide-card {
+  width: 100%;
+  max-width: 800px;
 }

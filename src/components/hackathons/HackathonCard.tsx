@@ -1,9 +1,9 @@
 
+import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { BookmarkIcon, Calendar, MapPin, Award, Users, ExternalLink } from "lucide-react";
 import { HackathonCard as HackathonCardType } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +17,7 @@ interface HackathonCardProps extends HackathonCardType {
   onFormTeam?: () => void;
   source?: string;
   isDetailed?: boolean;
+  description?: string;
 }
 
 export function HackathonCard({
@@ -31,13 +32,13 @@ export function HackathonCard({
   prizePool,
   teamSize,
   url,
-  description,
   isBookmarked,
   onBookmarkToggle,
   onViewDetails,
   onFormTeam,
   source,
-  isDetailed
+  isDetailed,
+  description
 }: HackathonCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
@@ -65,7 +66,7 @@ export function HackathonCard({
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col border-primary/10">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col border-primary/10 card-hover-effect wide-card">
         <div className="relative">
           {/* Circular image container for better UI */}
           <div className="relative h-48 overflow-hidden group">
@@ -118,7 +119,7 @@ export function HackathonCard({
           </div>
         </CardHeader>
         
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-4 pt-0 flex-1">
           <div className="flex flex-wrap gap-2 mb-3">
             <Badge variant="secondary" className="rounded-full capitalize">
               {mode}
@@ -160,26 +161,24 @@ export function HackathonCard({
           )}
         </CardContent>
         
-        <CardFooter className="p-4 pt-0 flex flex-wrap gap-2 justify-between">
-          <div className="flex gap-2 flex-wrap">
-            <Button asChild className="relative overflow-hidden group">
-              <a href={url} target="_blank" rel="noopener noreferrer">
-                <span className="relative z-10 flex items-center">
-                  Register
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </span>
-                <span className="absolute inset-0 rounded-md bg-white/10 group-hover:animate-ripple"></span>
-              </a>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              onClick={handleTeamCreate}
-              className="rounded-full border-primary/20 hover:bg-primary/10"
-            >
-              Form Team
-            </Button>
-          </div>
+        <CardFooter className="p-4 pt-0 flex justify-between flex-wrap md:flex-nowrap gap-2">
+          <Button asChild className="relative overflow-hidden group">
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              <span className="relative z-10 flex items-center">
+                Register
+                <ExternalLink className="h-4 w-4 ml-2" />
+              </span>
+              <span className="absolute inset-0 rounded-md bg-white/10 group-hover:animate-ripple"></span>
+            </a>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleTeamCreate}
+            className="rounded-full border-primary/20 hover:bg-primary/10"
+          >
+            Form Team
+          </Button>
           
           {!isDetailed && (
             <Button variant="ghost" asChild>
@@ -196,12 +195,14 @@ export function HackathonCard({
       />
       
       {isTeamModalOpen && (
-        <CreateTeamModal
-          isOpen={isTeamModalOpen}
-          onClose={() => setIsTeamModalOpen(false)}
-          hackathonId={id}
-          hackathonTitle={title}
-        />
+        <div className="fixed-center">
+          <CreateTeamModal
+            isOpen={isTeamModalOpen}
+            onClose={() => setIsTeamModalOpen(false)}
+            hackathonId={id}
+            hackathonTitle={title}
+          />
+        </div>
       )}
     </>
   );

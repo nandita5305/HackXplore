@@ -1,8 +1,11 @@
-
 // User type that matches what's expected by the application
 export interface User {
   id: string;
   email: string;
+  name?: string;
+  skills?: UserSkill[];
+  interests?: HackathonType[];
+  avatarUrl?: string;
 }
 
 // Separate UserProfile type for profile data
@@ -100,7 +103,7 @@ export interface HackathonCard {
   source?: string;
 }
 
-// Add InternshipCard interface
+// Update InternshipCard interface to include isBookmarked
 export interface InternshipCard {
   id: string;
   title: string;
@@ -114,6 +117,8 @@ export interface InternshipCard {
   description: string;
   skills: UserSkill[];
   isRemote: boolean;
+  isBookmarked?: boolean;
+  source?: string;
 }
 
 // Add Team interface for teamService
