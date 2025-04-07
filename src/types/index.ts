@@ -1,3 +1,4 @@
+
 // User type that matches what's expected by the application
 export interface User {
   id: string;
@@ -83,6 +84,7 @@ export type HackathonType =
   | "Sustainable Development"
   | "Hardware";
 
+// Update HackathonCard interface to fix build errors
 export interface HackathonCard {
   id: string;
   title: string;
@@ -101,6 +103,11 @@ export interface HackathonCard {
   description: string;
   isBookmarked?: boolean;
   source?: string;
+}
+
+// Creating a HackathonCardProps interface that extends HackathonCard but with optional description
+export interface HackathonCardProps extends Omit<HackathonCard, 'description'> {
+  description?: string;
 }
 
 // Update InternshipCard interface to include isBookmarked

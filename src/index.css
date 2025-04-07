@@ -78,6 +78,16 @@
   }
 }
 
+/* Enhanced glow effect for arrow key hover */
+@keyframes card-glow-intense {
+  0%, 100% {
+    box-shadow: 0 0 20px 5px rgba(155, 135, 245, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(155, 135, 245, 0.8);
+  }
+}
+
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
 }
@@ -99,7 +109,7 @@
   @apply bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:from-primary/80 hover:to-primary/60;
 }
 
-/* Fix card widths in grids */
+/* Fix card widths in grids - making them wider */
 .hackathon-card-container, .internship-card-container {
   width: 100%;
   max-width: 100%;
@@ -123,6 +133,16 @@
   animation: card-glow 2s ease-in-out infinite;
 }
 
+.card-hover-effect:focus-within {
+  animation: card-glow-intense 1.5s ease-in-out infinite;
+}
+
+/* Arrow key focus effect */
+.card-hover-effect:focus-visible {
+  animation: card-glow-intense 1.5s ease-in-out infinite;
+  outline: none;
+}
+
 /* Purple theme elements */
 .purple-gradient {
   background: linear-gradient(135deg, rgba(155, 135, 245, 0.2) 0%, rgba(126, 105, 171, 0.3) 100%);
@@ -136,4 +156,16 @@
 .wide-card {
   width: 100%;
   max-width: 800px;
+}
+
+/* Make cards responsive but wider */
+.hackathon-card, .internship-card, .team-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Enhanced input fields with purple glow */
+input:focus, textarea:focus, select:focus {
+  box-shadow: 0 0 0 2px rgba(155, 135, 245, 0.4);
+  border-color: rgba(155, 135, 245, 0.6);
 }

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, UserProfile, UserSkill, HackathonType } from "@/types";
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data) {
-        setProfile({
+        const profileData: UserProfile = {
           name: data.name,
           skills: data.skills || [],
           interests: data.interests || [],
@@ -78,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           portfolioUrl: data.portfolio_url,
           preferredRole: data.preferred_role,
           bio: data.bio,
-        });
+        };
+        
+        setProfile(profileData);
         
         // Update user with profile data for easier access
         setUser(prev => {
@@ -98,9 +101,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const generateAvatarUrl = (name: string) => {
-    // Generate a unique avatar using a service like DiceBear
-    const seed = name.replace(/\s+/g, '').toLowerCase();
-    return `https://avatars.dicebear.com/api/avataaars/${seed}.svg`;
+    // Generate a unique avatar using Dicebear with a variety of styles
+    const styles = ["adventurer", "adventurer-neutral", "big-ears", "big-smile", "bottts", "croodles", "micah", "miniavs", "personas", "pixel-art", "avataaars"];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+    const seed = name.trim().toLowerCase().replace(/\s+/g, '-');
+    return `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
   };
 
   const signUp = async (email: string, password: string) => {
@@ -197,6 +202,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatarUrl: avatarUrl || prev.avatarUrl,
         };
       });
+      
+      console.log("Profile updated successfully:", { profileData, avatarUrl });
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error;

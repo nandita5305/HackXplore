@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Team, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +22,7 @@ interface TeamCardProps {
 
 export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardProps) {
   const { user } = useAuth();
-  const { joinTeam, leaveTeam } = useTeams();
+  const teamService = useTeams();
   const { toast } = useToast();
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -44,7 +43,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
     
     try {
       setIsJoining(true);
-      await joinTeam(team.id);
+      await teamService.joinTeam(team.id);
       toast({
         title: "Team joined!",
         description: `You have successfully joined ${team.name}`,
@@ -66,7 +65,8 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
     
     try {
       setIsLeaving(true);
-      await leaveTeam(team.id);
+      // Fixed the reference to leaveTeam
+      await teamService.leaveTeam(team.id);
       toast({
         title: "Team left",
         description: `You have left ${team.name}`,
