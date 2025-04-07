@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,14 +16,15 @@ import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// Form validation schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   confirmPassword: z.string(),
   dob: z.string().optional(),
-  githubUrl: z.string().url().optional().or(z.literal("")),
-  linkedinUrl: z.string().url().optional().or(z.literal("")),
+  githubUrl: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
+  linkedinUrl: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -43,8 +43,10 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const [selectedInterests, setSelectedInterests] = useState<HackathonType[]>([]);
   const [lookingFor, setLookingFor] = useState<'hackathons' | 'internships' | 'both'>('both');
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { toast } = useToast();
   
+  // Initialize form with validation
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,16 +68,24 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     }
   }, [form.watch("name")]);
 
+  // Avatar generation with error handling
   const generateAvatar = (name: string) => {
-    // Use a variety of avatar styles for more diversity
-    const styles = ["adventurer", "adventurer-neutral", "big-ears", "big-smile", "bottts", "croodles", "micah", "miniavs", "personas", "pixel-art", "avataaars"];
-    const style = styles[Math.floor(Math.random() * styles.length)];
-    
-    // Create a seed based on name and a random number to ensure uniqueness
-    const seed = `${name.trim().toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-    const newAvatarUrl = `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
-    
-    setAvatarUrl(newAvatarUrl);
+    try {
+      // Use a variety of avatar styles for more diversity
+      const styles = ["adventurer", "adventurer-neutral", "big-ears", "big-smile", "bottts", "croodles", "micah", "miniavs", "personas", "pixel-art", "avataaars"];
+      const style = styles[Math.floor(Math.random() * styles.length)];
+      
+      // Create a seed based on name and a random number to ensure uniqueness
+      const seed = `${name.trim().toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+      const newAvatarUrl = `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
+      
+      setAvatarUrl(newAvatarUrl);
+      console.log("Avatar generated:", newAvatarUrl);
+    } catch (error) {
+      console.error("Error generating avatar:", error);
+      // Use a fallback avatar URL if generation fails
+      setAvatarUrl("https://avatars.dicebear.com/api/identicon/fallback.svg");
+    }
   };
 
   const toggleSkill = (skill: UserSkill) => {
@@ -94,35 +104,59 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     );
   };
 
+  // Form submission with enhanced error handling
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setFetchError(null);
+    console.log("Starting signup process with email:", values.email);
     
     try {
-      const { error } = await signUp(values.email, values.password);
+      console.log("Calling signUp function...");
       
-      if (error) {
+      // Wrap in try-catch specifically for network issues
+      try {
+        const result = await signUp(values.email, values.password);
+        console.log("SignUp API response:", result);
+        
+        if (result?.error) {
+          console.error("Signup error from API:", result.error);
+          setFetchError(`Error: ${result.error.message || "Unknown authentication error"}`);
+          toast({
+            title: "Error signing up",
+            description: result.error.message || "Failed to create account",
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch (networkError) {
+        console.error("Network error during signup:", networkError);
+        setFetchError(`Network error: ${networkError.message || "Failed to connect to authentication service"}`);
         toast({
-          title: "Error signing up",
-          description: error.message,
+          title: "Connection error",
+          description: "Unable to connect to the authentication service. Please check your internet connection and try again.",
           variant: "destructive",
         });
-      } else {
-        // If no avatar has been generated yet, generate one
-        if (!avatarUrl) {
-          generateAvatar(values.name);
-        }
-        
-        // Move to next step after successful signup
-        setCurrentStep(2);
-        toast({
-          title: "Account created!",
-          description: "Now let's complete your profile",
-        });
+        throw networkError; // Re-throw to skip the rest of the function
       }
+      
+      // If no avatar has been generated yet, generate one
+      if (!avatarUrl) {
+        generateAvatar(values.name);
+      }
+      
+      // Move to next step after successful signup
+      setCurrentStep(2);
+      toast({
+        title: "Account created!",
+        description: "Now let's complete your profile",
+      });
+      
     } catch (error) {
+      console.error("Unhandled error during signup:", error);
+      setFetchError(`Unhandled error: ${error.message || "Unknown error occurred"}`);
       toast({
         title: "Something went wrong",
-        description: "Please try again later",
+        description: "An unexpected error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -130,8 +164,10 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     }
   }
 
+  // Profile completion with enhanced error handling
   async function completeProfile() {
     setIsLoading(true);
+    setFetchError(null);
     
     try {
       const values = form.getValues();
@@ -147,15 +183,47 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         return;
       }
       
-      await updateProfile({
+      console.log("Updating profile with data:", {
         name: values.name,
-        githubUrl: values.githubUrl,
-        linkedinUrl: values.linkedinUrl,
         skills: selectedSkills,
         interests: selectedInterests,
-        lookingFor,
-        avatarUrl: avatarUrl,
+        lookingFor
       });
+      
+      // Wrap in try-catch specifically for network issues
+      try {
+        const profileResult = await updateProfile({
+          name: values.name,
+          githubUrl: values.githubUrl,
+          linkedinUrl: values.linkedinUrl,
+          skills: selectedSkills,
+          interests: selectedInterests,
+          lookingFor,
+          avatarUrl: avatarUrl,
+        });
+        
+        console.log("Profile update result:", profileResult);
+        
+        if (profileResult?.error) {
+          console.error("Profile update error:", profileResult.error);
+          setFetchError(`Profile error: ${profileResult.error.message || "Failed to update profile"}`);
+          toast({
+            title: "Error updating profile",
+            description: profileResult.error.message || "Failed to save profile information",
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch (networkError) {
+        console.error("Network error during profile update:", networkError);
+        setFetchError(`Network error: ${networkError.message || "Failed to connect to profile service"}`);
+        toast({
+          title: "Connection error",
+          description: "Unable to connect to the profile service. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+        throw networkError;
+      }
       
       toast({
         title: "Profile created!",
@@ -166,9 +234,11 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         onSuccess();
       }
     } catch (error) {
+      console.error("Unhandled error during profile update:", error);
+      setFetchError(`Unhandled error: ${error.message || "Unknown error occurred"}`);
       toast({
         title: "Error updating profile",
-        description: "Please try again later",
+        description: "An unexpected error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -184,6 +254,16 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
       </CardHeader>
       <ScrollArea className="max-h-[70vh]">
         <CardContent>
+          {/* Display any fetch errors prominently */}
+          {fetchError && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/50 rounded-md text-destructive text-sm">
+              <strong>Connection Error:</strong> {fetchError}
+              <div className="mt-1 text-xs">
+                Please check your internet connection and ensure the backend services are running.
+              </div>
+            </div>
+          )}
+          
           {currentStep === 1 ? (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
