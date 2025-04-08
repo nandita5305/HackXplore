@@ -69,7 +69,8 @@ export type UserSkill =
   | "Software Development"
   | "Computer Architecture"
   | "Embedded Systems"
-  | ".NET";
+  | ".NET"
+  | "Vue";
 
 export type HackathonType = 
   | "Web Development" 
@@ -142,6 +143,8 @@ export interface HackathonCardProps extends Partial<HackathonCard> {
   imageUrl: string;
   location: string;
   isDetailed?: boolean;
+  onViewDetails?: () => void;
+  onFormTeam?: () => void;
 }
 
 export interface InternshipCard {
@@ -175,4 +178,15 @@ export interface Bookmark {
   userId: string;
   itemId: string;
   itemType: 'hackathon' | 'internship';
+}
+
+export interface Reminder {
+  id: string;
+  userId: string;
+  internshipId: string;
+  internshipTitle: string;
+  company: string;
+  reminderDate: string;
+  note?: string;
+  isNotified: boolean;
 }

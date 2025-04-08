@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { useBookmarks } from "@/services/bookmarkService";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
-import { HackathonType } from "@/types";
+import { HackathonType, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +26,10 @@ export interface HackathonCardProps {
   prizePool?: string;
   description?: string;
   teamSize?: number;
-  skills?: string[];
+  skills?: UserSkill[];
   location: string;
   source?: string;
+  isDetailed?: boolean;
   onViewDetails?: () => void;
   onFormTeam?: () => void;
 }
@@ -47,13 +48,14 @@ export function HackathonCard({
   teamSize,
   skills,
   location,
+  isDetailed,
   onViewDetails,
   onFormTeam,
 }: HackathonCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const { user } = useAuth();
-  const { bookmarks, isLoading, isBookmarked, toggleBookmark } = useBookmarks();
+  const { isBookmarked, toggleBookmark, isLoading } = useBookmarks();
 
   const isItemBookmarked = isBookmarked(id, "hackathon");
 
@@ -86,58 +88,58 @@ export function HackathonCard({
 
   return (
     <>
-      <Card className="bg-card/50 backdrop-blur-sm border border-primary/10 card-hover-effect">
-        <a href={url} target="_blank" rel="noopener noreferrer">
-          <img
-            src={imageUrl}
-            alt={title}
-            className="aspect-video w-full rounded-md object-cover"
-          />
-        </a>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBookmark}
-              disabled={isLoading}
-              className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
-            >
-              <Bookmark
-                className={cn("h-5 w-5", isItemBookmarked && "fill-primary text-primary")}
-              />
-              <span className="sr-only">
-                {isItemBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-              </span>
-            </Button>
-          </div>
-
+      <Card className="h-full bg-card/50 backdrop-blur-sm border border-primary/10 card-hover-effect overflow-hidden flex flex-col">
+        <div className="relative">
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <img
+              src={imageUrl}
+              alt={title}
+              className="aspect-video w-full object-cover"
+            />
+          </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBookmark}
+            disabled={isLoading}
+            className="absolute top-2 right-2 h-8 w-8 rounded-full hover:bg-primary/10 bg-background/50 backdrop-blur-sm card-glow-effect"
+          >
+            <Bookmark
+              className={cn("h-5 w-5", isItemBookmarked && "fill-primary text-primary")}
+            />
+            <span className="sr-only">
+              {isItemBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            </span>
+          </Button>
+        </div>
+        
+        <CardContent className="p-4 flex-grow flex flex-col">
+          <h3 className="text-lg font-semibold mb-1">{title}</h3>
+          
           <p className="text-sm text-muted-foreground mb-2">
             {organizer && <span>{organizer}</span>}
             {location && <span>, {location}</span>}
           </p>
 
+          {dates && <p className="text-sm font-medium mb-2">{dates}</p>}
+
           {type && type.length > 0 && (
-            <div className="mb-3">
-              {type.map((type) => (
-                <Badge key={type} variant="secondary" className="mr-1 card-glow-effect">
-                  {type}
+            <div className="mb-3 flex flex-wrap gap-1">
+              {type.map((t) => (
+                <Badge key={t} variant="secondary" className="card-glow-effect text-xs">
+                  {t}
                 </Badge>
               ))}
             </div>
           )}
 
           {description && (
-            <p className="text-sm text-muted-foreground line-clamp-3">
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
               {description}
             </p>
           )}
-        </CardContent>
-
-        <CardFooter className="flex items-center justify-between p-4">
-          <div className="flex flex-col gap-1 text-sm">
-            {dates && <p className="font-medium">{dates}</p>}
+          
+          <div className="mt-auto space-y-1 text-sm">
             {prizePool && <p className="text-muted-foreground">Prize: {prizePool}</p>}
             {mode && <p className="text-muted-foreground">Mode: {mode}</p>}
             {teamSize && (
@@ -146,29 +148,29 @@ export function HackathonCard({
               </p>
             )}
           </div>
+        </CardContent>
 
-          <div className="flex items-center space-x-2">
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="card-glow-effect"
-            >
-              <a href={url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Learn More
-              </a>
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleFormTeam}
-              className="gradient-button card-glow-effect"
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Create Team
-            </Button>
-          </div>
+        <CardFooter className="p-4 pt-0 flex justify-between gap-2">
+          <Button
+            asChild
+            variant="secondary"
+            size="sm"
+            className="card-glow-effect flex-1"
+          >
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Learn More
+            </a>
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleFormTeam}
+            className="gradient-button card-glow-effect flex-1"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Create Team
+          </Button>
         </CardFooter>
       </Card>
 

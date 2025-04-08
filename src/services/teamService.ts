@@ -1,10 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Team } from "@/types";
+import { Team, UserSkill } from "@/types";
 
 // Mock data for teams (replace with API calls in a real application)
-const mockTeamsData = [
+const mockTeamsData: Team[] = [
   {
     id: "team-1",
     name: "Awesome Team",
@@ -12,7 +12,7 @@ const mockTeamsData = [
     members: ["user-1", "user-2"],
     createdAt: "2024-03-15T12:00:00Z",
     description: "A team working on an awesome project",
-    skillsNeeded: ["JavaScript", "React", "Node.js"],
+    skillsNeeded: ["JavaScript", "React", "Node.js"] as UserSkill[],
     creator: "user-1",
     maxMembers: 4,
     isOpen: true,
@@ -24,7 +24,7 @@ const mockTeamsData = [
     members: ["user-3", "user-4", "user-5", "user-6"],
     createdAt: "2024-03-20T18:00:00Z",
     description: "A team of fantastic developers",
-    skillsNeeded: ["Python", "Machine Learning", "Data Analysis"],
+    skillsNeeded: ["Python", "Machine Learning", "Data Analysis"] as UserSkill[],
     creator: "user-3",
     maxMembers: 4,
     isOpen: false,
@@ -44,6 +44,13 @@ export const useTeamService = () => {
         return mockTeamsData.filter((team) => team.hackathonId === hackathonId);
       },
     });
+  };
+  
+  // Function to check if a user is in a specific team
+  const isUserInTeam = (teamId: string): boolean => {
+    if (!user) return false;
+    const team = mockTeamsData.find(t => t.id === teamId);
+    return team ? team.members.includes(user.id) || team.creator === user.id : false;
   };
 
   // Function to create a new team
@@ -100,12 +107,14 @@ export const useTeamService = () => {
     createTeam,
     joinTeam,
     leaveTeam,
+    isUserInTeam
   };
 };
 
-// Also export a useTeams function that exports methods to get teams for a user
+// Export a useTeams function for getting user teams
 export const useTeams = () => {
   const { user } = useAuth();
+  const teamService = useTeamService();
   
   const useUserTeams = () => {
     return useQuery({
@@ -121,5 +130,6 @@ export const useTeams = () => {
   
   return {
     useUserTeams,
+    ...teamService
   };
 };

@@ -3,13 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ExternalLink, Calendar, DollarSign, MapPin, Globe } from "lucide-react";
+import { Bookmark, ExternalLink, Calendar, DollarSign, MapPin, Bell, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useBookmarks } from "@/services/bookmarkService";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { ReminderModal } from "@/components/internships/ReminderModal";
 import { UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface InternshipCardProps {
   id: string;
@@ -24,7 +26,10 @@ export interface InternshipCardProps {
   deadline?: string;
   stipend?: string;
   isRemote?: boolean;
+  postedDate: string;
+  type: string;
   isBookmarked?: boolean;
+  onViewDetailsClick?: () => void;
 }
 
 export function InternshipCard({
@@ -40,9 +45,13 @@ export function InternshipCard({
   deadline,
   stipend,
   isRemote,
+  postedDate,
+  type,
   isBookmarked: initialBookmarkState,
+  onViewDetailsClick,
 }: InternshipCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark, isLoading } = useBookmarks();
   
@@ -56,34 +65,79 @@ export function InternshipCard({
     
     toggleBookmark(id, "internship");
   };
+
+  const handleSetReminder = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
+    setIsReminderModalOpen(true);
+  };
+
+  const handleViewDetails = () => {
+    if (onViewDetailsClick) {
+      onViewDetailsClick();
+    }
+  };
   
   return (
     <>
-      <Card className="bg-card/50 backdrop-blur-sm border border-primary/10 card-hover-effect h-full flex flex-col">
+      <Card className="h-full bg-card/50 backdrop-blur-sm border border-primary/10 card-hover-effect flex flex-col overflow-hidden">
         <CardContent className="p-4 flex-grow">
           <div className="flex gap-4 mb-4">
-            <img
-              src={imageUrl}
-              alt={company}
-              className="h-16 w-16 rounded-md object-contain bg-white/10 p-2"
-            />
+            <div className="h-16 w-16 rounded-md bg-white/10 p-2 flex items-center justify-center">
+              <img
+                src={imageUrl}
+                alt={company}
+                className="h-12 w-12 object-contain"
+              />
+            </div>
             <div className="flex-1">
               <div className="flex items-start justify-between">
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleBookmark}
-                  disabled={isLoading}
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
-                >
-                  <Bookmark
-                    className={cn("h-5 w-5", hasBookmark && "fill-primary text-primary")}
-                  />
-                  <span className="sr-only">
-                    {hasBookmark ? "Remove from bookmarks" : "Add to bookmarks"}
-                  </span>
-                </Button>
+                <h3 className="text-lg font-semibold" onClick={handleViewDetails}>
+                  {title}
+                </h3>
+                <div className="flex gap-1">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleSetReminder}
+                          className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
+                        >
+                          <Bell className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Set deadline reminder</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleBookmark}
+                          disabled={isLoading}
+                          className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
+                        >
+                          <Bookmark
+                            className={cn("h-5 w-5", hasBookmark && "fill-primary text-primary")}
+                          />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{hasBookmark ? "Remove bookmark" : "Bookmark internship"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">{company}</p>
             </div>
@@ -91,7 +145,7 @@ export function InternshipCard({
           
           <div className="mb-3 space-y-2">
             <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 mr-2" />
+              <MapPin className="h-4 w-4 mr-2 text-primary/70" />
               <span>{location}</span>
               {isRemote && (
                 <Badge variant="outline" className="ml-2 text-xs">
@@ -102,19 +156,19 @@ export function InternshipCard({
             
             {deadline && (
               <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-2" />
+                <Calendar className="h-4 w-4 mr-2 text-primary/70" />
                 <span>Deadline: {deadline}</span>
               </div>
             )}
             
             <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className="h-4 w-4 mr-2 text-primary/70" />
               <span>Duration: {duration}</span>
             </div>
             
             {stipend && (
               <div className="flex items-center text-sm text-muted-foreground">
-                <DollarSign className="h-4 w-4 mr-2" />
+                <DollarSign className="h-4 w-4 mr-2 text-primary/70" />
                 <span>Stipend: {stipend}</span>
               </div>
             )}
@@ -129,7 +183,7 @@ export function InternshipCard({
               <p className="text-sm font-medium">Skills Required:</p>
               <div className="flex flex-wrap gap-1">
                 {skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="card-glow-effect">
+                  <Badge key={skill} variant="secondary" className="card-glow-effect text-xs">
                     {skill}
                   </Badge>
                 ))}
@@ -139,16 +193,28 @@ export function InternshipCard({
         </CardContent>
         
         <CardFooter className="p-4 pt-0">
-          <Button
-            asChild
-            className="w-full gradient-button card-glow-effect"
-            size="sm"
-          >
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Apply Now
-            </a>
-          </Button>
+          <div className="flex w-full gap-2">
+            {onViewDetailsClick && (
+              <Button
+                onClick={handleViewDetails}
+                variant="outline"
+                size="sm"
+                className="flex-1"
+              >
+                View Details
+              </Button>
+            )}
+            <Button
+              asChild
+              className="gradient-button card-glow-effect flex-1"
+              size="sm"
+            >
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Apply Now
+              </a>
+            </Button>
+          </div>
         </CardFooter>
       </Card>
       
@@ -156,6 +222,15 @@ export function InternshipCard({
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         defaultView="login"
+      />
+      
+      <ReminderModal
+        isOpen={isReminderModalOpen}
+        onClose={() => setIsReminderModalOpen(false)}
+        internshipId={id}
+        internshipTitle={title}
+        deadline={deadline}
+        company={company}
       />
     </>
   );

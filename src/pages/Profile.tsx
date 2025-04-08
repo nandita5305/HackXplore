@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -16,7 +17,9 @@ import { useBookmarks } from "@/services/bookmarkService";
 import { hackathonsData, internshipsData } from "@/data/mockData";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
 import { InternshipCard } from "@/components/internships/InternshipCard";
+import { AIInternshipRecommender } from "@/components/recommendations/AIInternshipRecommender";
 import { Edit, Github, Linkedin, Globe, User, LogIn } from "lucide-react";
+import { Team } from "@/types";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -80,6 +83,10 @@ export default function Profile() {
     );
   }
   
+  const handleProfileUpdate = () => {
+    setIsEditing(false);
+  };
+  
   return (
     <AnimatedBackground>
       <Navbar />
@@ -93,89 +100,95 @@ export default function Profile() {
                 Cancel
               </Button>
             </div>
-            <ProfileForm onComplete={() => setIsEditing(false)} />
+            <ProfileForm onComplete={handleProfileUpdate} />
           </div>
         ) : (
           <>
-            <div className="mb-12">
-              <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={profile?.avatarUrl} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                        {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 text-center md:text-left">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-                        <div>
-                          <h1 className="text-3xl font-bold">{profile?.name || user.email}</h1>
-                          <p className="text-muted-foreground">
-                            {profile?.preferredRole || "No role specified"}
-                          </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+              <div className="lg:col-span-2">
+                <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                      <Avatar className="h-24 w-24">
+                        <AvatarImage src={profile?.avatarUrl} />
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                          {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 text-center md:text-left">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+                          <div>
+                            <h1 className="text-3xl font-bold">{profile?.name || user.email}</h1>
+                            <p className="text-muted-foreground">
+                              {profile?.preferredRole || "No role specified"}
+                            </p>
+                          </div>
+                          
+                          <Button onClick={() => setIsEditing(true)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Profile
+                          </Button>
                         </div>
                         
-                        <Button onClick={() => setIsEditing(true)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Profile
-                        </Button>
-                      </div>
-                      
-                      {profile?.bio && (
-                        <p className="mb-4">{profile.bio}</p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {profile?.skills?.map((skill) => (
-                          <Badge key={skill} variant="outline">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-4">
-                        {profile?.githubUrl && (
-                          <a 
-                            href={profile.githubUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Github className="mr-1 h-4 w-4" />
-                            GitHub
-                          </a>
+                        {profile?.bio && (
+                          <p className="mb-4">{profile.bio}</p>
                         )}
                         
-                        {profile?.linkedinUrl && (
-                          <a 
-                            href={profile.linkedinUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Linkedin className="mr-1 h-4 w-4" />
-                            LinkedIn
-                          </a>
-                        )}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {profile?.skills?.map((skill) => (
+                            <Badge key={skill} variant="outline">
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
                         
-                        {profile?.portfolioUrl && (
-                          <a 
-                            href={profile.portfolioUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Globe className="mr-1 h-4 w-4" />
-                            Portfolio
-                          </a>
-                        )}
+                        <div className="flex flex-wrap gap-4">
+                          {profile?.githubUrl && (
+                            <a 
+                              href={profile.githubUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                            >
+                              <Github className="mr-1 h-4 w-4" />
+                              GitHub
+                            </a>
+                          )}
+                          
+                          {profile?.linkedinUrl && (
+                            <a 
+                              href={profile.linkedinUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                            >
+                              <Linkedin className="mr-1 h-4 w-4" />
+                              LinkedIn
+                            </a>
+                          )}
+                          
+                          {profile?.portfolioUrl && (
+                            <a 
+                              href={profile.portfolioUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                            >
+                              <Globe className="mr-1 h-4 w-4" />
+                              Portfolio
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="lg:col-span-1">
+                <AIInternshipRecommender className="h-full" />
+              </div>
             </div>
             
             <Tabs defaultValue="teams">
@@ -198,7 +211,7 @@ export default function Profile() {
                     {userTeams.map((team) => (
                       <TeamCard 
                         key={team.id} 
-                        team={team}
+                        team={team as Team}
                       />
                     ))}
                   </div>
@@ -230,7 +243,7 @@ export default function Profile() {
                       ))}
                     </div>
                   ) : hackathonBookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {hackathonBookmarks.map((hackathon) => (
                         <HackathonCard key={hackathon.id} {...hackathon} />
                       ))}
@@ -262,7 +275,7 @@ export default function Profile() {
                       ))}
                     </div>
                   ) : internshipBookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {internshipBookmarks.map((internship) => (
                         <InternshipCard key={internship.id} {...internship} />
                       ))}

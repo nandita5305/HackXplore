@@ -1,30 +1,17 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoginForm } from "./LoginForm";
-import { SignUpForm } from "./SignUpForm";
-import { User, UserProfile, UserSkill, HackathonType } from "@/types";
+import { LoginForm } from './LoginForm';
+import { SignUpForm } from './SignUpForm';
+import { UserProfile, User } from '@/types';
 
-// Types
-type AuthUser = {
-  id: string;
-  email: string;
-  name?: string;
-  avatarUrl?: string;
-};
-
+// Auth Context Types
 type AuthContextType = {
-  user: AuthUser | null;
+  user: User | null;
   profile: UserProfile | null;
-  signUp: (
-    email: string, 
-    password: string, 
-    name?: string,
-    skills?: UserSkill[],
-    interests?: HackathonType[]
-  ) => Promise<{ user?: AuthUser; error?: { message: string } }>;
-  signIn: (email: string, password: string) => Promise<{ user?: AuthUser; error?: { message: string } }>;
+  signUp: (email: string, password: string) => Promise<{ user?: User; error?: { message: string } }>;
+  signIn: (email: string, password: string) => Promise<{ user?: User; error?: { message: string } }>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: UserProfile) => Promise<{ success?: boolean; error?: { message: string } }>;
   isLoading: boolean;
@@ -33,9 +20,24 @@ type AuthContextType = {
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Provider Props
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+// API base URL - should match your backend
+const API_URL = 'http://localhost:3001/api';
+
+// Auth Modal Props
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultView?: 'login' | 'signup';
+}
+
 // Provider component
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,25 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // Get auth token from localStorage
-        const token = localStorage.getItem('authToken');
+        // Simulate fetching user data
+        const mockUser = localStorage.getItem('mockUser');
         
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
-
-        // For mock implementation, we'll just simulate a successful auth check
-        // In a real app, you'd validate the token with your backend
-        const storedUser = localStorage.getItem('authUser');
-        const storedProfile = localStorage.getItem('userProfile');
-        
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-        
-        if (storedProfile) {
-          setProfile(JSON.parse(storedProfile));
+        if (mockUser) {
+          const userData = JSON.parse(mockUser);
+          setUser(userData);
+          
+          // Also fetch user profile
+          const mockProfile = localStorage.getItem('mockProfile');
+          if (mockProfile) {
+            setProfile(JSON.parse(mockProfile));
+          }
         }
       } catch (error) {
         console.error("Auth status check error:", error);
@@ -74,41 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Sign up function
-  const signUp = async (
-    email: string, 
-    password: string,
-    name?: string,
-    skills?: UserSkill[],
-    interests?: HackathonType[]
-  ) => {
+  const signUp = async (email: string, password: string) => {
     try {
-      console.log(`Attempting to sign up user with email: ${email}`);
+      console.log(`Signing up user with email: ${email}`);
       
-      // For mock implementation, we'll just simulate a successful signup
-      const newUser: AuthUser = {
+      // Create a mock user for demo purposes
+      const newUser = {
         id: `user-${Date.now()}`,
-        email,
-        name,
-        avatarUrl: name ? `https://avatars.dicebear.com/api/initials/${name.charAt(0)}.svg` : undefined
+        email
       };
       
-      // Create a profile if name, skills and interests are provided
-      if (name && skills && interests) {
-        const newProfile: UserProfile = {
-          name,
-          skills: skills,
-          interests: interests,
-          lookingFor: 'both',
-          avatarUrl: newUser.avatarUrl
-        };
-        
-        setProfile(newProfile);
-        localStorage.setItem('userProfile', JSON.stringify(newProfile));
-      }
-      
-      // Store auth info
-      localStorage.setItem('authToken', 'mock-token-' + Date.now());
-      localStorage.setItem('authUser', JSON.stringify(newUser));
+      // Store in localStorage for persistence
+      localStorage.setItem('mockUser', JSON.stringify(newUser));
       
       // Set user in state
       setUser(newUser);
@@ -116,37 +88,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { user: newUser };
     } catch (error) {
       console.error("Sign up error:", error);
-      return { error: { message: "Failed to create account" } };
+      return { error: { message: "Error creating account" } };
     }
   };
 
   // Sign in function
   const signIn = async (email: string, password: string) => {
     try {
-      // For mock implementation, we'll just simulate a successful login
-      const mockUser: AuthUser = {
+      console.log(`Signing in user with email: ${email}`);
+      
+      // Create a mock user for demo purposes
+      const mockUser = {
         id: `user-${Date.now()}`,
-        email,
-        name: "Mock User",
-        avatarUrl: `https://avatars.dicebear.com/api/initials/M.svg`
+        email
       };
       
-      const mockProfile: UserProfile = {
-        name: "Mock User",
-        skills: ["JavaScript", "React", "Node.js"],
-        interests: ["Web Development", "Mobile App Development"],
-        lookingFor: 'both',
-        avatarUrl: mockUser.avatarUrl
-      };
+      // Store in localStorage for persistence
+      localStorage.setItem('mockUser', JSON.stringify(mockUser));
       
-      // Store auth info
-      localStorage.setItem('authToken', 'mock-token-' + Date.now());
-      localStorage.setItem('authUser', JSON.stringify(mockUser));
-      localStorage.setItem('userProfile', JSON.stringify(mockProfile));
-      
-      // Set user and profile in state
+      // Set user in state
       setUser(mockUser);
-      setProfile(mockProfile);
+      
+      // Create a mock profile if it doesn't exist
+      const existingProfile = localStorage.getItem('mockProfile');
+      if (!existingProfile) {
+        const defaultProfile: UserProfile = {
+          name: email.split('@')[0],
+          skills: ["JavaScript", "React", "CSS"],
+          interests: ["Web Development", "AI/ML"],
+          lookingFor: 'both',
+          preferredRole: 'Frontend Developer',
+          bio: 'Passionate about web development and learning new technologies'
+        };
+        
+        localStorage.setItem('mockProfile', JSON.stringify(defaultProfile));
+        setProfile(defaultProfile);
+      } else {
+        setProfile(JSON.parse(existingProfile));
+      }
       
       return { user: mockUser };
     } catch (error) {
@@ -158,10 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sign out function
   const signOut = async () => {
     try {
-      // Clear local auth state
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
-      localStorage.removeItem('userProfile');
+      // Clear local storage
+      localStorage.removeItem('mockUser');
+      
+      // Clear state
       setUser(null);
       setProfile(null);
     } catch (error) {
@@ -172,9 +151,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Update profile function
   const updateProfile = async (profileData: UserProfile) => {
     try {
-      // For mock implementation, just update the profile in localStorage
+      console.log("Updating profile with data:", profileData);
+      
+      // For demo, just store in localStorage
+      localStorage.setItem('mockProfile', JSON.stringify(profileData));
+      
+      // Update local state
       setProfile(profileData);
-      localStorage.setItem('userProfile', JSON.stringify(profileData));
       
       return { success: true };
     } catch (error) {
@@ -206,57 +189,49 @@ export function useAuth() {
   return context;
 }
 
-// Auth Modal Component
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  defaultView?: 'login' | 'signup';
-}
-
+// Auth Modal component
 export function AuthModal({ isOpen, onClose, defaultView = 'login' }: AuthModalProps) {
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>(defaultView);
-  const { user } = useAuth();
-  
-  // Close modal if user is logged in
-  useEffect(() => {
-    if (user) {
-      onClose();
-    }
-  }, [user, onClose]);
+  const [view, setView] = useState<'login' | 'signup'>(defaultView);
   
   const handleSwitchToLogin = () => {
-    setActiveTab('login');
+    setView('login');
   };
   
-  const handleSwitchToSignup = () => {
-    setActiveTab('signup');
+  const handleSwitchToSignUp = () => {
+    setView('signup');
+  };
+  
+  const handleSuccess = () => {
+    onClose();
   };
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md p-0 overflow-hidden border-0">
-        <Tabs value={activeTab} className="w-full">
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-bold">
+            {view === 'login' ? 'Welcome Back' : 'Create Your Account'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <Tabs value={view} onValueChange={(value) => setView(value as 'login' | 'signup')}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger 
-              value="login" 
-              onClick={handleSwitchToLogin}
-              className="rounded-none data-[state=active]:bg-primary/10"
-            >
-              Login
-            </TabsTrigger>
-            <TabsTrigger 
-              value="signup" 
-              onClick={handleSwitchToSignup}
-              className="rounded-none data-[state=active]:bg-primary/10"
-            >
-              Sign Up
-            </TabsTrigger>
+            <TabsTrigger value="login">Log In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
-          <TabsContent value="login" className="p-6">
-            <LoginForm onSwitchToSignup={handleSwitchToSignup} onSuccess={onClose} />
+          
+          <TabsContent value="login">
+            <LoginForm 
+              onSwitchToSignUp={handleSwitchToSignUp} 
+              onSuccess={handleSuccess} 
+            />
           </TabsContent>
-          <TabsContent value="signup" className="px-6 py-4">
-            <SignUpForm onSwitchToLogin={handleSwitchToLogin} onSuccess={onClose} />
+          
+          <TabsContent value="signup">
+            <SignUpForm 
+              onSwitchToLogin={handleSwitchToLogin} 
+              onSuccess={handleSuccess} 
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>

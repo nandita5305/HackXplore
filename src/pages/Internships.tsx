@@ -13,6 +13,8 @@ import { internshipsData } from "@/data/mockData";
 import { InternshipCard as InternshipCardType, UserSkill } from "@/types";
 import { filterInternships } from "@/services/recommendationService";
 import { useNavigate } from "react-router-dom";
+import { AIInternshipRecommender } from "@/components/recommendations/AIInternshipRecommender";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Internships() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +32,7 @@ export default function Internships() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const topRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
   
   useEffect(() => {
     let results = allInternships;
@@ -113,6 +116,14 @@ export default function Internships() {
             </form>
           </div>
         </section>
+        
+        {user && (
+          <section className="py-6">
+            <div className="container">
+              <AIInternshipRecommender />
+            </div>
+          </section>
+        )}
         
         <section className="py-8 md:py-12">
           <div className="container">

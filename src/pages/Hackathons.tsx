@@ -7,7 +7,6 @@ import { HackathonFilters } from "@/components/hackathons/HackathonFilters";
 import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Search, ArrowDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { hackathonsData } from "@/data/mockData";
@@ -16,6 +15,7 @@ import { filterHackathons } from "@/services/recommendationService";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
+import { AIInternshipRecommender } from "@/components/recommendations/AIInternshipRecommender";
 
 export default function Hackathons() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,14 +111,6 @@ export default function Hackathons() {
               <p className="text-muted-foreground text-lg">
                 Find hackathons from various platforms like DoraHacks and DevTown, filter based on your preferences, and build your next project.
               </p>
-              
-              {!user && (
-                <div className="mt-6 p-4 bg-secondary/10 rounded-lg border border-secondary/20">
-                  <p className="text-sm">
-                    Sign in to get personalized AI recommendations based on your skills and interests.
-                  </p>
-                </div>
-              )}
             </div>
             
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mb-8 relative">
@@ -137,6 +129,14 @@ export default function Hackathons() {
             </form>
           </div>
         </section>
+        
+        {user && (
+          <section className="py-6">
+            <div className="container">
+              <AIInternshipRecommender />
+            </div>
+          </section>
+        )}
         
         <section className="py-8 md:py-12 relative">
           <div className="absolute top-1/4 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
@@ -173,7 +173,6 @@ export default function Hackathons() {
                             {...hackathon}
                             onViewDetails={() => handleViewDetails(hackathon.id)}
                             onFormTeam={() => handleFormTeam(hackathon)}
-                            source={hackathon.source}
                           />
                         </div>
                       ))}
