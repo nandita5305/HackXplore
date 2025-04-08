@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Types
@@ -259,4 +260,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 // Custom hook for using auth context
-export
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
