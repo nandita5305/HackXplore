@@ -2,11 +2,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, UserProfile, UserSkill, HackathonType } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string, skills?: UserSkill[], interests?: HackathonType[]) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -108,15 +110,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return `https://avatars.dicebear.com/api/${style}/${seed}.svg`;
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, name: string, skills: UserSkill[] = [], interests: HackathonType[] = []) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      // First, create the authentication account
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
-      return { error };
+      
+      if (error) {
+        toast({
+          title: "Error signing up",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+      
+      if (data.user) {
+        // Generate avatar URL using the name
+        const avatarUrl = generateAvatarUrl(name);
+        
+        // Create profile in the database
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            user_id: data.user.id,
+            name: name,
+            skills: skills,
+            interests: interests,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+        
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+          toast({
+            title: "Profile creation issue",
+            description: "Your account was created but we had trouble with your profile. Please update it later.",
+            variant: "destructive",
+          });
+        } else {
+          // Set the user state immediately for a smoother UX
+          setUser({
+            id: data.user.id,
+            email: data.user.email || "",
+            name: name,
+            avatarUrl: avatarUrl,
+            skills: skills,
+            interests: interests,
+          });
+          
+          // Set the profile state
+          setProfile({
+            name: name,
+            skills: skills,
+            interests: interests,
+            lookingFor: "both",
+            avatarUrl: avatarUrl,
+          });
+          
+          toast({
+            title: "Account created!",
+            description: `Welcome to HackXplore, ${name}!`,
+          });
+        }
+      }
+      
+      return { error: null };
     } catch (error) {
       console.error("Error signing up:", error);
+      toast({
+        title: "Unexpected error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
       return { error: error as Error };
     }
   };
@@ -127,9 +195,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
+      
+      if (error) {
+        toast({
+          title: "Error signing in",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+      }
+      
       return { error };
     } catch (error) {
       console.error("Error signing in:", error);
+      toast({
+        title: "Error signing in",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
       return { error: error as Error };
     }
   };
@@ -139,8 +226,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out.",
+      });
     } catch (error) {
       console.error("Error signing out:", error);
+      toast({
+        title: "Error signing out",
+        description: "An error occurred while signing out.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -174,6 +270,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .upsert(updates, { onConflict: "user_id" });
 
       if (error) {
+        toast({
+          title: "Error updating profile",
+          description: error.message,
+          variant: "destructive",
+        });
         throw error;
       }
 
@@ -203,7 +304,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       });
       
-      console.log("Profile updated successfully:", { profileData, avatarUrl });
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       throw error;

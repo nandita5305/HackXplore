@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Team, UserSkill } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,7 +23,7 @@ interface TeamCardProps {
 
 export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardProps) {
   const { user } = useAuth();
-  const teamService = useTeams();
+  const { joinTeam, leaveTeam } = useTeams();
   const { toast } = useToast();
   
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -31,8 +32,8 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
   const [isJoining, setIsJoining] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   
-  const isCreator = team.creator === user?.id;
-  const isMember = team.members.includes(user?.id || "");
+  const isCreator = user && team.creator === user.id;
+  const isMember = user && team.members.includes(user.id || "");
   const isFull = team.members.length >= team.maxMembers;
   
   const handleJoinTeam = async () => {
@@ -43,7 +44,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
     
     try {
       setIsJoining(true);
-      await teamService.joinTeam(team.id);
+      await joinTeam(team.id);
       toast({
         title: "Team joined!",
         description: `You have successfully joined ${team.name}`,
@@ -65,9 +66,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
     
     try {
       setIsLeaving(true);
-      // Using teamService.joinTeam since leaveTeam doesn't exist yet
-      // This is a temporary fix until leaveTeam is implemented
-      await teamService.joinTeam(team.id);
+      await leaveTeam(team.id);
       toast({
         title: "Team left",
         description: `You have left ${team.name}`,
@@ -102,7 +101,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
               variant="ghost"
               size="icon"
               onClick={() => setShowMembersDialog(true)}
-              className="h-8 w-8 rounded-full hover:bg-primary/10"
+              className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
             >
               <Users className="h-5 w-5" />
               <span className="sr-only">View Members</span>
@@ -135,7 +134,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
             <h4 className="text-sm font-medium mb-2">Looking for skills:</h4>
             <div className="flex flex-wrap gap-1.5">
               {team.skillsNeeded?.map((skill) => (
-                <Badge key={skill} variant="outline" className="rounded-full">
+                <Badge key={skill} variant="outline" className="rounded-full card-glow-effect">
                   {skill}
                 </Badge>
               ))}
@@ -152,7 +151,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
               <Button 
                 onClick={handleJoinTeam} 
                 disabled={isJoining}
-                className="w-full gradient-button"
+                className="w-full gradient-button card-glow-effect"
               >
                 {isJoining ? "Joining..." : "Join Team"}
               </Button>
@@ -186,7 +185,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
       />
       
       <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-hidden">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-hidden purple-gradient">
           <DialogHeader>
             <DialogTitle>Team Members</DialogTitle>
             <DialogDescription>
@@ -225,7 +224,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
       </Dialog>
       
       <AlertDialog open={isLeaveConfirmOpen} onOpenChange={setIsLeaveConfirmOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="purple-gradient">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -234,7 +233,7 @@ export function TeamCard({ team, onViewDetails, showActions = true }: TeamCardPr
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLeaveTeam} disabled={isLeaving}>
+            <AlertDialogAction onClick={handleLeaveTeam} disabled={isLeaving} className="gradient-button card-glow-effect">
               {isLeaving ? "Leaving..." : "Leave Team"}
             </AlertDialogAction>
           </AlertDialogFooter>

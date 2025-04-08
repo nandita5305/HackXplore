@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { skillsOptions, interestOptions } from "@/data/mockData";
 import { UserSkill, HackathonType } from "@/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -36,7 +37,7 @@ interface SignUpFormProps {
 }
 
 export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
-  const { signUp, updateProfile } = useAuth();
+  const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
@@ -44,6 +45,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
   const [lookingFor, setLookingFor] = useState<'hackathons' | 'internships' | 'both'>('both');
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,27 +100,12 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
     setIsLoading(true);
     
     try {
-      const { error } = await signUp(values.email, values.password);
-      
-      if (error) {
-        toast({
-          title: "Error signing up",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        // If no avatar has been generated yet, generate one
-        if (!avatarUrl) {
-          generateAvatar(values.name);
-        }
-        
-        // Move to next step after successful signup
-        setCurrentStep(2);
-        toast({
-          title: "Account created!",
-          description: "Now let's complete your profile",
-        });
-      }
+      // Move to next step after form validation
+      setCurrentStep(2);
+      toast({
+        title: "Great!",
+        description: "Now let's complete your profile by selecting your skills and interests",
+      });
     } catch (error) {
       toast({
         title: "Something went wrong",
@@ -147,27 +134,31 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
         return;
       }
       
-      await updateProfile({
-        name: values.name,
-        githubUrl: values.githubUrl,
-        linkedinUrl: values.linkedinUrl,
-        skills: selectedSkills,
-        interests: selectedInterests,
-        lookingFor,
-        avatarUrl: avatarUrl,
-      });
+      // Sign up the user with all profile data
+      const { error } = await signUp(
+        values.email, 
+        values.password, 
+        values.name, 
+        selectedSkills,
+        selectedInterests
+      );
       
-      toast({
-        title: "Profile created!",
-        description: `Welcome to HackXplore, ${values.name}!`,
-      });
-      
-      if (onSuccess) {
-        onSuccess();
+      if (!error) {
+        toast({
+          title: "Account created!",
+          description: `Welcome to HackXplore, ${values.name}!`,
+        });
+        
+        // Redirect to profile page or dashboard
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/profile");
+        }
       }
     } catch (error) {
       toast({
-        title: "Error updating profile",
+        title: "Error creating account",
         description: "Please try again later",
         variant: "destructive",
       });
@@ -200,7 +191,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                         type="button"
                         size="sm"
                         variant="outline" 
-                        className="absolute bottom-0 right-0 rounded-full size-8 p-0"
+                        className="absolute bottom-0 right-0 rounded-full size-8 p-0 card-glow-effect"
                         onClick={() => generateAvatar(form.getValues().name)}
                         title="Generate new avatar"
                       >
@@ -315,11 +306,11 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                   />
                 </div>
                 
-                <Button type="submit" className="w-full gradient-button" disabled={isLoading}>
+                <Button type="submit" className="w-full gradient-button card-glow-effect" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
+                      Processing...
                     </>
                   ) : (
                     "Continue"
@@ -338,7 +329,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     </AvatarFallback>
                   </Avatar>
                   <Button 
-                    className="absolute bottom-0 right-0 rounded-full size-8 p-0"
+                    className="absolute bottom-0 right-0 rounded-full size-8 p-0 card-glow-effect"
                     onClick={() => generateAvatar(form.getValues().name)}
                     variant="outline"
                   >
@@ -370,7 +361,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                           <Badge
                             key={skill}
                             variant={isSelected ? "default" : "outline"}
-                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
+                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'} card-glow-effect`}
                             onClick={() => toggleSkill(skill as UserSkill)}
                           >
                             {skill}
@@ -396,7 +387,7 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                           <Badge
                             key={interest}
                             variant={isSelected ? "default" : "outline"}
-                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
+                            className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'} card-glow-effect`}
                             onClick={() => toggleInterest(interest as HackathonType)}
                           >
                             {interest}
@@ -416,21 +407,21 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                 <div className="flex flex-wrap gap-2">
                   <Badge
                     variant={lookingFor === 'hackathons' ? "default" : "outline"}
-                    className="cursor-pointer"
+                    className="cursor-pointer card-glow-effect"
                     onClick={() => setLookingFor('hackathons')}
                   >
                     Hackathons
                   </Badge>
                   <Badge
                     variant={lookingFor === 'internships' ? "default" : "outline"}
-                    className="cursor-pointer"
+                    className="cursor-pointer card-glow-effect"
                     onClick={() => setLookingFor('internships')}
                   >
                     Internships
                   </Badge>
                   <Badge
                     variant={lookingFor === 'both' ? "default" : "outline"}
-                    className="cursor-pointer"
+                    className="cursor-pointer card-glow-effect"
                     onClick={() => setLookingFor('both')}
                   >
                     Both
@@ -467,17 +458,17 @@ export function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
                     Back
                   </Button>
                   <Button 
-                    className="flex-1 gradient-button"
+                    className="flex-1 gradient-button card-glow-effect"
                     onClick={completeProfile}
                     disabled={isLoading || selectedSkills.length === 0 || selectedInterests.length === 0}
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        Creating Account...
                       </>
                     ) : (
-                      "Complete Profile"
+                      "Complete Signup"
                     )}
                   </Button>
                 </div>

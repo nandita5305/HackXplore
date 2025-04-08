@@ -1,5 +1,3 @@
-
-// User type that matches what's expected by the application
 export interface User {
   id: string;
   email: string;
@@ -9,12 +7,11 @@ export interface User {
   avatarUrl?: string;
 }
 
-// Separate UserProfile type for profile data
 export interface UserProfile {
-  name?: string;
-  skills?: UserSkill[];
-  interests?: HackathonType[];
-  lookingFor?: "hackathons" | "internships" | "both";
+  name: string;
+  skills: UserSkill[];
+  interests: HackathonType[];
+  lookingFor: 'hackathons' | 'internships' | 'both';
   avatarUrl?: string;
   githubUrl?: string;
   linkedinUrl?: string;
@@ -23,143 +20,131 @@ export interface UserProfile {
   bio?: string;
 }
 
-export type UserSkill =
-  | "JavaScript"
-  | "Python"
-  | "React"
-  | "Node.js"
-  | "HTML"
-  | "CSS"
-  | "Java"
-  | "C++"
-  | "C#"
-  | "TypeScript"
-  | "Vue.js"
-  | "Angular"
-  | "SQL"
-  | "MongoDB"
-  | "AWS"
-  | "Azure"
-  | "Docker"
-  | "Kubernetes"
-  | "Git"
-  | "Figma"
-  | "UI/UX Design"
-  | "Project Management"
-  | "Communication"
-  | "Problem Solving"
-  | "Leadership"
-  | "Data Analysis"
-  | "Machine Learning"
-  | "AI"
-  | "Blockchain"
-  | "Solidity"
-  | "Unity"
-  | "C"
-  | "Web3.js"
-  | "TensorFlow"
-  | "3D Modeling"
-  | "Arduino";
+export type UserSkill = 
+  | "JavaScript" 
+  | "TypeScript" 
+  | "React" 
+  | "Node.js" 
+  | "Python" 
+  | "Java" 
+  | "C++" 
+  | "C#" 
+  | "PHP" 
+  | "Ruby" 
+  | "Go" 
+  | "Rust" 
+  | "Flutter" 
+  | "Kotlin" 
+  | "Swift" 
+  | "Objective-C" 
+  | "iOS Development" 
+  | "macOS Development" 
+  | "Android" 
+  | "Vue" 
+  | "Angular" 
+  | "MongoDB" 
+  | "MySQL" 
+  | "PostgreSQL" 
+  | "GraphQL" 
+  | "AWS" 
+  | "Azure" 
+  | "GCP" 
+  | "DevOps" 
+  | "Docker" 
+  | "Kubernetes" 
+  | "UI/UX Design" 
+  | "Product Management" 
+  | "Technical Writing" 
+  | "AI/ML" 
+  | "PyTorch" 
+  | "Data Science" 
+  | "Cybersecurity" 
+  | "Blockchain" 
+  | "Web3" 
+  | "IoT" 
+  | "Backend" 
+  | ".NET" 
+  | "Software Development" 
+  | "Computer Architecture" 
+  | "Embedded Systems" 
+  | "Cloud Computing" 
+  | "Mobile Development";
 
-export type HackathonType =
-  | "Web Development"
-  | "Mobile App Development"
-  | "AI & Machine Learning"
-  | "Blockchain Technology"
-  | "Data Science"
-  | "Cybersecurity"
-  | "Cloud Computing"
-  | "Game Development"
-  | "UI/UX Design"
-  | "E-commerce"
-  | "Social Media"
-  | "FinTech"
-  | "HealthTech"
-  | "EdTech"
-  | "IoT (Internet of Things)"
-  | "AR/VR"
-  | "Robotics"
-  | "Space Exploration"
-  | "Renewable Energy"
-  | "Sustainable Development"
-  | "Hardware";
+export type HackathonType = 
+  | "Web Development" 
+  | "Mobile App Development" 
+  | "Game Development" 
+  | "HealthTech" 
+  | "EdTech" 
+  | "FinTech" 
+  | "Sustainability" 
+  | "Social Impact" 
+  | "Open Innovation" 
+  | "AI/ML" 
+  | "Blockchain" 
+  | "Web3" 
+  | "IoT" 
+  | "Healthtech"
+  | "Fintech"
+  | "Mobile Development";
 
-// Define HackathonCard interface for the data structure
+export interface Team {
+  id: string;
+  createdAt: string;
+  name: string;
+  hackathonId: string;
+  description: string;
+  skillsNeeded: UserSkill[];
+  creator: string;
+  maxMembers: number;
+  isOpen: boolean;
+  members: string[];
+}
+
 export interface HackathonCard {
   id: string;
   title: string;
-  organizer: string;
-  dates: string;
-  endDate: string;
-  startDate: string;
-  location: string;
-  imageUrl: string;
   url: string;
+  imageUrl: string;
+  dates: string;
+  startDate: string;
+  endDate: string;
+  organizer: string;
   mode: "online" | "in-person" | "hybrid";
   type: HackathonType[];
   prizePool: string;
+  description: string;
   teamSize: number;
   skills: UserSkill[];
-  description: string;
-  isBookmarked?: boolean;
-  source?: string;
+  location: string;
 }
 
-// Creating HackathonCardProps that extends HackathonCard with optional description
-export interface HackathonCardProps {
+export interface HackathonCardProps extends Partial<HackathonCard> {
   id: string;
   title: string;
-  organizer: string;
-  dates: string;
-  endDate: string;
-  startDate: string;
-  location: string;
-  imageUrl: string;
   url: string;
-  mode: "online" | "in-person" | "hybrid";
-  type: HackathonType[];
-  prizePool: string;
-  teamSize: number;
-  skills: UserSkill[];
-  description?: string;
-  isBookmarked?: boolean;
-  source?: string;
-  onBookmarkToggle?: () => void;
-  onViewDetails?: () => void;
-  onFormTeam?: () => void;
-  isDetailed?: boolean;
+  imageUrl: string;
+  location: string;
 }
 
-// Update InternshipCard interface to include isBookmarked
 export interface InternshipCard {
   id: string;
   title: string;
   company: string;
   location: string;
-  deadline: string;
-  duration: string;
-  stipend: string;
-  imageUrl: string;
+  type: string;
   url: string;
+  imageUrl: string;
   description: string;
   skills: UserSkill[];
-  isRemote: boolean;
-  isBookmarked?: boolean;
-  source?: string;
+  postedDate: string;
+  duration: string;
 }
 
-// Add Team interface for teamService
-export interface Team {
+export interface Bookmark {
   id: string;
-  hackathonId: string;
-  name: string;
-  description: string;
-  skillsNeeded: UserSkill[];
-  members: string[];
-  creator: string;
-  maxMembers: number;
-  isOpen: boolean;
-  skills?: UserSkill[]; // For backward compatibility
-  createdBy?: string; // For backward compatibility
-  createdAt?: string; // For backward compatibility
+  createdAt: string;
+  userId: string;
+  itemId: string;
+  itemType: 'hackathon' | 'internship';
 }
