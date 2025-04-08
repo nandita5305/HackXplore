@@ -39,6 +39,10 @@ export function ReminderModal({
   const [enableBrowser, setEnableBrowser] = useState(true);
   const [note, setNote] = useState(`Reminder for ${internshipTitle} application at ${company}`);
   
+  // Get current date with time set to 00:00:00 for proper comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
   const handleSetReminder = () => {
     // In a real app, this would save the reminder to the user's account
     // For now, we'll just simulate it with a toast
@@ -112,6 +116,8 @@ export function ReminderModal({
                   selected={reminderDate}
                   onSelect={setReminderDate}
                   initialFocus
+                  disabled={(date) => date < today}
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
