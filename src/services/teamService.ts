@@ -31,6 +31,23 @@ const mockTeamsData: Team[] = [
   },
 ];
 
+// Mock data for team join requests
+const mockJoinRequestsData: {
+  id: string;
+  teamId: string;
+  userId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}[] = [
+  {
+    id: "request-1",
+    teamId: "team-1",
+    userId: "user-3",
+    status: "pending",
+    createdAt: "2024-03-21T10:00:00Z"
+  }
+];
+
 export const useTeamService = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -54,17 +71,38 @@ export const useTeamService = () => {
   };
 
   // Function to create a new team
-  const createTeam = async (
-    hackathonId: string,
-    teamName: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  const createTeam = async (teamData: {
+    hackathonId: string;
+    name: string;
+    description?: string;
+    skillsNeeded?: UserSkill[];
+    maxMembers?: number;
+  }): Promise<{ success: boolean; error?: string }> => {
     try {
       // In a real implementation, this would make an API call
-      console.log(
-        `Creating team "${teamName}" for hackathon with ID ${hackathonId}`
-      );
+      console.log("Creating team:", teamData);
 
-      // For mock implementation, we'll just simulate success
+      // For mock implementation, we'll simulate adding a team
+      const newTeam: Team = {
+        id: `team-${Date.now()}`,
+        name: teamData.name,
+        hackathonId: teamData.hackathonId,
+        description: teamData.description || `Team for hackathon ${teamData.hackathonId}`,
+        skillsNeeded: teamData.skillsNeeded || [],
+        maxMembers: teamData.maxMembers || 4,
+        creator: user?.id || "unknown",
+        members: [user?.id || "unknown"],
+        createdAt: new Date().toISOString(),
+        isOpen: true,
+      };
+      
+      // Add the team to mock data
+      mockTeamsData.push(newTeam);
+      
+      // Invalidate team queries
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      
       return { success: true };
     } catch (error) {
       console.error("Error creating team:", error);
@@ -80,7 +118,18 @@ export const useTeamService = () => {
       // In a real implementation, this would make an API call
       console.log(`User joining team: ${teamId}`);
 
-      // For mock implementation, we'll just simulate success
+      // Create a join request
+      const newRequest = {
+        id: `request-${Date.now()}`,
+        teamId,
+        userId: user?.id || "unknown",
+        status: "pending" as const,
+        createdAt: new Date().toISOString()
+      };
+      
+      mockJoinRequestsData.push(newRequest);
+      queryClient.invalidateQueries({ queryKey: ["joinRequests"] });
+      
       return { success: true };
     } catch (error) {
       console.error("Error joining team:", error);
@@ -94,12 +143,127 @@ export const useTeamService = () => {
       // In a real implementation, this would make an API call
       console.log(`User leaving team: ${teamId}`);
       
-      // For mock implementation, we'll just simulate success
+      const teamIndex = mockTeamsData.findIndex(t => t.id === teamId);
+      if (teamIndex !== -1 && user) {
+        // Remove user from team members
+        mockTeamsData[teamIndex].members = mockTeamsData[teamIndex].members.filter(
+          memberId => memberId !== user.id
+        );
+        
+        queryClient.invalidateQueries({ queryKey: ["teams"] });
+        queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      }
+      
       return { success: true };
     } catch (error) {
       console.error("Error leaving team:", error);
       return { success: false, error: "Failed to leave team" };
     }
+  };
+  
+  // Function to delete a team (only for creators)
+  const deleteTeam = async (teamId: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const team = mockTeamsData.find(t => t.id === teamId);
+      
+      if (!team) {
+        return { success: false, error: "Team not found" };
+      }
+      
+      if (team.creator !== user?.id) {
+        return { success: false, error: "Only team creator can delete the team" };
+      }
+      
+      // Remove the team from mock data
+      const teamIndex = mockTeamsData.findIndex(t => t.id === teamId);
+      if (teamIndex !== -1) {
+        mockTeamsData.splice(teamIndex, 1);
+        queryClient.invalidateQueries({ queryKey: ["teams"] });
+        queryClient.invalidateQueries({ queryKey: ["userTeams"] });
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting team:", error);
+      return { success: false, error: "Failed to delete team" };
+    }
+  };
+  
+  // Function to handle join requests
+  const respondToJoinRequest = async (
+    requestId: string, 
+    status: 'accepted' | 'rejected'
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const requestIndex = mockJoinRequestsData.findIndex(r => r.id === requestId);
+      
+      if (requestIndex === -1) {
+        return { success: false, error: "Request not found" };
+      }
+      
+      const request = mockJoinRequestsData[requestIndex];
+      const team = mockTeamsData.find(t => t.id === request.teamId);
+      
+      if (!team) {
+        return { success: false, error: "Team not found" };
+      }
+      
+      if (team.creator !== user?.id) {
+        return { success: false, error: "Only team creator can respond to requests" };
+      }
+      
+      // Update request status
+      mockJoinRequestsData[requestIndex].status = status;
+      
+      // If accepted, add user to team
+      if (status === 'accepted') {
+        const teamIndex = mockTeamsData.findIndex(t => t.id === request.teamId);
+        if (teamIndex !== -1 && !mockTeamsData[teamIndex].members.includes(request.userId)) {
+          mockTeamsData[teamIndex].members.push(request.userId);
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["joinRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Error responding to join request:", error);
+      return { success: false, error: "Failed to respond to join request" };
+    }
+  };
+  
+  // Function to get pending join requests for user's teams
+  const useTeamJoinRequests = () => {
+    return useQuery({
+      queryKey: ["joinRequests", user?.id],
+      queryFn: () => {
+        if (!user) return [];
+        
+        // Get teams created by the user
+        const userCreatedTeams = mockTeamsData.filter(team => team.creator === user.id);
+        const userTeamIds = userCreatedTeams.map(team => team.id);
+        
+        // Get join requests for those teams
+        return mockJoinRequestsData.filter(request => 
+          userTeamIds.includes(request.teamId) && request.status === 'pending'
+        );
+      },
+      enabled: !!user,
+    });
+  };
+  
+  // Function to get user's sent join requests
+  const useUserSentRequests = () => {
+    return useQuery({
+      queryKey: ["sentRequests", user?.id],
+      queryFn: () => {
+        if (!user) return [];
+        
+        return mockJoinRequestsData.filter(request => request.userId === user.id);
+      },
+      enabled: !!user,
+    });
   };
 
   return {
@@ -107,7 +271,11 @@ export const useTeamService = () => {
     createTeam,
     joinTeam,
     leaveTeam,
-    isUserInTeam
+    deleteTeam,
+    isUserInTeam,
+    useTeamJoinRequests,
+    respondToJoinRequest,
+    useUserSentRequests
   };
 };
 

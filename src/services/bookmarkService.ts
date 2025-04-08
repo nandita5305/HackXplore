@@ -1,5 +1,7 @@
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 // Mock data for bookmarks
 const mockBookmarksData = [
@@ -78,6 +80,12 @@ export const useBookmarks = () => {
       return [...(oldData || []), newBookmark];
     });
     
+    // Show success toast
+    toast({
+      title: "Bookmark added",
+      description: `The ${itemType} has been added to your bookmarks.`,
+    });
+    
     // Here you would normally make an API call to actually save the bookmark
     console.log(`Added bookmark for ${itemType} with ID ${itemId}`);
   };
@@ -92,6 +100,12 @@ export const useBookmarks = () => {
         (bookmark: any) => 
           !(bookmark.item_id === itemId && bookmark.item_type === itemType)
       );
+    });
+    
+    // Show success toast
+    toast({
+      title: "Bookmark removed",
+      description: `The ${itemType} has been removed from your bookmarks.`,
     });
     
     // Here you would normally make an API call to actually remove the bookmark

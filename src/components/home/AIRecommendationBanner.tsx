@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "../auth/AuthModal";
@@ -24,10 +24,10 @@ export function AIRecommendationBanner() {
         
         <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-3">
-            <Sparkles className="h-8 w-8 text-primary opacity-80" />
+            <Users className="h-8 w-8 text-primary opacity-80" />
             <div>
-              <h3 className="text-lg font-semibold">Personalized Recommendations</h3>
-              <p className="text-muted-foreground">Sign in to get AI recommendations based on your skills and interests</p>
+              <h3 className="text-lg font-semibold">Join Hackathons & Find Teams</h3>
+              <p className="text-muted-foreground">Sign in to create or join teams for upcoming hackathons</p>
             </div>
           </div>
           

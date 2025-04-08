@@ -17,18 +17,20 @@ import { useBookmarks } from "@/services/bookmarkService";
 import { hackathonsData, internshipsData } from "@/data/mockData";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
 import { InternshipCard } from "@/components/internships/InternshipCard";
-import { AIInternshipRecommender } from "@/components/recommendations/AIInternshipRecommender";
-import { Edit, Github, Linkedin, Globe, User, LogIn } from "lucide-react";
-import { Team } from "@/types";
+import { Edit, Github, Linkedin, Globe, User, LogIn, Users, PlusCircle, UserPlus, Bell } from "lucide-react";
+import { Team, TeamJoinRequest } from "@/types";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user, profile } = useAuth();
-  const { useUserTeams } = useTeams();
+  const { useUserTeams, useUserSentRequests, deleteTeam } = useTeams();
   const { bookmarks, isLoading: isLoadingBookmarks } = useBookmarks();
   
   const { data: userTeams, isLoading: isLoadingTeams } = useUserTeams();
+  const { data: sentRequests = [] } = useUserSentRequests();
+  
+  const [activeTab, setActiveTab] = useState("teams");
   
   const hackathonBookmarks = bookmarks
     .filter(bookmark => bookmark.item_type === "hackathon")
@@ -43,6 +45,13 @@ export default function Profile() {
       internshipsData.find(internship => internship.id === bookmark.item_id)
     )
     .filter(internship => internship !== undefined) as any[];
+  
+  const handleDeleteTeam = async (teamId: string) => {
+    const result = await deleteTeam(teamId);
+    if (result.success) {
+      // Team deleted successfully
+    }
+  };
   
   if (!user) {
     return (
@@ -87,6 +96,12 @@ export default function Profile() {
     setIsEditing(false);
   };
   
+  const getPendingRequestsForTeam = (teamId: string) => {
+    return sentRequests.filter(
+      (request: TeamJoinRequest) => request.teamId === teamId && request.status === 'pending'
+    );
+  };
+  
   return (
     <AnimatedBackground>
       <Navbar />
@@ -104,101 +119,104 @@ export default function Profile() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-              <div className="lg:col-span-2">
-                <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                      <Avatar className="h-24 w-24">
-                        <AvatarImage src={profile?.avatarUrl} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                          {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 text-center md:text-left">
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-                          <div>
-                            <h1 className="text-3xl font-bold">{profile?.name || user.email}</h1>
-                            <p className="text-muted-foreground">
-                              {profile?.preferredRole || "No role specified"}
-                            </p>
-                          </div>
-                          
-                          <Button onClick={() => setIsEditing(true)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Profile
-                          </Button>
+            <div className="lg:col-span-2 mb-8">
+              <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={profile?.avatarUrl} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                        {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 text-center md:text-left">
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+                        <div>
+                          <h1 className="text-3xl font-bold">{profile?.name || user.email}</h1>
+                          <p className="text-muted-foreground">
+                            {profile?.preferredRole || "No role specified"}
+                          </p>
                         </div>
                         
-                        {profile?.bio && (
-                          <p className="mb-4">{profile.bio}</p>
+                        <Button onClick={() => setIsEditing(true)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Profile
+                        </Button>
+                      </div>
+                      
+                      {profile?.bio && (
+                        <p className="mb-4">{profile.bio}</p>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {profile?.skills?.map((skill) => (
+                          <Badge key={skill} variant="outline">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-4">
+                        {profile?.githubUrl && (
+                          <a 
+                            href={profile.githubUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                          >
+                            <Github className="mr-1 h-4 w-4" />
+                            GitHub
+                          </a>
                         )}
                         
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {profile?.skills?.map((skill) => (
-                            <Badge key={skill} variant="outline">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
+                        {profile?.linkedinUrl && (
+                          <a 
+                            href={profile.linkedinUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                          >
+                            <Linkedin className="mr-1 h-4 w-4" />
+                            LinkedIn
+                          </a>
+                        )}
                         
-                        <div className="flex flex-wrap gap-4">
-                          {profile?.githubUrl && (
-                            <a 
-                              href={profile.githubUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                            >
-                              <Github className="mr-1 h-4 w-4" />
-                              GitHub
-                            </a>
-                          )}
-                          
-                          {profile?.linkedinUrl && (
-                            <a 
-                              href={profile.linkedinUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                            >
-                              <Linkedin className="mr-1 h-4 w-4" />
-                              LinkedIn
-                            </a>
-                          )}
-                          
-                          {profile?.portfolioUrl && (
-                            <a 
-                              href={profile.portfolioUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                            >
-                              <Globe className="mr-1 h-4 w-4" />
-                              Portfolio
-                            </a>
-                          )}
-                        </div>
+                        {profile?.portfolioUrl && (
+                          <a 
+                            href={profile.portfolioUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                          >
+                            <Globe className="mr-1 h-4 w-4" />
+                            Portfolio
+                          </a>
+                        )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="lg:col-span-1">
-                <AIInternshipRecommender className="h-full" />
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
             
-            <Tabs defaultValue="teams">
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="mb-8 w-full md:w-auto">
                 <TabsTrigger value="teams">My Teams</TabsTrigger>
                 <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+                <TabsTrigger value="requests">Join Requests</TabsTrigger>
               </TabsList>
               
               <TabsContent value="teams">
-                <h2 className="text-2xl font-semibold mb-6">My Teams</h2>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-semibold">My Teams</h2>
+                  <Button asChild>
+                    <a href="/hackathons">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Find Hackathons
+                    </a>
+                  </Button>
+                </div>
                 
                 {isLoadingTeams ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -212,6 +230,8 @@ export default function Profile() {
                       <TeamCard 
                         key={team.id} 
                         team={team as Team}
+                        showActions={true}
+                        onDelete={() => handleDeleteTeam(team.id)}
                       />
                     ))}
                   </div>
@@ -219,6 +239,7 @@ export default function Profile() {
                   <Card>
                     <CardContent className="py-12">
                       <div className="text-center">
+                        <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-xl font-semibold mb-2">No teams yet</h3>
                         <p className="text-muted-foreground mb-6">
                           You haven't created or joined any teams yet
@@ -232,9 +253,69 @@ export default function Profile() {
                 )}
               </TabsContent>
               
+              <TabsContent value="requests">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-semibold mb-4">Join Requests</h2>
+                  
+                  {sentRequests.length > 0 ? (
+                    <div className="space-y-4">
+                      {sentRequests.map((request: TeamJoinRequest) => {
+                        const team = userTeams?.find(t => t.id === request.teamId);
+                        const hackathon = hackathonsData.find(h => team && h.id === team.hackathonId);
+                        
+                        return (
+                          <Card key={request.id} className="overflow-hidden">
+                            <CardContent className="p-6">
+                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div>
+                                  <h3 className="text-lg font-semibold">{team?.name || "Unknown Team"}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {hackathon?.title || "Unknown Hackathon"} • Request sent: {new Date(request.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                
+                                <Badge className={
+                                  request.status === 'accepted' ? 'bg-green-500' : 
+                                  request.status === 'rejected' ? 'bg-red-500' : 
+                                  'bg-yellow-500'
+                                }>
+                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                </Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8">
+                        <div className="text-center">
+                          <UserPlus className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <h3 className="text-xl font-semibold mb-2">No join requests</h3>
+                          <p className="text-muted-foreground mb-6">
+                            You haven't sent any requests to join teams
+                          </p>
+                          <Button asChild>
+                            <a href="/hackathons">Find Teams</a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </TabsContent>
+              
               <TabsContent value="bookmarks">
                 <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-6">Bookmarked Hackathons</h2>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-semibold">Bookmarked Hackathons</h2>
+                    <Button asChild variant="outline">
+                      <a href="/hackathons">
+                        Find More Hackathons
+                      </a>
+                    </Button>
+                  </div>
                   
                   {isLoadingBookmarks ? (
                     <div className="grid grid-cols-1 gap-6">
@@ -266,7 +347,14 @@ export default function Profile() {
                 </div>
                 
                 <div>
-                  <h2 className="text-2xl font-semibold mb-6">Bookmarked Internships</h2>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-semibold">Bookmarked Internships</h2>
+                    <Button asChild variant="outline">
+                      <a href="/internships">
+                        Find More Internships
+                      </a>
+                    </Button>
+                  </div>
                   
                   {isLoadingBookmarks ? (
                     <div className="grid grid-cols-1 gap-6">

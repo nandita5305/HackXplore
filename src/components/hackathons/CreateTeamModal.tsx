@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
 import { UserSkill } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { Check, PlusCircle, X } from "lucide-react";
+import { Check, PlusCircle, X, Users } from "lucide-react";
 import { skillsOptions } from "@/data/mockData";
 
 interface CreateTeamModalProps {
@@ -24,7 +24,7 @@ interface CreateTeamModalProps {
 
 export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }: CreateTeamModalProps) {
   const { user, profile } = useAuth();
-  const { createTeam } = useTeams();
+  const { createTeam, useHackathonTeams } = useTeams();
   const { toast } = useToast();
   
   const [teamName, setTeamName] = useState("");
@@ -34,6 +34,9 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
   const [availableSkills, setAvailableSkills] = useState<UserSkill[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<UserSkill[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Fetch existing teams for recommendations
+  const { data: hackathonTeams = [] } = useHackathonTeams(hackathonId);
   
   // Initialize available skills and filter user's existing skills
   useEffect(() => {
@@ -83,7 +86,7 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
       // Combine user skills and selected additional skills
       const skillsNeeded = [...selectedSkills];
       
-      await createTeam({
+      const result = await createTeam({
         hackathonId,
         name: teamName,
         description: description || `Team for ${hackathonTitle}`,
@@ -91,12 +94,20 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
         maxMembers,
       });
       
-      toast({
-        title: "Team created successfully",
-        description: `Your team '${teamName}' has been created for ${hackathonTitle}`,
-      });
-      
-      onClose();
+      if (result.success) {
+        toast({
+          title: "Team created successfully",
+          description: `Your team '${teamName}' has been created for ${hackathonTitle}`,
+        });
+        
+        onClose();
+      } else {
+        toast({
+          title: "Failed to create team",
+          description: result.error || "An error occurred while creating your team. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error creating team:", error);
       toast({
@@ -111,9 +122,18 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
   
   const filteredSkills = getFilteredSkills();
   
+  // Find teams looking for skills the user has
+  const recommendedTeams = hackathonTeams.filter(team => {
+    if (!team.isOpen || team.members.length >= team.maxMembers) return false;
+    if (profile?.skills && profile.skills.length > 0) {
+      return team.skillsNeeded.some(skill => profile.skills.includes(skill));
+    }
+    return false;
+  });
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Create a Team for {hackathonTitle}</DialogTitle>
           <DialogDescription>
@@ -121,8 +141,42 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[70vh] pr-4">
+        <ScrollArea className="flex-1 pr-4">
           <div className="space-y-6 py-4">
+            {recommendedTeams.length > 0 && (
+              <div className="space-y-4 mb-4">
+                <h3 className="text-lg font-semibold">Recommended Teams</h3>
+                <p className="text-sm text-muted-foreground">
+                  These teams are looking for members with your skills
+                </p>
+                
+                <div className="space-y-2">
+                  {recommendedTeams.slice(0, 3).map(team => (
+                    <div key={team.id} className="border rounded-md p-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium">{team.name}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{team.description}</p>
+                        </div>
+                        <Button size="sm" variant="outline">
+                          Request to Join
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {team.skillsNeeded.map(skill => (
+                          <Badge key={skill} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Separator />
+              </div>
+            )}
+          
             <div className="space-y-2">
               <Label htmlFor="teamName">Team Name</Label>
               <Input
@@ -234,10 +288,10 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
               <Label>Team Creator</Label>
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                  {profile?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{user?.name || user?.email}</p>
+                  <p className="text-sm font-medium">{profile?.name || user?.email}</p>
                   <p className="text-xs text-muted-foreground">Team Leader</p>
                 </div>
                 <Badge variant="outline" className="ml-auto">
@@ -249,7 +303,7 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
           </div>
         </ScrollArea>
         
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -258,6 +312,7 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
             disabled={!teamName.trim() || isLoading}
             className="gradient-button"
           >
+            <Users className="mr-2 h-4 w-4" />
             {isLoading ? "Creating..." : "Create Team"}
           </Button>
         </div>

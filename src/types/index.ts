@@ -190,3 +190,11 @@ export interface Reminder {
   note?: string;
   isNotified: boolean;
 }
+
+export interface TeamJoinRequest {
+  id: string;
+  teamId: string;
+  userId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}

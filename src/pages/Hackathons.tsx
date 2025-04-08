@@ -15,7 +15,6 @@ import { filterHackathons } from "@/services/recommendationService";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
-import { AIInternshipRecommender } from "@/components/recommendations/AIInternshipRecommender";
 
 export default function Hackathons() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -109,7 +108,7 @@ export default function Hackathons() {
                 Discover Hackathons
               </h1>
               <p className="text-muted-foreground text-lg">
-                Find hackathons from various platforms like DoraHacks and DevTown, filter based on your preferences, and build your next project.
+                Find hackathons from various platforms, filter based on your preferences, and build your next project.
               </p>
             </div>
             
@@ -129,14 +128,6 @@ export default function Hackathons() {
             </form>
           </div>
         </section>
-        
-        {user && (
-          <section className="py-6">
-            <div className="container">
-              <AIInternshipRecommender />
-            </div>
-          </section>
-        )}
         
         <section className="py-8 md:py-12 relative">
           <div className="absolute top-1/4 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
