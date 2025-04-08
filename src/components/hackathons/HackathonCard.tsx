@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,9 @@ export interface HackathonCardProps {
   teamSize?: number;
   skills?: string[];
   location: string;
+  source?: string;
+  onViewDetails?: () => void;
+  onFormTeam?: () => void;
 }
 
 export function HackathonCard({
@@ -43,15 +47,15 @@ export function HackathonCard({
   teamSize,
   skills,
   location,
+  onViewDetails,
+  onFormTeam,
 }: HackathonCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const { user } = useAuth();
-  const { bookmarks, addBookmark, removeBookmark, isLoading } = useBookmarks();
+  const { bookmarks, isLoading, isBookmarked, toggleBookmark } = useBookmarks();
 
-  const isBookmarked = bookmarks.some(
-    (bookmark) => bookmark.item_id === id && bookmark.item_type === "hackathon"
-  );
+  const isItemBookmarked = isBookmarked(id, "hackathon");
 
   const handleBookmark = async () => {
     if (!user) {
@@ -59,10 +63,24 @@ export function HackathonCard({
       return;
     }
 
-    if (isBookmarked) {
-      await removeBookmark(id, "hackathon");
+    toggleBookmark(id, "hackathon");
+  };
+
+  const handleViewDetails = () => {
+    if (onViewDetails) {
+      onViewDetails();
+    }
+  };
+
+  const handleFormTeam = () => {
+    if (onFormTeam) {
+      onFormTeam();
     } else {
-      await addBookmark(id, "hackathon");
+      if (!user) {
+        setIsAuthModalOpen(true);
+      } else {
+        setIsCreateTeamModalOpen(true);
+      }
     }
   };
 
@@ -87,10 +105,10 @@ export function HackathonCard({
               className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
             >
               <Bookmark
-                className={cn("h-5 w-5", isBookmarked && "fill-primary text-primary")}
+                className={cn("h-5 w-5", isItemBookmarked && "fill-primary text-primary")}
               />
               <span className="sr-only">
-                {isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+                {isItemBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
               </span>
             </Button>
           </div>
@@ -144,7 +162,7 @@ export function HackathonCard({
             <Button
               variant="default"
               size="sm"
-              onClick={() => setIsCreateTeamModalOpen(true)}
+              onClick={handleFormTeam}
               className="gradient-button card-glow-effect"
             >
               <Users className="mr-2 h-4 w-4" />
@@ -164,6 +182,7 @@ export function HackathonCard({
         isOpen={isCreateTeamModalOpen}
         onClose={() => setIsCreateTeamModalOpen(false)}
         hackathonId={id}
+        hackathonTitle={title}
       />
     </>
   );

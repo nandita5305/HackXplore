@@ -1,5 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { SignUpForm } from "./SignUpForm";
+import { LoginForm } from "./LoginForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Types
 type AuthUser = {
@@ -26,6 +30,13 @@ type AuthContextType = {
   updateProfile: (profileData: UserProfile) => Promise<{ success?: boolean; error?: { message: string } }>;
   isLoading: boolean;
 };
+
+// AuthModal props
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultView?: "login" | "signup";
+}
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -267,3 +278,30 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Auth Modal Component
+export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalProps) {
+  const [activeView, setActiveView] = useState<"login" | "signup">(defaultView);
+  
+  const handleViewChange = (view: "login" | "signup") => {
+    setActiveView(view);
+  };
+  
+  const handleClose = () => {
+    onClose();
+    // Reset to default view when closing
+    setTimeout(() => setActiveView(defaultView), 300);
+  };
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-transparent border-none shadow-none">
+        {activeView === "login" ? (
+          <LoginForm onSuccess={handleClose} onSwitchToSignUp={() => handleViewChange("signup")} />
+        ) : (
+          <SignUpForm onSuccess={handleClose} onSwitchToLogin={() => handleViewChange("login")} />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

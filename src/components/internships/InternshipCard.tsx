@@ -1,16 +1,30 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BookmarkIcon, Calendar, MapPin, Clock, DollarSign, ExternalLink } from "lucide-react";
+
 import { useState } from "react";
-import { InternshipCard as InternshipCardType, UserSkill } from "@/types";
-import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Bookmark, ExternalLink, Calendar, DollarSign, MapPin, Globe } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useBookmarks } from "@/services/bookmarkService";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { UserSkill } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
-interface InternshipCardProps extends InternshipCardType {
-  onBookmarkToggle?: () => void;
-  onViewDetailsClick?: () => void;
+export interface InternshipCardProps {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  url: string;
+  imageUrl: string;
+  skills: UserSkill[];
+  duration: string;
+  deadline?: string;
+  stipend?: string;
+  isRemote?: boolean;
+  isBookmarked?: boolean;
 }
 
 export function InternshipCard({
@@ -18,139 +32,126 @@ export function InternshipCard({
   title,
   company,
   location,
-  deadline,
-  duration,
-  stipend,
-  imageUrl,
-  url,
-  skills,
-  isRemote,
   description,
-  isBookmarked,
-  onBookmarkToggle,
-  onViewDetailsClick,
-
+  url,
+  imageUrl,
+  skills,
+  duration,
+  deadline,
+  stipend,
+  isRemote,
+  isBookmarked: initialBookmarkState,
 }: InternshipCardProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user } = useAuth();
-  const { isBookmarked: isBookmarkedService, toggleBookmark } = useBookmarks();
-  const bookmarked = isBookmarked || isBookmarkedService(id, "internship");
-
-  const handleBookmarkClick = () => {
+  const { isBookmarked, toggleBookmark, isLoading } = useBookmarks();
+  
+  const hasBookmark = isBookmarked(id, "internship");
+  
+  const handleBookmark = () => {
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
-    onBookmarkToggle?.();
+    
     toggleBookmark(id, "internship");
   };
-
+  
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col border-primary/10">
-        <div className="relative h-36 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70 z-10"></div>
-          <img
-            src={imageUrl}
-            alt={`${company} logo`}
-            className="w-full h-full object-cover"
-          />
-          {isRemote && (
-            <Badge 
-              variant="outline" 
-              className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm border-none"
-            >
-              Remote
-            </Badge>
-          )}
-
-
-
-
-
-
-
-
-
-        </div>
-
-        <CardHeader className="p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-xl font-bold">{title}</h3>
-              <p className="text-muted-foreground text-sm">{company}</p>
+      <Card className="bg-card/50 backdrop-blur-sm border border-primary/10 card-hover-effect h-full flex flex-col">
+        <CardContent className="p-4 flex-grow">
+          <div className="flex gap-4 mb-4">
+            <img
+              src={imageUrl}
+              alt={company}
+              className="h-16 w-16 rounded-md object-contain bg-white/10 p-2"
+            />
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <h3 className="text-lg font-semibold">{title}</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBookmark}
+                  disabled={isLoading}
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 card-glow-effect"
+                >
+                  <Bookmark
+                    className={cn("h-5 w-5", hasBookmark && "fill-primary text-primary")}
+                  />
+                  <span className="sr-only">
+                    {hasBookmark ? "Remove from bookmarks" : "Add to bookmarks"}
+                  </span>
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">{company}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBookmarkClick}
-              className="h-8 w-8 rounded-full hover:bg-primary/10"
-            >
-              <BookmarkIcon
-                className={`h-5 w-5 ${bookmarked ? "fill-primary text-primary" : ""}`}
-              />
-              <span className="sr-only">Bookmark</span>
-            </Button>
           </div>
-        </CardHeader>
-
-        <CardContent className="p-4 pt-0 flex-1">
-          <div className="space-y-2 mb-4">
+          
+          <div className="mb-3 space-y-2">
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="h-4 w-4 mr-2" />
               <span>{location}</span>
+              {isRemote && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  Remote Available
+                </Badge>
+              )}
             </div>
-
+            
+            {deadline && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>Deadline: {deadline}</span>
+              </div>
+            )}
+            
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="h-4 w-4 mr-2" />
-              <span>Deadline: {deadline}</span>
+              <span>Duration: {duration}</span>
             </div>
-
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="h-4 w-4 mr-2" />
-              <span>{duration}</span>
-            </div>
-
-            <div className="flex items-center text-sm text-muted-foreground">
-              <DollarSign className="h-4 w-4 mr-2" />
-              <span>{stipend}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {skills?.slice(0, 3).map((skill) => (
-              <Badge key={skill} variant="outline" className="rounded-full text-xs">
-                {skill}
-              </Badge>
-            ))}
-            {skills?.length > 3 && (
-              <Badge variant="outline" className="rounded-full text-xs">
-                +{skills.length - 3} more
-              </Badge>
+            
+            {stipend && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <DollarSign className="h-4 w-4 mr-2" />
+                <span>Stipend: {stipend}</span>
+              </div>
             )}
           </div>
-
-          {description && (
-            <p className="text-sm line-clamp-2 text-muted-foreground">
-              {description}
-            </p>
+          
+          <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+            {description}
+          </p>
+          
+          {skills && skills.length > 0 && (
+            <div className="mt-3 space-y-1">
+              <p className="text-sm font-medium">Skills Required:</p>
+              <div className="flex flex-wrap gap-1">
+                {skills.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="card-glow-effect">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           )}
         </CardContent>
-
-        <CardFooter className="p-4 pt-0 flex justify-between">
-          <Button variant="outline" asChild>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center">
+        
+        <CardFooter className="p-4 pt-0">
+          <Button
+            asChild
+            className="w-full gradient-button card-glow-effect"
+            size="sm"
+          >
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
               Apply Now
-              <ExternalLink className="h-4 w-4 ml-2" />
             </a>
-          </Button>
-
-          <Button variant="ghost" onClick={onViewDetailsClick}>
-            View Details
           </Button>
         </CardFooter>
       </Card>
-
+      
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
