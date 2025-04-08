@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import * as z from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import React, { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -21,12 +23,13 @@ const formSchema = z.object({
 
 interface SignUpFormProps {
   setView: (view: "login" | "signup") => void;
+  onSuccess?: () => void;
 }
 
-export function SignUpForm({ setView }: SignUpFormProps) {
+export function SignUpForm({ setView, onSuccess }: SignUpFormProps) {
   const { toast } = useToast();
-  const { auth } = useAuth();
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const { signUp } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,12 +42,13 @@ export function SignUpForm({ setView }: SignUpFormProps) {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      await auth.signUp(data.email, data.password);
+      await signUp(data.email, data.password);
       toast({
         title: "Account created",
         description: "You've successfully signed up! Please sign in.",
       });
       setView("login");
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Sign up error:", error);
       toast({

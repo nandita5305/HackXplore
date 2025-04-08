@@ -53,6 +53,84 @@ export const skillsOptions: UserSkill[] = [
   "Vue"
 ];
 
+// Mock data for interest options
+export const interestOptions: HackathonType[] = [
+  "Web Development",
+  "Mobile App Development", 
+  "AI/ML",
+  "Blockchain",
+  "Web3",
+  "Cybersecurity",
+  "Cloud Computing",
+  "IoT",
+  "Game Development",
+  "AR/VR",
+  "HealthTech",
+  "EdTech",
+  "FinTech",
+  "Sustainable Development"
+];
+
+// Partner logos
+export const partnerLogos = [
+  {
+    name: "Microsoft",
+    logo: "https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?q=80&w=150&h=150&auto=format&fit=crop",
+    url: "https://microsoft.com"
+  },
+  {
+    name: "Amazon",
+    logo: "https://images.unsplash.com/photo-1602934445884-da0436954033?q=80&w=150&h=150&auto=format&fit=crop",
+    url: "https://amazon.com"
+  },
+  {
+    name: "Google",
+    logo: "https://images.unsplash.com/photo-1600783245998-e7fe553fee8f?q=80&w=150&h=150&auto=format&fit=crop",
+    url: "https://google.com"
+  },
+  {
+    name: "Meta",
+    logo: "https://images.unsplash.com/photo-1644419711997-0868be4f72d7?q=80&w=150&h=150&auto=format&fit=crop",
+    url: "https://meta.com"
+  }
+];
+
+// Testimonials data
+export const testimonialsData = [
+  {
+    id: "1",
+    name: "Alex Johnson",
+    role: "Frontend Developer",
+    company: "TechCorp",
+    text: "I joined a hackathon team through HackXplore and ended up winning first place! Now I work full-time with my teammates at our own startup.",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&h=150&auto=format&fit=crop"
+  },
+  {
+    id: "2",
+    name: "Michael Chen",
+    role: "UX Designer",
+    company: "DesignHub",
+    text: "Finding the right internship was always a struggle until I discovered HackXplore. Their platform connected me with opportunities that perfectly matched my skills.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&h=150&auto=format&fit=crop"
+  },
+  {
+    id: "3",
+    name: "Sarah Williams",
+    role: "Data Scientist",
+    company: "DataWorks",
+    text: "The team matching feature helped me find collaborators with complementary skills. We've now participated in three hackathons together!",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&h=150&auto=format&fit=crop"
+  },
+  {
+    id: "4",
+    name: "David Kim",
+    role: "Full Stack Developer",
+    company: "StartupX",
+    text: "Through HackXplore, I found both a great internship and valuable connections in the industry. Highly recommend to all CS students!",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&h=150&auto=format&fit=crop"
+  }
+];
+
 // Mock data for hackathons
 export const hackathonsDataById: { [id: string]: HackathonCard } = {
   "hackathon-1": {

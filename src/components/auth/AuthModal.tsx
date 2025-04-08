@@ -193,14 +193,6 @@ export function useAuth() {
 export function AuthModal({ isOpen, onClose, defaultView = 'login' }: AuthModalProps) {
   const [view, setView] = useState<'login' | 'signup'>(defaultView);
   
-  const handleSwitchToLogin = () => {
-    setView('login');
-  };
-  
-  const handleSwitchToSignUp = () => {
-    setView('signup');
-  };
-  
   const handleSuccess = () => {
     onClose();
   };
@@ -222,14 +214,14 @@ export function AuthModal({ isOpen, onClose, defaultView = 'login' }: AuthModalP
           
           <TabsContent value="login">
             <LoginForm 
-              onSwitchToSignUp={handleSwitchToSignUp} 
+              onSwitchToSignUp={() => setView('signup')} 
               onSuccess={handleSuccess} 
             />
           </TabsContent>
           
           <TabsContent value="signup">
             <SignUpForm 
-              onSwitchToLogin={handleSwitchToLogin} 
+              setView={setView}
               onSuccess={handleSuccess} 
             />
           </TabsContent>
