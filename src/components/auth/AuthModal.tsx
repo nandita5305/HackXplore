@@ -1,48 +1,37 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { SignUpForm } from "./SignUpForm";
-import { LoginForm } from "./LoginForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoginForm } from "./LoginForm";
+import { SignUpForm } from "./SignUpForm";
+import { User, UserProfile, UserSkill, HackathonType } from "@/types";
 
 // Types
 type AuthUser = {
   id: string;
   email: string;
-};
-
-type UserProfile = {
   name?: string;
   avatarUrl?: string;
-  githubUrl?: string;
-  linkedinUrl?: string;
-  skills?: string[];
-  interests?: string[];
-  lookingFor?: 'hackathons' | 'internships' | 'both';
 };
 
 type AuthContextType = {
   user: AuthUser | null;
   profile: UserProfile | null;
-  signUp: (email: string, password: string) => Promise<{ user?: AuthUser; error?: { message: string } }>;
+  signUp: (
+    email: string, 
+    password: string, 
+    name?: string,
+    skills?: UserSkill[],
+    interests?: HackathonType[]
+  ) => Promise<{ user?: AuthUser; error?: { message: string } }>;
   signIn: (email: string, password: string) => Promise<{ user?: AuthUser; error?: { message: string } }>;
   signOut: () => Promise<void>;
   updateProfile: (profileData: UserProfile) => Promise<{ success?: boolean; error?: { message: string } }>;
   isLoading: boolean;
 };
 
-// AuthModal props
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  defaultView?: "login" | "signup";
-}
-
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// API base URL - should match your backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 // Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -62,38 +51,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Verify token with backend
-        const response = await fetch(`${API_URL}/auth/me`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-          
-          // Also fetch user profile if available
-          try {
-            const profileResponse = await fetch(`${API_URL}/users/profile`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (profileResponse.ok) {
-              const profileData = await profileResponse.json();
-              setProfile(profileData);
-            }
-          } catch (profileError) {
-            console.error("Error fetching profile:", profileError);
-          }
-        } else {
-          // Invalid token, clear it
-          localStorage.removeItem('authToken');
+        // For mock implementation, we'll just simulate a successful auth check
+        // In a real app, you'd validate the token with your backend
+        const storedUser = localStorage.getItem('authUser');
+        const storedProfile = localStorage.getItem('userProfile');
+        
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+        
+        if (storedProfile) {
+          setProfile(JSON.parse(storedProfile));
         }
       } catch (error) {
         console.error("Auth status check error:", error);
@@ -105,154 +73,113 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuthStatus();
   }, []);
 
-  // Sign up function with better error handling
-  const signUp = async (email: string, password: string) => {
+  // Sign up function
+  const signUp = async (
+    email: string, 
+    password: string,
+    name?: string,
+    skills?: UserSkill[],
+    interests?: HackathonType[]
+  ) => {
     try {
       console.log(`Attempting to sign up user with email: ${email}`);
       
-      const response = await fetch(`${API_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      // For mock implementation, we'll just simulate a successful signup
+      const newUser: AuthUser = {
+        id: `user-${Date.now()}`,
+        email,
+        name,
+        avatarUrl: name ? `https://avatars.dicebear.com/api/initials/${name.charAt(0)}.svg` : undefined
+      };
       
-      console.log(`Sign up response status: ${response.status}`);
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        console.error("Signup API error:", data.error || "Unknown error");
-        return { error: { message: data.error || "Failed to create account" } };
+      // Create a profile if name, skills and interests are provided
+      if (name && skills && interests) {
+        const newProfile: UserProfile = {
+          name,
+          skills: skills,
+          interests: interests,
+          lookingFor: 'both',
+          avatarUrl: newUser.avatarUrl
+        };
+        
+        setProfile(newProfile);
+        localStorage.setItem('userProfile', JSON.stringify(newProfile));
       }
       
-      // Save auth token
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-      }
+      // Store auth info
+      localStorage.setItem('authToken', 'mock-token-' + Date.now());
+      localStorage.setItem('authUser', JSON.stringify(newUser));
       
       // Set user in state
-      setUser(data.user);
+      setUser(newUser);
       
-      return { user: data.user };
+      return { user: newUser };
     } catch (error) {
-      console.error("Sign up network error:", error);
-      return { error: { message: "Network error: Unable to connect to authentication service" } };
+      console.error("Sign up error:", error);
+      return { error: { message: "Failed to create account" } };
     }
   };
 
   // Sign in function
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      // For mock implementation, we'll just simulate a successful login
+      const mockUser: AuthUser = {
+        id: `user-${Date.now()}`,
+        email,
+        name: "Mock User",
+        avatarUrl: `https://avatars.dicebear.com/api/initials/M.svg`
+      };
       
-      const data = await response.json();
+      const mockProfile: UserProfile = {
+        name: "Mock User",
+        skills: ["JavaScript", "React", "Node.js"],
+        interests: ["Web Development", "Mobile App Development"],
+        lookingFor: 'both',
+        avatarUrl: mockUser.avatarUrl
+      };
       
-      if (!response.ok) {
-        return { error: { message: data.error || "Invalid credentials" } };
-      }
+      // Store auth info
+      localStorage.setItem('authToken', 'mock-token-' + Date.now());
+      localStorage.setItem('authUser', JSON.stringify(mockUser));
+      localStorage.setItem('userProfile', JSON.stringify(mockProfile));
       
-      // Save auth token
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-      }
+      // Set user and profile in state
+      setUser(mockUser);
+      setProfile(mockProfile);
       
-      // Set user in state
-      setUser(data.user);
-      
-      // Also fetch user profile if available
-      try {
-        const profileResponse = await fetch(`${API_URL}/users/profile`, {
-          headers: {
-            'Authorization': `Bearer ${data.token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          setProfile(profileData);
-        }
-      } catch (profileError) {
-        console.error("Error fetching profile after login:", profileError);
-      }
-      
-      return { user: data.user };
+      return { user: mockUser };
     } catch (error) {
       console.error("Sign in error:", error);
-      return { error: { message: "Network error: Unable to connect to authentication service" } };
+      return { error: { message: "Invalid credentials" } };
     }
   };
 
   // Sign out function
   const signOut = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      
-      if (token) {
-        try {
-          // Optional: Notify backend about logout
-          await fetch(`${API_URL}/auth/logout`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-        } catch (error) {
-          console.error("Error during backend logout:", error);
-          // Continue with local logout regardless
-        }
-      }
-    } finally {
-      // Always clear local auth state
+      // Clear local auth state
       localStorage.removeItem('authToken');
+      localStorage.removeItem('authUser');
+      localStorage.removeItem('userProfile');
       setUser(null);
       setProfile(null);
+    } catch (error) {
+      console.error("Sign out error:", error);
     }
   };
 
   // Update profile function
   const updateProfile = async (profileData: UserProfile) => {
     try {
-      const token = localStorage.getItem('authToken');
-      
-      if (!token) {
-        return { error: { message: "Not authenticated" } };
-      }
-      
-      console.log("Sending profile update with data:", profileData);
-      
-      const response = await fetch(`${API_URL}/users/profile`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(profileData)
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        console.error("Profile update API error:", data.error || "Unknown error");
-        return { error: { message: data.error || "Failed to update profile" } };
-      }
-      
-      // Update local profile state
-      setProfile(data.profile);
+      // For mock implementation, just update the profile in localStorage
+      setProfile(profileData);
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
       
       return { success: true };
     } catch (error) {
-      console.error("Profile update network error:", error);
-      return { error: { message: "Network error: Unable to connect to profile service" } };
+      console.error("Profile update error:", error);
+      return { error: { message: "Failed to update profile" } };
     }
   };
 
@@ -271,36 +198,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 // Custom hook for using auth context
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}
 
 // Auth Modal Component
-export function AuthModal({ isOpen, onClose, defaultView = "login" }: AuthModalProps) {
-  const [activeView, setActiveView] = useState<"login" | "signup">(defaultView);
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultView?: 'login' | 'signup';
+}
+
+export function AuthModal({ isOpen, onClose, defaultView = 'login' }: AuthModalProps) {
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>(defaultView);
+  const { user } = useAuth();
   
-  const handleViewChange = (view: "login" | "signup") => {
-    setActiveView(view);
+  // Close modal if user is logged in
+  useEffect(() => {
+    if (user) {
+      onClose();
+    }
+  }, [user, onClose]);
+  
+  const handleSwitchToLogin = () => {
+    setActiveTab('login');
   };
   
-  const handleClose = () => {
-    onClose();
-    // Reset to default view when closing
-    setTimeout(() => setActiveView(defaultView), 300);
+  const handleSwitchToSignup = () => {
+    setActiveTab('signup');
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-transparent border-none shadow-none">
-        {activeView === "login" ? (
-          <LoginForm onSuccess={handleClose} onSwitchToSignUp={() => handleViewChange("signup")} />
-        ) : (
-          <SignUpForm onSuccess={handleClose} onSwitchToLogin={() => handleViewChange("login")} />
-        )}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md p-0 overflow-hidden border-0">
+        <Tabs value={activeTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger 
+              value="login" 
+              onClick={handleSwitchToLogin}
+              className="rounded-none data-[state=active]:bg-primary/10"
+            >
+              Login
+            </TabsTrigger>
+            <TabsTrigger 
+              value="signup" 
+              onClick={handleSwitchToSignup}
+              className="rounded-none data-[state=active]:bg-primary/10"
+            >
+              Sign Up
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="login" className="p-6">
+            <LoginForm onSwitchToSignup={handleSwitchToSignup} onSuccess={onClose} />
+          </TabsContent>
+          <TabsContent value="signup" className="px-6 py-4">
+            <SignUpForm onSwitchToLogin={handleSwitchToLogin} onSuccess={onClose} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

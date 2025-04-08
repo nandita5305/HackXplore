@@ -1,3 +1,3 @@
 
 // Export the auth components from the AuthModal.tsx
-export { AuthProvider, useAuth } from "../components/auth/AuthModal";
+export { AuthProvider, useAuth, AuthModal } from "../components/auth/AuthModal";

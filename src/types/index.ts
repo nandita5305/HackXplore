@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -53,7 +54,22 @@ export type UserSkill =
   | "Leadership" 
   | "AI" 
   | "TensorFlow" 
-  | "IoT";
+  | "IoT"
+  | "Swift"
+  | "Objective-C"
+  | "iOS Development"
+  | "macOS Development"
+  | "PyTorch"
+  | "AI/ML"
+  | "Data Science"
+  | "Cloud Computing"
+  | "Cybersecurity"
+  | "Backend"
+  | "Mobile Development"
+  | "Software Development"
+  | "Computer Architecture"
+  | "Embedded Systems"
+  | ".NET";
 
 export type HackathonType = 
   | "Web Development" 
@@ -76,7 +92,16 @@ export type HackathonType =
   | "IoT (Internet of Things)"
   | "Hardware"
   | "Sustainable Development"
-  | "Game Development";
+  | "Game Development"
+  | "Mobile Development"
+  | "Fintech"
+  | "Healthtech"
+  | "UI/UX Design"
+  | "E-commerce"
+  | "Social Media"
+  | "Robotics"
+  | "Space Exploration"
+  | "Renewable Energy";
 
 export interface Team {
   id: string;
@@ -107,6 +132,7 @@ export interface HackathonCard {
   teamSize: number;
   skills: UserSkill[];
   location: string;
+  source?: string;
 }
 
 export interface HackathonCardProps extends Partial<HackathonCard> {
@@ -115,6 +141,7 @@ export interface HackathonCardProps extends Partial<HackathonCard> {
   url: string;
   imageUrl: string;
   location: string;
+  isDetailed?: boolean;
 }
 
 export interface InternshipCard {
@@ -129,6 +156,17 @@ export interface InternshipCard {
   skills: UserSkill[];
   postedDate: string;
   duration: string;
+  deadline?: string;
+  stipend?: string;
+  isRemote?: boolean;
+}
+
+export interface InternshipCardProps extends Partial<InternshipCard> {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  onViewDetailsClick?: () => void;
 }
 
 export interface Bookmark {
