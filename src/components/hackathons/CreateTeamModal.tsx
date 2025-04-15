@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -54,10 +55,10 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
     );
   };
   
-  const handleSelectSkill = (skill: string) => {
-    if (!selectedSkills.includes(skill as UserSkill)) {
-      setSelectedSkills([...selectedSkills, skill as UserSkill]);
-      setAvailableSkills(availableSkills.filter(s => s !== skill as UserSkill));
+  const handleSelectSkill = (skill: UserSkill) => {
+    if (!selectedSkills.includes(skill)) {
+      setSelectedSkills([...selectedSkills, skill]);
+      setAvailableSkills(availableSkills.filter(s => s !== skill));
     }
     setSearchTerm("");
   };
@@ -158,7 +159,7 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
     if (!team.isOpen || team.members.length >= team.maxMembers) return false;
     if (profile?.skills && profile.skills.length > 0) {
       return team.skillsNeeded.some(skill => 
-        profile.skills.includes(skill)
+        profile.skills?.includes(skill as UserSkill)
       );
     }
     return false;

@@ -68,6 +68,9 @@ export interface InternshipCard {
   description: string;
   onViewDetails?: () => void;
   onApply?: () => void;
+  url: string;
+  logo: string;
+  requiredSkills: string[];
 }
 
 export type UserSkill =
@@ -240,12 +243,12 @@ export interface TeamCardProps {
 export interface ReminderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  date?: Date;
-  title?: string;
   eventName?: string;
   eventDate?: Date;
   eventType?: string;
   type?: string;
+  date?: Date;
+  title?: string;
 }
 
 export interface TeamServiceProps {
@@ -281,8 +284,8 @@ export interface HackathonCardProps {
   mode: "online" | "in-person" | "hybrid";
   dates: string;
   description?: string;
-  onViewDetails: () => void;
-  onFormTeam: () => void;
+  onViewDetails?: () => void;
+  onFormTeam?: () => void;
   isDetailed?: boolean;
 }
 
@@ -303,4 +306,5 @@ export interface InternshipCardProps {
   description: string;
   onViewDetails?: () => void;
   onApply?: () => void;
+  url?: string;
 }

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -186,12 +187,13 @@ export function AIInternshipRecommender({ className }: AIInternshipRecommenderPr
                         stipend={internship.stipend}
                         duration={internship.duration}
                         applicationDeadline={internship.applicationDeadline}
-                        skills={internship.requiredSkills || []}
+                        skills={internship.requiredSkills}
                         companySize={internship.companySize}
-                        description={internship.description || ""}
+                        description={internship.description}
                         imageUrl={internship.logo}
                         type="Tech"
                         postedDate={new Date().toISOString().split('T')[0]}
+                        url={internship.url}
                         onViewDetails={() => {}}
                       />
                     ))}

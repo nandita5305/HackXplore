@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -153,6 +154,8 @@ export default function Index() {
                       mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
                       dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
                       description={hackathon.description}
+                      onViewDetails={() => navigate(`/hackathons/${hackathon.id}`)}
+                      onFormTeam={() => navigate(`/hackathons/${hackathon.id}`)}
                     />
                   </div>
                 ))}
@@ -161,7 +164,13 @@ export default function Index() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredInternships.map((internship) => (
                   <div key={internship.id} className="internship-card-container animate-float">
-                    <InternshipCard {...internship} />
+                    <InternshipCard 
+                      {...internship}
+                      imageUrl={internship.logo}
+                      skills={internship.requiredSkills}
+                      onViewDetails={() => navigate(`/internships/${internship.id}`)}
+                      url={internship.url}
+                    />
                   </div>
                 ))}
               </div>

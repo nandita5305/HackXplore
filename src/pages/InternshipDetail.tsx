@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -62,7 +63,7 @@ export default function InternshipDetail() {
             <div className="mb-4">
               <h2 className="text-xl font-semibold mb-2">Skills</h2>
               <div className="flex flex-wrap gap-2">
-                {internship.requiredSkills.map((skill, index) => (
+                {internship.skills.map((skill, index) => (
                   <span key={index} className="px-3 py-1 bg-secondary/10 rounded-full text-sm">{skill}</span>
                 ))}
               </div>

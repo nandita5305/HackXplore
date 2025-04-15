@@ -7,18 +7,19 @@ import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useHackathonTeams } from "@/services/teamService";
 import { HackathonCard as HackathonCardType, HackathonType } from "@/types";
 
 export default function HackathonDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { useHackathonTeams, joinTeam, leaveTeam, isUserInTeam } = useHackathonTeamsService();
   const [hackathon, setHackathon] = useState<HackathonCardType | null>(null);
   const [similarHackathons, setSimilarHackathons] = useState<HackathonCardType[]>([]);
   const [isJoining, setIsJoining] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // Mock implementation for useHackathonTeams
+  const { hackathonTeams, isLoadingTeams, joinTeam, leaveTeam, isUserInTeam } = useHackathonTeamsService();
 
   // Fetch hackathon details and similar hackathons
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function HackathonDetail() {
         startDate: "2024-08-01",
         endDate: "2024-08-03",
         location: "Online",
-        mode: "Online",
+        mode: "Online" as "Online" | "In-person" | "Hybrid",
         prizePool: 10000,
         tags: ["AI", "Machine Learning"],
         applicationDeadline: "2024-07-25",
@@ -48,7 +49,7 @@ export default function HackathonDetail() {
         startDate: "2024-09-15",
         endDate: "2024-09-17",
         location: "New York, NY",
-        mode: "In-person",
+        mode: "In-person" as "Online" | "In-person" | "Hybrid",
         prizePool: 15000,
         tags: ["Web3", "Blockchain"],
         applicationDeadline: "2024-09-01",
@@ -95,25 +96,16 @@ export default function HackathonDetail() {
     ];
 
     const selectedHackathon = mockHackathons.find(h => h.id === id) || null;
-    setHackathon(selectedHackathon);
-
-    // Find similar hackathons based on tags
     if (selectedHackathon) {
+      setHackathon(selectedHackathon);
+
+      // Find similar hackathons based on tags
       const similar = mockHackathons.filter(h =>
         h.tags.some(tag => selectedHackathon.tags.includes(tag)) && h.id !== id
       );
       setSimilarHackathons(similar);
     }
   }, [id]);
-
-  // Fetch teams for the hackathon
-  const { data: hackathonTeams, isLoading: isLoadingTeams } = useHackathonTeams(id || '');
-
-  // For the isUserInTeam error, we'll add a fallback
-  const isUserTeamMember = hackathonTeams?.some(team => {
-    const isInTeam = team.members.includes(user?.id || '');
-    return isInTeam;
-  }) || false;
 
   // Check if hackathon is hackathon-friendly for the error with 'some'
   const isHackathonFriendly = Array.isArray(hackathon?.type) 
@@ -239,23 +231,21 @@ export default function HackathonDetail() {
 // Mock implementation (this should be replaced with your actual implementation)
 function useHackathonTeamsService() {
   return {
-    useHackathonTeams: (hackathonId: string) => ({
-      data: [
-        {
-          id: "team-1",
-          name: "AI Innovators",
-          description: "Building the future with AI",
-          members: ["user-1", "user-2"],
-        },
-        {
-          id: "team-2",
-          name: "Web3 Wizards",
-          description: "Decentralizing the world",
-          members: ["user-3", "user-4"],
-        },
-      ],
-      isLoading: false,
-    }),
+    hackathonTeams: [
+      {
+        id: "team-1",
+        name: "AI Innovators",
+        description: "Building the future with AI",
+        members: ["user-1", "user-2"],
+      },
+      {
+        id: "team-2",
+        name: "Web3 Wizards",
+        description: "Decentralizing the world",
+        members: ["user-3", "user-4"],
+      },
+    ],
+    isLoadingTeams: false,
     joinTeam: async (teamId: string) => ({ success: true }),
     leaveTeam: async (teamId: string) => ({ success: true }),
     isUserInTeam: (teamId: string) => false

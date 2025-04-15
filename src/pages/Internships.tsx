@@ -152,13 +152,14 @@ export default function Internships() {
                             isRemote={internship.isRemote}
                             stipend={internship.stipend}
                             duration={internship.duration}
-                            skills={internship.requiredSkills || []}
+                            skills={internship.skills}
                             postedDate={new Date().toISOString().split('T')[0]}
                             applicationDeadline={internship.applicationDeadline}
                             type="Tech"
                             companySize={internship.companySize}
                             description={internship.description || ""}
-                            onViewDetailsClick={() => handleViewDetails(internship.id)}
+                            url={internship.url}
+                            onViewDetails={() => handleViewDetails(internship.id)}
                           />
                         </div>
                       ))}
