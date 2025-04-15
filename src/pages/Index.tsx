@@ -74,7 +74,7 @@ export default function Index() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  Search className="h-6 w-6 text-primary" />
+                  <Search className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Centralized Discovery</h3>
                 <p className="text-muted-foreground">
