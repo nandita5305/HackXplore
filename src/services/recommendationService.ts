@@ -34,9 +34,20 @@ export const filterHackathons = (hackathons: HackathonCard[], filters: Hackathon
     }
     
     // Filter by prize pool
-    if (hackathon.prizePool) {
-      const prizePoolNumber = parseInt(hackathon.prizePool.replace(/[^0-9]/g, ""));
-      if (prizePoolNumber < filters.prizePoolMin || prizePoolNumber > filters.prizePoolMax) {
+    if (hackathon.prizePool !== undefined) {
+      let prizePoolNumber: number;
+      
+      // Handle both string and number types for prizePool
+      if (typeof hackathon.prizePool === 'string') {
+        // Remove non-numeric characters if it's a string
+        prizePoolNumber = parseInt(hackathon.prizePool.replace(/[^0-9]/g, ""));
+      } else {
+        // If it's already a number, use it directly
+        prizePoolNumber = hackathon.prizePool;
+      }
+      
+      // Check if the prize pool is within the specified range
+      if (isNaN(prizePoolNumber) || prizePoolNumber < filters.prizePoolMin || prizePoolNumber > filters.prizePoolMax) {
         return false;
       }
     }

@@ -59,7 +59,6 @@ export function ScholarshipCard({
     setIsReminderModalOpen(true);
   };
   
-  // Format deadline
   const formattedDeadline = new Date(deadline);
   const deadlineDistance = formatDistanceToNow(formattedDeadline, { addSuffix: true });
   
@@ -168,9 +167,9 @@ export function ScholarshipCard({
       <ReminderModal
         isOpen={isReminderModalOpen}
         onClose={() => setIsReminderModalOpen(false)}
-        eventName={title}
-        eventDate={formattedDeadline}
-        eventType="scholarship"
+        title={title}
+        date={formattedDeadline}
+        type="scholarship"
       />
     </>
   );

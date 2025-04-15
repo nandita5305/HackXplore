@@ -168,7 +168,7 @@ export default function Hackathons() {
                             url={hackathon.url}
                             imageUrl={hackathon.image}
                             type={hackathon.type}
-                            prizePool={hackathon.prizePool?.toString()}
+                            prizePool={hackathon.prizePool !== undefined ? hackathon.prizePool.toString() : undefined}
                             mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
                             dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
                             description={hackathon.description}
