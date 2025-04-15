@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
-import { UserProfile, User } from '@/types';
+import { UserProfile, User, UserSkill, HackathonType } from '@/types';
 
 // Auth Context Types
 type AuthContextType = {
@@ -13,7 +13,7 @@ type AuthContextType = {
   signUp: (email: string, password: string) => Promise<{ user?: User; error?: { message: string } }>;
   signIn: (email: string, password: string) => Promise<{ user?: User; error?: { message: string } }>;
   signOut: () => Promise<void>;
-  updateProfile: (profileData: UserProfile) => Promise<{ success?: boolean; error?: { message: string } }>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<{ success?: boolean; error?: { message: string } }>;
   isLoading: boolean;
 };
 
@@ -113,9 +113,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const existingProfile = localStorage.getItem('mockProfile');
       if (!existingProfile) {
         const defaultProfile: UserProfile = {
+          userId: mockUser.id,
           name: email.split('@')[0],
-          skills: ["JavaScript", "React", "CSS"],
-          interests: ["Web Development", "AI/ML"],
+          skills: ["TypeScript", "React", "CSS"] as UserSkill[],
+          interests: ["Web Development", "AI/ML"] as HackathonType[],
           lookingFor: 'both',
           preferredRole: 'Frontend Developer',
           bio: 'Passionate about web development and learning new technologies'
@@ -149,15 +150,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Update profile function
-  const updateProfile = async (profileData: UserProfile) => {
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
     try {
       console.log("Updating profile with data:", profileData);
       
       // For demo, just store in localStorage
-      localStorage.setItem('mockProfile', JSON.stringify(profileData));
+      const updatedProfile = { ...profile, ...profileData };
+      localStorage.setItem('mockProfile', JSON.stringify(updatedProfile));
       
       // Update local state
-      setProfile(profileData);
+      setProfile(updatedProfile as UserProfile);
       
       return { success: true };
     } catch (error) {

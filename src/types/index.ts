@@ -1,3 +1,4 @@
+
 export type HackathonType =
   | "Open"
   | "Themed"
@@ -5,7 +6,17 @@ export type HackathonType =
   | "AI/ML"
   | "Web3"
   | "Mobile"
-  | "Hardware";
+  | "Hardware"
+  | "Web Development"
+  | "Cloud Computing"
+  | "EdTech"
+  | "HealthTech"
+  | "Sustainable Development"
+  | "Blockchain"
+  | "Game Development"
+  | "IoT"
+  | "Robotics"
+  | "AR/VR";
 
 export interface HackathonCard {
   id: string;
@@ -42,75 +53,63 @@ export interface InternshipCard {
 }
 
 export type UserSkill =
-  | "Web Development"
-  | "Mobile Development"
-  | "Data Science"
-  | "Machine Learning"
-  | "Artificial Intelligence"
-  | "Cybersecurity"
-  | "Cloud Computing"
-  | "DevOps"
-  | "Blockchain"
+  | "JavaScript"
+  | "Python"
+  | "Java"
+  | "C++"
+  | "C#"
+  | "TypeScript"
+  | "React"
+  | "Angular"
+  | "Vue.js"
+  | "Node.js"
+  | "Express.js"
+  | "Django"
+  | "Flask"
+  | "Ruby on Rails"
+  | "SQL"
+  | "NoSQL"
+  | "MongoDB"
+  | "PostgreSQL"
+  | "MySQL"
+  | "AWS"
+  | "Azure"
+  | "Google Cloud"
+  | "Docker"
+  | "Kubernetes"
+  | "Git"
+  | "HTML"
+  | "CSS"
+  | "Sass"
+  | "Less"
   | "UI/UX Design"
-  | "Game Development"
-  | "Robotics"
-  | "IoT"
-  | "AR/VR"
-  | "Full Stack Development"
-  | "Frontend Development"
-  | "Backend Development"
-  | "Database Management"
-  | "Network Administration"
-  | "Project Management"
-  | "Product Management"
-  | "Digital Marketing"
-  | "Graphic Design"
-  | "Technical Writing"
-  | "Sales"
-  | "Customer Support"
-  | "Business Analysis"
-  | "Financial Analysis"
-  | "Human Resources"
-  | "Legal"
-  | "Teaching"
-  | "Research"
-  | "Content Creation"
-  | "Video Editing"
-  | "Animation"
-  | "3D Modeling"
-  | "Data Analysis"
-  | "Cloud Architecture"
-  | "Network Security"
-  | "Penetration Testing"
-  | "Incident Response"
-  | "Security Auditing"
-  | "Risk Management"
-  | "Compliance"
-  | "Data Visualization"
-  | "Statistical Analysis"
-  | "Predictive Modeling"
-  | "Natural Language Processing"
-  | "Computer Vision"
+  | "Figma"
+  | "Sketch"
+  | "Adobe XD"
+  | "Machine Learning"
   | "Deep Learning"
-  | "Reinforcement Learning"
-  | "Big Data"
-  | "Data Mining"
-  | "Data Warehousing"
-  | "ETL"
-  | "Data Governance"
-  | "Data Integration"
-  | "Data Quality"
-  | "Data Security"
-  | "Data Privacy"
-  | "Data Ethics"
-  | "Data Literacy"
-  | "Data Storytelling"
-  | "Data Strategy"
-  | "Data Architecture"
-  | "Data Engineering"
-  | "Data Science as a Service"
-  | "Machine Learning as a Service"
-  | "Artificial Intelligence as a Service";
+  | "Data Science"
+  | "Data Analysis"
+  | "Cybersecurity"
+  | "Network Security"
+  | "Cryptography"
+  | "Penetration Testing"
+  | "Blockchain"
+  | "Web3"
+  | "AR/VR"
+  | "IoT"
+  | "Robotics"
+  | "Game Development"
+  | "Mobile Development"
+  | "Swift"
+  | "Kotlin"
+  | "React Native"
+  | "Flutter";
+
+export interface User {
+  id: string;
+  email: string;
+}
 
 export interface UserProfile {
   id?: string;
@@ -120,11 +119,12 @@ export interface UserProfile {
   bio?: string;
   location?: string;
   skills?: UserSkill[];
-  interests?: string[];
+  interests?: HackathonType[];
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
   preferredRole?: string;
+  lookingFor?: 'hackathons' | 'internships' | 'both';
 }
 
 export interface Team {
@@ -139,6 +139,10 @@ export interface Team {
   isOpen: boolean;
   createdAt: string;
   updatedAt: string;
+  creator?: {
+    name: string;
+    avatar: string;
+  };
 }
 
 export interface TeamJoinRequest {
@@ -180,4 +184,18 @@ export interface ReminderItem {
   type: "hackathon" | "internship" | "scholarship";
   notified: boolean;
   createdAt: string;
+}
+
+export interface PartnerLogo {
+  name: string;
+  logo: string;
+  url: string;
+}
+
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  text: string;
 }

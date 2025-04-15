@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -167,9 +168,10 @@ export function ScholarshipCard({
       <ReminderModal
         isOpen={isReminderModalOpen}
         onClose={() => setIsReminderModalOpen(false)}
-        title={title}
-        date={formattedDeadline}
-        type="scholarship"
+        internshipId={id}
+        internshipTitle={title}
+        deadline={deadline}
+        company={provider}
       />
     </>
   );
