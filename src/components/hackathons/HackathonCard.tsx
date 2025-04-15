@@ -22,7 +22,7 @@ export interface HackathonCardProps {
   endDate?: string;
   organizer?: string;
   mode?: "online" | "in-person" | "hybrid";
-  type?: HackathonType[];
+  type?: HackathonType | HackathonType[];
   prizePool?: string;
   description?: string;
   teamSize?: number;
@@ -123,13 +123,20 @@ export function HackathonCard({
 
           {dates && <p className="text-sm font-medium mb-2">{dates}</p>}
 
-          {type && type.length > 0 && (
+          {type && (
             <div className="mb-3 flex flex-wrap gap-1">
-              {type.map((t) => (
-                <Badge key={t} variant="secondary" className="card-glow-effect text-xs">
-                  {t}
-                </Badge>
-              ))}
+              {Array.isArray(type) 
+                ? type.map((t) => (
+                    <Badge key={t} variant="secondary" className="card-glow-effect text-xs">
+                      {t}
+                    </Badge>
+                  ))
+                : (
+                    <Badge variant="secondary" className="card-glow-effect text-xs">
+                      {type}
+                    </Badge>
+                  )
+              }
             </div>
           )}
 

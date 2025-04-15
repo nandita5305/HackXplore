@@ -161,7 +161,17 @@ export default function Hackathons() {
                       {filteredHackathons.map((hackathon) => (
                         <div key={hackathon.id} className="animate-float hackathon-card-container">
                           <HackathonCard 
-                            {...hackathon}
+                            id={hackathon.id}
+                            title={hackathon.title}
+                            organizer={hackathon.organizer}
+                            location={hackathon.location}
+                            url={hackathon.url}
+                            imageUrl={hackathon.image}
+                            type={hackathon.type}
+                            prizePool={hackathon.prizePool?.toString()}
+                            mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                            dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
+                            description={hackathon.description}
                             onViewDetails={() => handleViewDetails(hackathon.id)}
                             onFormTeam={() => handleFormTeam(hackathon)}
                           />

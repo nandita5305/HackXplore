@@ -9,7 +9,7 @@ export const hackathonsData: HackathonCard[] = [
     startDate: "2024-07-15",
     endDate: "2024-07-17",
     location: "Online",
-    mode: "Remote",
+    mode: "Online",
     prizePool: 10000,
     tags: ["AI", "Innovation"],
     applicationDeadline: "2024-07-10",

@@ -21,7 +21,7 @@ export interface HackathonCard {
   url: string;
   image: string;
   isPopular: boolean;
-  type: HackathonType;
+  type: HackathonType | HackathonType[];
   description?: string;
 }
 

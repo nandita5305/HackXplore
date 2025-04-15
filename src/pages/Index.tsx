@@ -142,7 +142,19 @@ export default function Index() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredHackathons.map((hackathon) => (
                   <div key={hackathon.id} className="hackathon-card-container animate-float">
-                    <HackathonCard {...hackathon} />
+                    <HackathonCard 
+                      id={hackathon.id}
+                      title={hackathon.title}
+                      organizer={hackathon.organizer}
+                      location={hackathon.location}
+                      url={hackathon.url}
+                      imageUrl={hackathon.image}
+                      type={hackathon.type}
+                      prizePool={hackathon.prizePool?.toString()}
+                      mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                      dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
+                      description={hackathon.description}
+                    />
                   </div>
                 ))}
               </div>
