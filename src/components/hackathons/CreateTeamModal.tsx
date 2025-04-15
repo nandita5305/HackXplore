@@ -37,10 +37,8 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
   
-  // Fetch existing teams for recommendations
   const { data: hackathonTeams = [], isLoading: isLoadingTeams } = useHackathonTeams(hackathonId);
   
-  // Initialize available skills and filter user's existing skills
   useEffect(() => {
     const allSkills = [...skillsOptions] as UserSkill[];
     const userSkills = profile?.skills || [];
@@ -48,7 +46,6 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
     setAvailableSkills(filteredSkills.sort((a, b) => a.localeCompare(b)));
   }, [profile?.skills]);
   
-  // Get filtered skills based on search term
   const getFilteredSkills = () => {
     if (!searchTerm) return availableSkills;
     
@@ -57,10 +54,10 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
     );
   };
   
-  const handleSelectSkill = (skill: UserSkill) => {
-    if (!selectedSkills.includes(skill)) {
-      setSelectedSkills([...selectedSkills, skill]);
-      setAvailableSkills(availableSkills.filter(s => s !== skill));
+  const handleSelectSkill = (skill: string) => {
+    if (!selectedSkills.includes(skill as UserSkill)) {
+      setSelectedSkills([...selectedSkills, skill as UserSkill]);
+      setAvailableSkills(availableSkills.filter(s => s !== skill as UserSkill));
     }
     setSearchTerm("");
   };
@@ -85,7 +82,6 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
     try {
       setIsLoading(true);
       
-      // Combine user skills and selected additional skills
       const skillsNeeded = [...selectedSkills];
       
       const result = await createTeam({
@@ -158,11 +154,12 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
   
   const filteredSkills = getFilteredSkills();
   
-  // Find teams looking for skills the user has
   const recommendedTeams = hackathonTeams.filter(team => {
     if (!team.isOpen || team.members.length >= team.maxMembers) return false;
     if (profile?.skills && profile.skills.length > 0) {
-      return team.skillsNeeded.some(skill => profile.skills.includes(skill));
+      return team.skillsNeeded.some(skill => 
+        profile.skills.includes(skill)
+      );
     }
     return false;
   });
@@ -316,7 +313,6 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
                     </p>
                   </div>
                   
-                  {/* Already selected skills */}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {selectedSkills.map((skill) => (
                       <Badge key={skill} variant="secondary" className="gap-1">
@@ -338,7 +334,6 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
                     )}
                   </div>
                   
-                  {/* Skills search */}
                   <div className="space-y-2">
                     <Label htmlFor="skillSearch">Add Skills</Label>
                     <div className="relative">

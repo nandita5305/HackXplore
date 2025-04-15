@@ -1,4 +1,3 @@
-
 export type HackathonType =
   | "Open"
   | "Themed"
@@ -49,6 +48,7 @@ export interface HackathonCard {
   isPopular: boolean;
   type: HackathonType | HackathonType[];
   description?: string;
+  skills?: UserSkill[]; // Add skills property for recommendations
 }
 
 export interface InternshipCard {
@@ -56,19 +56,18 @@ export interface InternshipCard {
   title: string;
   company: string;
   location: string;
+  imageUrl: string;
   isRemote: boolean;
   stipend?: number;
   duration: string;
+  skills: string[];
+  postedDate?: string;
   applicationDeadline: string;
-  url: string;
-  logo: string;
-  requiredSkills: string[];
-  companySize: "Startup" | "Small" | "Medium" | "Large";
-  description?: string;
-  imageUrl?: string; // Added for compatibility with InternshipCardProps
-  skills?: string[]; // Added for compatibility with component usage
-  postedDate?: string; // Added for compatibility with InternshipCardProps
-  type?: string; // Added for compatibility with InternshipCardProps
+  type: string;
+  companySize?: "Startup" | "Small" | "Medium" | "Large";
+  description: string;
+  onViewDetails?: () => void;
+  onApply?: () => void;
 }
 
 export type UserSkill =
@@ -228,7 +227,48 @@ export interface Testimonial {
   image?: string; // Added for compatibility
 }
 
-// Props interfaces for components
+export interface TeamCardProps {
+  team: Team;
+  isUserTeamMember?: boolean;
+  hackathonId?: string;
+  hasJoinRequest?: boolean;
+  isDetailed?: boolean;
+  showActions?: boolean;
+  onDelete?: () => Promise<void>;
+}
+
+export interface ReminderModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  date?: Date;
+  title?: string;
+  eventName?: string;
+  eventDate?: Date;
+  eventType?: string;
+  type?: string;
+}
+
+export interface TeamServiceProps {
+  createTeam: (teamData: Omit<Team, "id" | "isOpen" | "members" | "createdAt" | "updatedAt" | "leaderId">) => Promise<{
+    success: boolean;
+    error: string;
+    data?: any;
+  } | {
+    success: boolean;
+    data: any;
+    error?: undefined;
+  }>;
+  sendJoinRequest: (teamId: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  useHackathonTeams: (hackathonId: string) => any;
+  useUserSentRequests: () => any;
+  joinTeam: (teamId: string) => Promise<{ success: boolean; error?: string }>;
+  leaveTeam: (teamId: string) => Promise<{ success: boolean; error?: string }>;
+  isUserInTeam: (teamId: string) => boolean;
+}
+
 export interface HackathonCardProps {
   id: string;
   title: string;
@@ -260,36 +300,7 @@ export interface InternshipCardProps {
   applicationDeadline: string;
   type: string;
   companySize?: "Startup" | "Small" | "Medium" | "Large";
-  description?: string;
+  description: string;
   onViewDetails?: () => void;
   onApply?: () => void;
-}
-
-export interface TeamServiceProps {
-  createTeam: (teamData: Omit<Team, "id" | "isOpen" | "members" | "createdAt" | "updatedAt" | "leaderId">) => Promise<{
-    success: boolean;
-    error: string;
-    data?: any;
-  } | {
-    success: boolean;
-    data: any;
-    error?: undefined;
-  }>;
-  sendJoinRequest: (teamId: string) => Promise<{
-    success: boolean;
-    error?: string;
-  }>;
-  useHackathonTeams: (hackathonId: string) => any;
-  useUserSentRequests: () => any;
-  joinTeam?: (teamId: string) => Promise<{ success: boolean; error?: string }>;
-  leaveTeam?: (teamId: string) => Promise<{ success: boolean; error?: string }>;
-  isUserInTeam?: (teamId: string) => boolean;
-}
-
-export interface ReminderModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  date: Date;
-  type: string;
 }

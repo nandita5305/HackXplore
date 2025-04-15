@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -145,7 +144,20 @@ export default function Internships() {
                       {filteredInternships.map((internship) => (
                         <div key={internship.id} className="animate-float internship-card-container">
                           <InternshipCard 
-                            {...internship}
+                            id={internship.id}
+                            title={internship.title}
+                            company={internship.company}
+                            location={internship.location}
+                            imageUrl={internship.logo}
+                            isRemote={internship.isRemote}
+                            stipend={internship.stipend}
+                            duration={internship.duration}
+                            skills={internship.requiredSkills || []}
+                            postedDate={new Date().toISOString().split('T')[0]}
+                            applicationDeadline={internship.applicationDeadline}
+                            type="Tech"
+                            companySize={internship.companySize}
+                            description={internship.description || ""}
                             onViewDetailsClick={() => handleViewDetails(internship.id)}
                           />
                         </div>

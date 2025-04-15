@@ -1,4 +1,4 @@
-import { HackathonCard, InternshipCard, Scholarship } from "@/types";
+import { HackathonCard, InternshipCard, Scholarship, PartnerLogo } from "@/types";
 
 // Mock data for hackathons
 export const hackathonsData: HackathonCard[] = [
@@ -73,7 +73,7 @@ export const hackathonsData: HackathonCard[] = [
     startDate: "2024-11-15",
     endDate: "2024-11-17",
     location: "Online",
-    mode: "Remote",
+    mode: "Online", // Changed from "Remote" to "Online"
     prizePool: 20000,
     tags: ["Cybersecurity", "Innovation"],
     applicationDeadline: "2024-11-10",
@@ -105,7 +105,7 @@ export const hackathonsData: HackathonCard[] = [
     startDate: "2025-01-10",
     endDate: "2025-01-12",
     location: "Online",
-    mode: "Remote",
+    mode: "Online", // Changed from "Remote" to "Online"
     prizePool: 12000,
     tags: ["AR", "VR"],
     applicationDeadline: "2025-01-05",
@@ -137,7 +137,7 @@ export const hackathonsData: HackathonCard[] = [
     startDate: "2025-03-01",
     endDate: "2025-03-03",
     location: "Online",
-    mode: "Remote",
+    mode: "Online", // Changed from "Remote" to "Online"
     prizePool: 20000,
     tags: ["Blockchain", "Web3"],
     applicationDeadline: "2025-02-25",

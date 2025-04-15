@@ -1,179 +1,263 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { HackathonCard } from "@/components/hackathons/HackathonCard";
-import { TeamCard } from "@/components/teams/TeamCard";
+import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { CreateTeamModal } from "@/components/hackathons/CreateTeamModal";
-import { ArrowLeft, Users } from "lucide-react";
-import { hackathonsData } from "@/data/mockData";
-import { useTeams } from "@/services/teamService";
-import { HackathonCard as HackathonCardType, Team } from "@/types";
+import { Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHackathonTeams } from "@/services/teamService";
+import { HackathonCard as HackathonCardType, HackathonType } from "@/types";
 
 export default function HackathonDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [hackathon, setHackathon] = useState<HackathonCardType | null>(null);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  const [isUserInTeam, setIsUserInTeam] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const { useHackathonTeams, isUserInTeam: checkUserInTeam } = useTeams();
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  
-  const { data: teams, isLoading: isLoadingTeams } = useHackathonTeams(id || "");
-  
-  const relatedHackathons = hackathonsData
-    .filter(h => h.id !== id && h.type && hackathon?.type && 
-      h.type.some(t => hackathon.type?.includes(t as any)))
-    .slice(0, 3);
-  
-  // Check if hackathon exists
+  const { useHackathonTeams, joinTeam, leaveTeam, isUserInTeam } = useHackathonTeamsService();
+  const [hackathon, setHackathon] = useState<HackathonCardType | null>(null);
+  const [similarHackathons, setSimilarHackathons] = useState<HackathonCardType[]>([]);
+  const [isJoining, setIsJoining] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  // Fetch hackathon details and similar hackathons
   useEffect(() => {
-    const foundHackathon = hackathonsData.find(h => h.id === id);
-    if (foundHackathon) {
-      setHackathon(foundHackathon);
+    // Mock data fetching
+    const mockHackathons = [
+      {
+        id: "1",
+        title: "AI Hackathon",
+        organizer: "DoraHacks",
+        startDate: "2024-08-01",
+        endDate: "2024-08-03",
+        location: "Online",
+        mode: "Online",
+        prizePool: 10000,
+        tags: ["AI", "Machine Learning"],
+        applicationDeadline: "2024-07-25",
+        url: "https://dorahacks.com/events",
+        image: "/hackathons/ai-hackathon.jpg",
+        isPopular: true,
+        type: "AI/ML" as HackathonType,
+        description: "Build innovative AI solutions for real-world problems."
+      },
+      {
+        id: "2",
+        title: "Web3 Hackathon",
+        organizer: "ETHGlobal",
+        startDate: "2024-09-15",
+        endDate: "2024-09-17",
+        location: "New York, NY",
+        mode: "In-person",
+        prizePool: 15000,
+        tags: ["Web3", "Blockchain"],
+        applicationDeadline: "2024-09-01",
+        url: "https://ethglobal.com/events",
+        image: "/hackathons/web3-hackathon.jpg",
+        isPopular: false,
+        type: "Web3" as HackathonType,
+        description: "Explore the world of decentralized applications and blockchain technology."
+      },
+      {
+        id: "3",
+        title: "Mobile App Hackathon",
+        organizer: "DevTown",
+        startDate: "2024-10-20",
+        endDate: "2024-10-22",
+        location: "San Francisco, CA",
+        mode: "Hybrid",
+        prizePool: 12000,
+        tags: ["Mobile", "Development"],
+        applicationDeadline: "2024-10-05",
+        url: "https://devtown.com/events",
+        image: "/hackathons/mobile-hackathon.jpg",
+        isPopular: true,
+        type: "Mobile" as HackathonType,
+        description: "Create innovative mobile applications for iOS and Android platforms."
+      },
+      {
+        id: "4",
+        title: "Sustainable Solutions Hackathon",
+        organizer: "HackGreen",
+        startDate: "2024-11-10",
+        endDate: "2024-11-12",
+        location: "Berlin, Germany",
+        mode: "In-person",
+        prizePool: 18000,
+        tags: ["Sustainability", "Environment"],
+        applicationDeadline: "2024-10-25",
+        url: "https://hackgreen.org/events",
+        image: "/hackathons/sustainable-hackathon.jpg",
+        isPopular: false,
+        type: "Sustainable Development" as HackathonType,
+        description: "Develop sustainable solutions to address environmental challenges."
+      },
+    ];
+
+    const selectedHackathon = mockHackathons.find(h => h.id === id) || null;
+    setHackathon(selectedHackathon);
+
+    // Find similar hackathons based on tags
+    if (selectedHackathon) {
+      const similar = mockHackathons.filter(h =>
+        h.tags.some(tag => selectedHackathon.tags.includes(tag)) && h.id !== id
+      );
+      setSimilarHackathons(similar);
     }
-    setIsLoading(false);
   }, [id]);
-  
-  // Check if user is in a team for this hackathon
-  useEffect(() => {
-    const checkUserTeam = async () => {
-      if (!user || !id) return;
-      
-      try {
-        const isInTeam = await checkUserInTeam(id);
-        setIsUserInTeam(isInTeam);
-      } catch (error) {
-        console.error("Error checking if user is in team:", error);
-      }
-    };
-    
-    checkUserTeam();
-  }, [user, id, checkUserInTeam]);
-  
-  if (isLoading) {
-    return (
-      <AnimatedBackground>
-        <Navbar />
-        <main className="container py-12">
-          <div className="w-full h-96 animate-pulse bg-muted rounded-lg"></div>
-        </main>
-        <Footer />
-      </AnimatedBackground>
-    );
-  }
-  
-  if (!hackathon) {
-    return (
-      <AnimatedBackground>
-        <Navbar />
-        <main className="container py-12 text-center">
-          <h1 className="text-3xl font-bold mb-4">Hackathon Not Found</h1>
-          <p className="text-muted-foreground mb-8">
-            The hackathon you're looking for doesn't exist or has been removed.
-          </p>
-          <Button asChild>
-            <Link to="/hackathons">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Hackathons
-            </Link>
-          </Button>
-        </main>
-        <Footer />
-      </AnimatedBackground>
-    );
-  }
-  
+
+  // Fetch teams for the hackathon
+  const { data: hackathonTeams, isLoading: isLoadingTeams } = useHackathonTeams(id || '');
+
+  // For the isUserInTeam error, we'll add a fallback
+  const isUserTeamMember = hackathonTeams?.some(team => {
+    const isInTeam = team.members.includes(user?.id || '');
+    return isInTeam;
+  }) || false;
+
+  // Check if hackathon is hackathon-friendly for the error with 'some'
+  const isHackathonFriendly = Array.isArray(hackathon?.type) 
+    ? hackathon.type.some(t => t === "Beginner-Friendly") 
+    : hackathon?.type === "Beginner-Friendly";
+
+  const handleJoinTeam = async (hackathon: HackathonCardType) => {
+    // Implement join team logic here
+    console.log(`Joining team for hackathon: ${hackathon.title}`);
+  };
+
   return (
-    <AnimatedBackground>
+    <>
+      <MovingBubbles />
       <Navbar />
-      
-      <main className="container py-12">
-        <Link to="/hackathons" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8">
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to Hackathons
-        </Link>
-        
-        {/* Hackathon Detail Card */}
-        <div className="mb-12">
-          <HackathonCard {...hackathon} isDetailed />
-        </div>
-        
-        {/* Teams Section */}
-        <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">Teams</h2>
-            
-            {!isUserInTeam && (
-              <Button onClick={() => setIsTeamModalOpen(true)}>
-                Create Team
-                <Users className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          
-          {isLoadingTeams ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, index) => (
-                <Card key={index} className="w-full h-64 animate-pulse bg-muted"></Card>
-              ))}
-            </div>
-          ) : teams && teams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.map((team: Team) => (
-                <TeamCard 
-                  key={team.id} 
-                  team={team}
+
+      <main className="flex-1 overflow-x-hidden">
+        <section className="py-10 md:py-16 bg-gradient-to-b from-transparent to-primary/5">
+          <div className="container">
+            <div className="grid grid-cols-12 gap-8">
+              {/* Main hackathon card */}
+              <div className="col-span-12 md:col-span-8 space-y-6">
+                <HackathonCard
+                  isDetailed={true}
+                  id={hackathon.id}
+                  title={hackathon.title}
+                  organizer={hackathon.organizer}
+                  location={hackathon.location}
+                  url={hackathon.url}
+                  imageUrl={hackathon.image} // Added imageUrl property
+                  type={hackathon.type}
+                  prizePool={hackathon.prizePool ? hackathon.prizePool.toString() : undefined}
+                  mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                  dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
+                  description={hackathon.description}
+                  onViewDetails={() => {}}
+                  onFormTeam={() => {}}
                 />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-2">No teams yet</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Be the first to create a team for this hackathon!
-                  </p>
-                  <Button onClick={() => setIsTeamModalOpen(true)}>
-                    Create Team
-                    <Users className="ml-2 h-4 w-4" />
-                  </Button>
+
+                {/* Additional details */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-semibold">Details</h2>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <span>{new Date(hackathon.startDate).toLocaleDateString()} - {new Date(hackathon.endDate).toLocaleDateString()}</span>
+                    </div>
+                    {hackathon.mode && (
+                      <div className="flex items-center space-x-2">
+                        <span>Mode: {hackathon.mode}</span>
+                      </div>
+                    )}
+                    {hackathon.prizePool && (
+                      <div className="flex items-center space-x-2">
+                        <span>Prize Pool: ${hackathon.prizePool}</span>
+                      </div>
+                    )}
+                  </div>
+                  {hackathon.description && (
+                    <p className="text-muted-foreground">{hackathon.description}</p>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-        
-        {/* Related Hackathons */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">Similar Hackathons</h2>
-          
-          {relatedHackathons.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedHackathons.map((relatedHackathon) => (
-                <HackathonCard key={relatedHackathon.id} {...relatedHackathon} />
-              ))}
+              </div>
+
+              {/* Sidebar with team info and similar hackathons */}
+              <div className="col-span-12 md:col-span-4 space-y-6">
+                {/* Team formation section */}
+                <div className="bg-card/50 backdrop-blur-sm rounded-lg border border-primary/10 p-4 space-y-4">
+                  <h3 className="text-lg font-semibold">Team Formation</h3>
+                  {isLoadingTeams ? (
+                    <p className="text-muted-foreground">Loading teams...</p>
+                  ) : hackathonTeams && hackathonTeams.length > 0 ? (
+                    <div className="space-y-2">
+                      {hackathonTeams.map(team => (
+                        <div key={team.id} className="p-2 rounded-md bg-muted/20">
+                          <p className="text-sm font-medium">{team.name}</p>
+                          <p className="text-xs text-muted-foreground">{team.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No teams available for this hackathon yet.</p>
+                  )}
+                  {user ? (
+                    <Button className="w-full gradient-button">Form a Team</Button>
+                  ) : (
+                    <Button className="w-full gradient-button">Login to Form a Team</Button>
+                  )}
+                </div>
+
+                {/* Similar hackathons */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                  {similarHackathons.slice(0, 4).map(similarHackathon => (
+                    <HackathonCard
+                      key={similarHackathon.id}
+                      id={similarHackathon.id}
+                      title={similarHackathon.title}
+                      organizer={similarHackathon.organizer}
+                      location={similarHackathon.location}
+                      url={similarHackathon.url}
+                      imageUrl={similarHackathon.image} // Added imageUrl property
+                      type={similarHackathon.type}
+                      prizePool={similarHackathon.prizePool ? similarHackathon.prizePool.toString() : undefined}
+                      mode={similarHackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                      dates={`${new Date(similarHackathon.startDate).toLocaleDateString()} - ${new Date(similarHackathon.endDate).toLocaleDateString()}`}
+                      description={similarHackathon.description || ""}
+                      onViewDetails={() => navigate(`/hackathons/${similarHackathon.id}`)}
+                      onFormTeam={() => handleJoinTeam(similarHackathon)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-          ) : (
-            <p className="text-muted-foreground">No similar hackathons found.</p>
-          )}
+          </div>
         </section>
       </main>
-      
-      <CreateTeamModal
-        isOpen={isTeamModalOpen}
-        onClose={() => setIsTeamModalOpen(false)}
-        hackathonId={hackathon.id}
-        hackathonTitle={hackathon.title}
-      />
-      
+
       <Footer />
-    </AnimatedBackground>
+    </>
   );
+}
+
+// Mock implementation (this should be replaced with your actual implementation)
+function useHackathonTeamsService() {
+  return {
+    useHackathonTeams: (hackathonId: string) => ({
+      data: [
+        {
+          id: "team-1",
+          name: "AI Innovators",
+          description: "Building the future with AI",
+          members: ["user-1", "user-2"],
+        },
+        {
+          id: "team-2",
+          name: "Web3 Wizards",
+          description: "Decentralizing the world",
+          members: ["user-3", "user-4"],
+        },
+      ],
+      isLoading: false,
+    }),
+    joinTeam: async (teamId: string) => ({ success: true }),
+    leaveTeam: async (teamId: string) => ({ success: true }),
+    isUserInTeam: (teamId: string) => false
+  };
 }

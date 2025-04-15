@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -17,8 +16,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Scholarships() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredScholarships, setFilteredScholarships] = useState<Scholarship[]>(scholarshipsData.slice(0, 9));
-  const [allScholarships, setAllScholarships] = useState<Scholarship[]>(scholarshipsData);
+  const [filteredScholarships, setFilteredScholarships] = useState<Scholarship[]>(
+    scholarshipsData.map(s => ({...s, type: s.type as ScholarshipType}))
+  );
+  const [allScholarships, setAllScholarships] = useState<Scholarship[]>(
+    scholarshipsData.map(s => ({...s, type: s.type as ScholarshipType}))
+  );
   const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
     types: [] as ScholarshipType[],

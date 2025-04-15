@@ -1,271 +1,180 @@
-import { HackathonCard, HackathonType, UserSkill } from "@/types";
+import { HackathonCard, InternshipCard, UserSkill, HackathonType } from "@/types";
 
-// Type for filtering hackathons
-interface HackathonFilters {
-  types: HackathonType[];
-  mode: "all" | "online" | "in-person" | "hybrid";
-  prizePoolMin: number;
-  prizePoolMax: number;
-  timeframe: "all" | "upcoming" | "ongoing" | "past";
-  skills: UserSkill[];
-}
-
-// Filter hackathons based on provided filters
-export const filterHackathons = (hackathons: HackathonCard[], filters: HackathonFilters): HackathonCard[] => {
+// Filter hackathons based on user preferences
+export const filterHackathons = (hackathons: HackathonCard[], filters: any) => {
+  const { types, mode, prizePoolMin, prizePoolMax, timeframe, skills } = filters;
+  
   return hackathons.filter(hackathon => {
-    // Filter by type
-    if (filters.types.length > 0) {
-      if (!hackathon.type) return false;
-      
-      const hackathonTypes = Array.isArray(hackathon.type) 
-        ? hackathon.type.map(t => t as HackathonType) 
-        : [hackathon.type as HackathonType];
-        
-      const hasMatchingType = filters.types.some(type => 
-        hackathonTypes.includes(type)
-      );
-      
-      if (!hasMatchingType) return false;
+    // Filter by hackathon types
+    if (types && types.length > 0) {
+      // Check if the hackathon's type matches any of the selected types
+      if (Array.isArray(hackathon.type)) {
+        if (!hackathon.type.some(type => types.includes(type))) {
+          return false;
+        }
+      } else if (!types.includes(hackathon.type)) {
+        return false;
+      }
     }
     
-    // Filter by mode
-    if (filters.mode !== "all") {
-      if (hackathon.mode !== filters.mode) return false;
+    // Filter by mode (online, in-person, hybrid)
+    if (mode && mode !== "all") {
+      // Convert to lowercase for comparison
+      const hackathonMode = hackathon.mode.toLowerCase();
+      const filterMode = mode.toLowerCase();
+      if (hackathonMode !== filterMode) {
+        return false;
+      }
     }
     
     // Filter by prize pool
-    if (hackathon.prizePool !== undefined) {
-      let prizePoolNumber: number;
+    if (hackathon.prizePool) {
+      const prizePool = typeof hackathon.prizePool === 'string' 
+        ? parseInt(hackathon.prizePool.replace(/,/g, '')) 
+        : hackathon.prizePool;
       
-      // Handle both string and number types for prizePool
-      if (typeof hackathon.prizePool === 'string') {
-        // Remove non-numeric characters if it's a string
-        prizePoolNumber = parseInt(hackathon.prizePool.replace(/[^0-9]/g, ""));
-      } else {
-        // If it's already a number, use it directly
-        prizePoolNumber = hackathon.prizePool;
-      }
-      
-      // Check if the prize pool is within the specified range
-      if (isNaN(prizePoolNumber) || prizePoolNumber < filters.prizePoolMin || prizePoolNumber > filters.prizePoolMax) {
+      if (prizePool < prizePoolMin || prizePool > prizePoolMax) {
         return false;
       }
     }
     
-    // Filter by skills
-    if (filters.skills.length > 0 && hackathon.skills) {
-      const hackathonSkills = Array.isArray(hackathon.skills) 
-        ? hackathon.skills.map(s => s as UserSkill) 
-        : [hackathon.skills as UserSkill];
-        
-      const hasMatchingSkill = filters.skills.some(skill => 
-        hackathonSkills.includes(skill)
-      );
-      
-      if (!hasMatchingSkill) return false;
-    }
-    
-    // Filter by timeframe
-    if (filters.timeframe !== "all") {
-      const now = new Date();
+    // Filter by timeframe (upcoming, ongoing, past)
+    if (timeframe && timeframe !== "all") {
+      const today = new Date();
       const startDate = new Date(hackathon.startDate);
       const endDate = new Date(hackathon.endDate);
       
-      if (filters.timeframe === "upcoming" && startDate <= now) {
+      if (timeframe === "upcoming" && startDate <= today) {
         return false;
-      }
-      
-      if (filters.timeframe === "ongoing" && (startDate > now || endDate < now)) {
+      } else if (timeframe === "ongoing" && (startDate > today || endDate < today)) {
         return false;
-      }
-      
-      if (filters.timeframe === "past" && endDate >= now) {
+      } else if (timeframe === "past" && endDate >= today) {
         return false;
       }
     }
     
-    return true;
-  });
-};
-
-// Filter internships based on provided filters
-export const filterInternships = (internships: any[], filters: any): any[] => {
-  return internships.filter(internship => {
     // Filter by skills
-    if (filters.skills && filters.skills.length > 0 && internship.skills) {
-      const internshipSkills = Array.isArray(internship.skills) 
-        ? internship.skills 
-        : [internship.skills];
-        
-      const hasMatchingSkill = filters.skills.some((skill: string) => 
-        internshipSkills.includes(skill)
+    if (skills && skills.length > 0 && hackathon.tags) {
+      // Check if any of the selected skills match the hackathon's tags
+      const hackathonSkills = hackathon.tags.map(tag => tag.toLowerCase());
+      const matchingSkills = skills.filter(skill => 
+        hackathonSkills.includes(skill.toLowerCase())
       );
       
-      if (!hasMatchingSkill) return false;
-    }
-    
-    // Filter by remote preference
-    if (filters.isRemote !== undefined && internship.isRemote !== filters.isRemote) {
-      return false;
+      if (matchingSkills.length === 0) {
+        return false;
+      }
     }
     
     return true;
   });
 };
 
-// Get internship recommendations based on user profile
-// Define this function before it's referenced in getHackathonRecommendations
-export const getRecommendedInternships = (
-  internships: any[],
-  userSkills: UserSkill[] = []
-): any[] => {
-  if (!userSkills.length) {
-    return internships.slice(0, 3); // Return first 3 if no user skills
-  }
-  
-  return internships
-    .map(internship => {
-      let score = 0;
-      
-      // Score based on matching skills
-      if (internship.skills && userSkills.length) {
-        const internshipSkills = Array.isArray(internship.skills) 
-          ? internship.skills.map(s => s as UserSkill) 
-          : [internship.skills as UserSkill];
-          
-        userSkills.forEach(skill => {
-          if (internshipSkills.includes(skill)) {
-            score += 2;
-          }
-        });
+// Filter internships based on user preferences
+export const filterInternships = (internships: InternshipCard[], filters: any) => {
+  const { skills, isRemote, stipendMin, stipendMax, location } = filters;
+
+  return internships.filter(internship => {
+    if (skills && skills.length > 0) {
+      const internshipSkills = internship.requiredSkills.map(skill => skill.toLowerCase());
+      const matchingSkills = skills.filter(skill =>
+        internshipSkills.includes(skill.toLowerCase())
+      );
+
+      if (matchingSkills.length === 0) {
+        return false;
       }
-      
-      // Boost score for remote internships (might be preferred)
-      if (internship.isRemote) {
-        score += 1;
-      }
-      
-      return { ...internship, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .map(({ score, ...internship }) => internship);
+    }
+
+    if (isRemote !== undefined && internship.isRemote !== isRemote) {
+      return false;
+    }
+
+    if (internship.stipend !== undefined && (internship.stipend < stipendMin || internship.stipend > stipendMax)) {
+      return false;
+    }
+
+    if (location && !internship.location.toLowerCase().includes(location.toLowerCase())) {
+      return false;
+    }
+
+    return true;
+  });
 };
 
-// Get hackathon recommendations based on user profile
+// Get recommended hackathons based on user skills and interests
 export const getRecommendedHackathons = (
   hackathons: HackathonCard[],
-  userSkills: UserSkill[] = [],
-  userInterests: HackathonType[] = []
+  userSkills: UserSkill[],
+  userInterests: HackathonType[]
 ): HackathonCard[] => {
-  if (!userSkills.length && !userInterests.length) {
-    return hackathons.slice(0, 3); // Return first 3 if no user preferences
-  }
+  if (!userSkills?.length && !userInterests?.length) return [];
   
-  return hackathons
-    .map(hackathon => {
-      let score = 0;
+  // Score each hackathon based on match with user skills and interests
+  const scoredHackathons = hackathons.map(hackathon => {
+    let score = 0;
+    
+    // Match skills with hackathon tags
+    if (userSkills?.length && hackathon.tags) {
+      const hackathonSkillTags = hackathon.tags.map(tag => tag.toLowerCase());
+      const matchingSkills = userSkills.filter(skill => 
+        hackathonSkillTags.includes(skill.toLowerCase())
+      );
       
-      // Score based on matching skills
-      if (hackathon.skills && userSkills.length) {
-        const hackathonSkills = Array.isArray(hackathon.skills) 
-          ? hackathon.skills.map(s => s as UserSkill) 
-          : [hackathon.skills as UserSkill];
-          
-        userSkills.forEach(skill => {
-          if (hackathonSkills.includes(skill)) {
-            score += 2;
-          }
-        });
+      score += matchingSkills.length * 2; // Higher weight for skill matches
+    }
+    
+    // Match user interests with hackathon type
+    if (userInterests?.length) {
+      if (Array.isArray(hackathon.type)) {
+        const matchingInterests = userInterests.filter(interest => 
+          hackathon.type.includes(interest)
+        );
+        score += matchingInterests.length * 3; // Higher weight for interest matches
+      } else if (userInterests.includes(hackathon.type as HackathonType)) {
+        score += 3;
       }
-      
-      // Score based on matching interests/types
-      if (hackathon.type && userInterests.length) {
-        const hackathonTypes = Array.isArray(hackathon.type) 
-          ? hackathon.type.map(t => t as HackathonType) 
-          : [hackathon.type as HackathonType];
-          
-        userInterests.forEach(interest => {
-          if (hackathonTypes.includes(interest)) {
-            score += 3;
-          }
-        });
-      }
-      
-      // Boost score for upcoming hackathons
-      const now = new Date();
-      const startDate = new Date(hackathon.startDate);
-      if (startDate > now) {
-        score += 1;
-      }
-      
-      return { ...hackathon, score };
-    })
-    .sort((a, b) => (b as any).score - (a as any).score)
-    .slice(0, 5)
-    .map(({ score, ...hackathon }) => hackathon);
+    }
+    
+    return { hackathon, score };
+  });
+  
+  // Sort by score (highest first) and return the top 5
+  return scoredHackathons
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.hackathon)
+    .slice(0, 5);
 };
 
-// Backward compatibility aliases - defined after the main functions
-export const getHackathonRecommendations = getRecommendedHackathons;
-export const getInternshipRecommendations = getRecommendedInternships;
+// Get recommended internships based on user skills
+export const getRecommendedInternships = (
+  internships: InternshipCard[],
+  userSkills: UserSkill[]
+): InternshipCard[] => {
+  if (!userSkills?.length) return [];
 
-export const filterScholarships = (
-  scholarships: any[],
-  filters: {
-    types: string[];
-    amountMin: number;
-    amountMax: number;
-    deadlineType: "all" | "upcoming" | "urgent";
-    provider: string;
-    eligibility: string[];
-  }
-) => {
-  return scholarships.filter((scholarship) => {
-    // Filter by type
-    if (filters.types.length > 0 && !filters.types.includes(scholarship.type)) {
-      return false;
-    }
+  // Score each internship based on match with user skills
+  const scoredInternships = internships.map(internship => {
+    let score = 0;
 
-    // Filter by amount range
-    if (
-      scholarship.amount < filters.amountMin ||
-      scholarship.amount > filters.amountMax
-    ) {
-      return false;
-    }
-
-    // Filter by deadline
-    if (filters.deadlineType !== "all") {
-      const deadlineDate = new Date(scholarship.deadline);
-      const currentDate = new Date();
-      const timeDiff = deadlineDate.getTime() - currentDate.getTime();
-      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-      if (filters.deadlineType === "upcoming" && (daysDiff < 0 || daysDiff > 30)) {
-        return false;
-      }
-
-      if (filters.deadlineType === "urgent" && (daysDiff < 0 || daysDiff > 7)) {
-        return false;
-      }
-    }
-
-    // Filter by provider
-    if (filters.provider && !scholarship.provider.toLowerCase().includes(filters.provider.toLowerCase())) {
-      return false;
-    }
-
-    // Filter by eligibility criteria
-    if (filters.eligibility.length > 0) {
-      const hasMatchingCriteria = filters.eligibility.some(criterion => 
-        scholarship.eligibility.includes(criterion)
+    // Match skills with internship required skills
+    if (internship.requiredSkills?.length) {
+      const internshipSkills = internship.requiredSkills.map(skill => skill.toLowerCase());
+      const matchingSkills = userSkills.filter(skill =>
+        internshipSkills.includes(skill.toLowerCase())
       );
-      if (!hasMatchingCriteria) {
-        return false;
-      }
+
+      score += matchingSkills.length;
     }
 
-    return true;
+    return { internship, score };
   });
+
+  // Sort by score (highest first) and return the top 5
+  return scoredInternships
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.internship)
+    .slice(0, 5);
 };

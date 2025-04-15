@@ -188,10 +188,10 @@ export function AIInternshipRecommender({ className }: AIInternshipRecommenderPr
                         applicationDeadline={internship.applicationDeadline}
                         skills={internship.requiredSkills || []}
                         companySize={internship.companySize}
-                        description={internship.description}
+                        description={internship.description || ""}
                         imageUrl={internship.logo}
                         type="Tech"
-                        postedDate="2023-01-01"
+                        postedDate={new Date().toISOString().split('T')[0]}
                         onViewDetails={() => {}}
                       />
                     ))}

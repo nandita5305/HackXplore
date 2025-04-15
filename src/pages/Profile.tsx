@@ -1,452 +1,436 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { AnimatedBackground } from "@/components/ui/animated-background";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MovingBubbles } from "@/components/ui/moving-bubbles";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/auth/ProfileForm";
 import { TeamCard } from "@/components/teams/TeamCard";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { InternshipCard } from "@/components/internships/InternshipCard";
+import { HackathonCard } from "@/components/hackathons/HackathonCard";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTeams } from "@/services/teamService";
 import { useBookmarks } from "@/services/bookmarkService";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Pencil, Github, Linkedin, Globe, Trash2, AlertTriangle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { hackathonsData, internshipsData } from "@/data/mockData";
-import { HackathonCard } from "@/components/hackathons/HackathonCard";
-import { InternshipCard } from "@/components/internships/InternshipCard";
-import { Edit, Github, Linkedin, Globe, User, LogIn, Users, PlusCircle, UserPlus, Bell } from "lucide-react";
-import { Team, TeamJoinRequest } from "@/types";
 
 export default function Profile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { user, profile } = useAuth();
-  const { useUserTeams, useUserSentRequests, deleteTeam } = useTeams();
-  const { bookmarks, isLoading: isLoadingBookmarks } = useBookmarks();
+  const { user, profile, isLoading: isProfileLoading } = useAuth();
+  const { useUserTeams, deleteTeam } = useTeams();
+  const { bookmarks, removeBookmark } = useBookmarks();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   
-  const { data: userTeams, isLoading: isLoadingTeams } = useUserTeams();
-  const { data: sentRequests = [] } = useUserSentRequests();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState("teams");
+  const { data: teams, isLoading: isTeamsLoading } = useUserTeams();
   
-  const hackathonBookmarks = bookmarks
-    .filter(bookmark => bookmark.item_type === "hackathon")
-    .map(bookmark => 
-      hackathonsData.find(hackathon => hackathon.id === bookmark.item_id)
-    )
-    .filter(hackathon => hackathon !== undefined) as any[];
-    
-  const internshipBookmarks = bookmarks
-    .filter(bookmark => bookmark.item_type === "internship")
-    .map(bookmark => 
-      internshipsData.find(internship => internship.id === bookmark.item_id)
-    )
-    .filter(internship => internship !== undefined) as any[];
+  const bookmarkedHackathons = hackathonsData.filter(
+    hackathon => bookmarks.some(b => b.itemId === hackathon.id && b.itemType === "hackathon")
+  );
   
-  const scholarshipBookmarks = bookmarks
-    .filter(bookmark => bookmark.item_type === "scholarship")
-    .map(bookmark => 
-      // Assuming there's a way to fetch scholarship data
-      // For example, you could have a service that fetches scholarship data by ID
-      // and then map it to a scholarship object
-      // For now, let's just assume it's a string
-      bookmark.item_id
-    )
-    .filter(scholarship => scholarship !== undefined) as any[];
+  const bookmarkedInternships = internshipsData.filter(
+    internship => bookmarks.some(b => b.itemId === internship.id && b.itemType === "internship")
+  );
+  
+  useEffect(() => {
+    if (!user && !isProfileLoading) {
+      navigate("/login");
+    }
+  }, [user, isProfileLoading, navigate]);
   
   const handleDeleteTeam = async (teamId: string) => {
-    const result = await deleteTeam(teamId);
-    if (result.success) {
-      // Team deleted successfully
+    setTeamToDelete(teamId);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const confirmDeleteTeam = async () => {
+    if (!teamToDelete) return;
+    
+    try {
+      const result = await deleteTeam(teamToDelete);
+      
+      if (result.success) {
+        toast({
+          title: "Team deleted",
+          description: "Your team has been successfully deleted.",
+        });
+      } else {
+        toast({
+          title: "Failed to delete team",
+          description: result.error || "An error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setTeamToDelete(null);
     }
   };
   
-  if (!user) {
+  const handleRemoveBookmark = async (id: string, type: "hackathon" | "internship") => {
+    await removeBookmark(id, type);
+    toast({
+      title: "Bookmark removed",
+      description: `The ${type} has been removed from your bookmarks.`,
+    });
+  };
+  
+  if (isProfileLoading) {
     return (
-      <AnimatedBackground>
+      <>
         <Navbar />
-        <main className="container py-16">
-          <div className="max-w-md mx-auto text-center">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sign In Required</CardTitle>
-                <CardDescription>
-                  Please sign in to view your profile
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pb-6">
-                <User className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-6">
-                  You need to be signed in to access your profile, bookmarks, and teams
-                </p>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <Button onClick={() => setIsAuthModalOpen(true)}>
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Sign In
-                </Button>
-              </CardFooter>
-            </Card>
+        <main className="container py-10">
+          <div className="max-w-4xl mx-auto">
+            <Skeleton className="h-12 w-1/3 mb-4" />
+            <Skeleton className="h-64 w-full mb-8" />
+            <Skeleton className="h-8 w-1/4 mb-2" />
+            <Skeleton className="h-32 w-full" />
           </div>
-          
-          <AuthModal
-            isOpen={isAuthModalOpen}
-            onClose={() => setIsAuthModalOpen(false)}
-            defaultView="login"
-          />
         </main>
         <Footer />
-      </AnimatedBackground>
+      </>
     );
   }
   
-  const handleProfileUpdate = () => {
-    setIsEditing(false);
-  };
-  
-  const getPendingRequestsForTeam = (teamId: string) => {
-    return sentRequests.filter(
-      (request: TeamJoinRequest) => request.teamId === teamId && request.status === 'pending'
-    );
-  };
+  if (!user) {
+    return null; // Will redirect in useEffect
+  }
   
   return (
-    <AnimatedBackground>
+    <>
+      <MovingBubbles />
       <Navbar />
       
-      <main className="container py-12">
-        {isEditing ? (
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold">Edit Profile</h1>
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Cancel
-              </Button>
+      <main className="container py-10">
+        <div className="max-w-5xl mx-auto">
+          {isEditMode ? (
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-3xl font-bold">Edit Profile</h1>
+                <Button variant="outline" onClick={() => setIsEditMode(false)}>
+                  Cancel
+                </Button>
+              </div>
+              <ProfileForm onComplete={() => setIsEditMode(false)} />
             </div>
-            <ProfileForm onComplete={handleProfileUpdate} />
-          </div>
-        ) : (
-          <>
-            <div className="lg:col-span-2 mb-8">
-              <Card className="bg-card/50 backdrop-blur-sm border border-primary/10">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={profile?.avatarUrl} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                        {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 text-center md:text-left">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-                        <div>
-                          <h1 className="text-3xl font-bold">{profile?.name || user.email}</h1>
-                          <p className="text-muted-foreground">
-                            {profile?.preferredRole || "No role specified"}
-                          </p>
+          ) : (
+            <>
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold">My Profile</h1>
+                  <p className="text-muted-foreground">
+                    Manage your profile, teams, and bookmarks
+                  </p>
+                </div>
+                <Button onClick={() => setIsEditMode(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Profile
+                </Button>
+              </div>
+              
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid grid-cols-3 mb-8">
+                  <TabsTrigger value="profile">Profile</TabsTrigger>
+                  <TabsTrigger value="teams">My Teams</TabsTrigger>
+                  <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="profile">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                      <CardDescription>
+                        Your personal information and preferences
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row gap-8">
+                        <div className="flex flex-col items-center">
+                          <Avatar className="h-32 w-32 mb-4">
+                            <AvatarImage src={profile?.avatarUrl || ""} />
+                            <AvatarFallback className="text-4xl">
+                              {profile?.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex flex-col items-center">
+                            <h2 className="text-xl font-semibold">{profile?.name || "Anonymous User"}</h2>
+                            <p className="text-muted-foreground">{user.email}</p>
+                            
+                            {profile?.preferredRole && (
+                              <Badge className="mt-2">{profile.preferredRole}</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2 mt-4">
+                            {profile?.githubUrl && (
+                              <Button variant="outline" size="icon" asChild>
+                                <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer">
+                                  <Github className="h-4 w-4" />
+                                  <span className="sr-only">GitHub</span>
+                                </a>
+                              </Button>
+                            )}
+                            
+                            {profile?.linkedinUrl && (
+                              <Button variant="outline" size="icon" asChild>
+                                <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                                  <Linkedin className="h-4 w-4" />
+                                  <span className="sr-only">LinkedIn</span>
+                                </a>
+                              </Button>
+                            )}
+                            
+                            {profile?.portfolioUrl && (
+                              <Button variant="outline" size="icon" asChild>
+                                <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer">
+                                  <Globe className="h-4 w-4" />
+                                  <span className="sr-only">Portfolio</span>
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         
-                        <Button onClick={() => setIsEditing(true)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit Profile
-                        </Button>
-                      </div>
-                      
-                      {profile?.bio && (
-                        <p className="mb-4">{profile.bio}</p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {profile?.skills?.map((skill) => (
-                          <Badge key={skill} variant="outline">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-4">
-                        {profile?.githubUrl && (
-                          <a 
-                            href={profile.githubUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Github className="mr-1 h-4 w-4" />
-                            GitHub
-                          </a>
-                        )}
-                        
-                        {profile?.linkedinUrl && (
-                          <a 
-                            href={profile.linkedinUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Linkedin className="mr-1 h-4 w-4" />
-                            LinkedIn
-                          </a>
-                        )}
-                        
-                        {profile?.portfolioUrl && (
-                          <a 
-                            href={profile.portfolioUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                          >
-                            <Globe className="mr-1 h-4 w-4" />
-                            Portfolio
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-8 w-full md:w-auto">
-                <TabsTrigger value="teams">My Teams</TabsTrigger>
-                <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
-                <TabsTrigger value="requests">Join Requests</TabsTrigger>
-                <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="teams">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-semibold">My Teams</h2>
-                  <Button asChild>
-                    <a href="/hackathons">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Find Hackathons
-                    </a>
-                  </Button>
-                </div>
-                
-                {isLoadingTeams ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(3)].map((_, index) => (
-                      <Card key={index} className="w-full h-64 animate-pulse bg-muted"></Card>
-                    ))}
-                  </div>
-                ) : userTeams && userTeams.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {userTeams.map((team) => (
-                      <TeamCard 
-                        key={team.id} 
-                        team={team as Team}
-                        showActions={true}
-                        onDelete={() => handleDeleteTeam(team.id)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="py-12">
-                      <div className="text-center">
-                        <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">No teams yet</h3>
-                        <p className="text-muted-foreground mb-6">
-                          You haven't created or joined any teams yet
-                        </p>
-                        <Button asChild>
-                          <a href="/hackathons">Find Hackathons</a>
-                        </Button>
+                        <div className="flex-1">
+                          {profile?.bio && (
+                            <div className="mb-6">
+                              <h3 className="text-lg font-medium mb-2">About</h3>
+                              <p className="text-muted-foreground">{profile.bio}</p>
+                            </div>
+                          )}
+                          
+                          <Separator className="my-4" />
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h3 className="text-lg font-medium mb-2">Skills</h3>
+                              {profile?.skills && profile.skills.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {profile.skills.map(skill => (
+                                    <Badge key={skill} variant="secondary">
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-muted-foreground">No skills added yet</p>
+                              )}
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-lg font-medium mb-2">Interests</h3>
+                              {profile?.interests && profile.interests.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {profile.interests.map(interest => (
+                                    <Badge key={interest} variant="outline">
+                                      {interest}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-muted-foreground">No interests added yet</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <Separator className="my-4" />
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Looking For</h3>
+                            <Badge variant="default">
+                              {profile?.lookingFor === "hackathons" 
+                                ? "Hackathons" 
+                                : profile?.lookingFor === "internships" 
+                                  ? "Internships" 
+                                  : "Hackathons & Internships"}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="requests">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-semibold mb-4">Join Requests</h2>
-                  
-                  {sentRequests.length > 0 ? (
-                    <div className="space-y-4">
-                      {sentRequests.map((request: TeamJoinRequest) => {
-                        const team = userTeams?.find(t => t.id === request.teamId);
-                        const hackathon = hackathonsData.find(h => team && h.id === team.hackathonId);
-                        
-                        return (
-                          <Card key={request.id} className="overflow-hidden">
-                            <CardContent className="p-6">
-                              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <div>
-                                  <h3 className="text-lg font-semibold">{team?.name || "Unknown Team"}</h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {hackathon?.title || "Unknown Hackathon"} • Request sent: {new Date(request.createdAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                
-                                <Badge className={
-                                  request.status === 'accepted' ? 'bg-green-500' : 
-                                  request.status === 'rejected' ? 'bg-red-500' : 
-                                  'bg-yellow-500'
-                                }>
-                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                </Badge>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8">
-                        <div className="text-center">
-                          <UserPlus className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                          <h3 className="text-xl font-semibold mb-2">No join requests</h3>
-                          <p className="text-muted-foreground mb-6">
-                            You haven't sent any requests to join teams
-                          </p>
-                          <Button asChild>
-                            <a href="/hackathons">Find Teams</a>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="bookmarks">
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold">Bookmarked Hackathons</h2>
-                    <Button asChild variant="outline">
-                      <a href="/hackathons">
-                        Find More Hackathons
-                      </a>
-                    </Button>
-                  </div>
-                  
-                  {isLoadingBookmarks ? (
-                    <div className="grid grid-cols-1 gap-6">
-                      {[...Array(3)].map((_, index) => (
-                        <Card key={index} className="w-full h-48 animate-pulse bg-muted"></Card>
-                      ))}
-                    </div>
-                  ) : hackathonBookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {hackathonBookmarks.map((hackathon) => (
-                        <HackathonCard key={hackathon.id} {...hackathon} />
-                      ))}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8">
-                        <div className="text-center">
-                          <h3 className="text-xl font-semibold mb-2">No bookmarked hackathons</h3>
-                          <p className="text-muted-foreground mb-6">
-                            You haven't bookmarked any hackathons yet
-                          </p>
-                          <Button asChild>
-                            <a href="/hackathons">Explore Hackathons</a>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                </TabsContent>
                 
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold">Bookmarked Internships</h2>
-                    <Button asChild variant="outline">
-                      <a href="/internships">
-                        Find More Internships
-                      </a>
-                    </Button>
-                  </div>
-                  
-                  {isLoadingBookmarks ? (
-                    <div className="grid grid-cols-1 gap-6">
-                      {[...Array(3)].map((_, index) => (
-                        <Card key={index} className="w-full h-48 animate-pulse bg-muted"></Card>
-                      ))}
-                    </div>
-                  ) : internshipBookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {internshipBookmarks.map((internship) => (
-                        <InternshipCard key={internship.id} {...internship} />
-                      ))}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8">
-                        <div className="text-center">
-                          <h3 className="text-xl font-semibold mb-2">No bookmarked internships</h3>
-                          <p className="text-muted-foreground mb-6">
-                            You haven't bookmarked any internships yet
+                <TabsContent value="teams">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>My Teams</CardTitle>
+                      <CardDescription>
+                        Teams you've created or joined for hackathons
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {isTeamsLoading ? (
+                        <div className="space-y-4">
+                          <Skeleton className="h-32 w-full" />
+                          <Skeleton className="h-32 w-full" />
+                        </div>
+                      ) : teams && teams.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {teams?.map(team => (
+                            <TeamCard 
+                              key={team.id}
+                              team={team}
+                              isUserTeamMember={true}
+                              hackathonId={team.hackathonId}
+                              isDetailed={false}
+                              showActions={true}
+                              onDelete={async () => handleDeleteTeam(team.id)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <h3 className="text-lg font-medium mb-2">No teams yet</h3>
+                          <p className="text-muted-foreground mb-4">
+                            You haven't created or joined any teams yet.
                           </p>
                           <Button asChild>
-                            <a href="/internships">Explore Internships</a>
+                            <a href="/hackathons">Browse Hackathons</a>
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="scholarships">
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold">Bookmarked Scholarships</h2>
-                    <Button asChild variant="outline">
-                      <a href="/scholarships">
-                        Find More Scholarships
-                      </a>
-                    </Button>
-                  </div>
-                  
-                  {isLoadingBookmarks ? (
-                    <div className="grid grid-cols-1 gap-6">
-                      {[...Array(3)].map((_, index) => (
-                        <Card key={index} className="w-full h-48 animate-pulse bg-muted"></Card>
-                      ))}
-                    </div>
-                  ) : scholarshipBookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {scholarshipBookmarks.map((scholarship) => (
-                        <Card key={scholarship} className="w-full h-48">
-                          <CardContent>
-                            <CardTitle>{scholarship}</CardTitle>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <Card>
-                      <CardContent className="py-8">
-                        <div className="text-center">
-                          <h3 className="text-xl font-semibold mb-2">No bookmarked scholarships</h3>
-                          <p className="text-muted-foreground mb-6">
-                            You haven't bookmarked any scholarships yet
-                          </p>
-                          <Button asChild>
-                            <a href="/scholarships">Explore Scholarships</a>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="bookmarks">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>My Bookmarks</CardTitle>
+                      <CardDescription>
+                        Hackathons and internships you've saved for later
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="hackathons" className="mt-4">
+                        <TabsList>
+                          <TabsTrigger value="hackathons">Hackathons</TabsTrigger>
+                          <TabsTrigger value="internships">Internships</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="hackathons" className="mt-4">
+                          {bookmarkedHackathons.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {bookmarkedHackathons.map(hackathon => (
+                                <HackathonCard
+                                  key={hackathon.id}
+                                  id={hackathon.id}
+                                  title={hackathon.title}
+                                  organizer={hackathon.organizer}
+                                  location={hackathon.location}
+                                  url={hackathon.url}
+                                  imageUrl={hackathon.image}
+                                  type={hackathon.type}
+                                  prizePool={hackathon.prizePool ? hackathon.prizePool.toString() : undefined}
+                                  mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                                  dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
+                                  description={hackathon.description}
+                                  onViewDetails={() => navigate(`/hackathons/${hackathon.id}`)}
+                                  onFormTeam={() => navigate(`/hackathons/${hackathon.id}`)}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                              <h3 className="text-lg font-medium mb-2">No bookmarked hackathons</h3>
+                              <p className="text-muted-foreground mb-4">
+                                You haven't bookmarked any hackathons yet.
+                              </p>
+                              <Button asChild>
+                                <a href="/hackathons">Browse Hackathons</a>
+                              </Button>
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        <TabsContent value="internships" className="mt-4">
+                          {bookmarkedInternships.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {bookmarkedInternships.map(internship => (
+                                <InternshipCard
+                                  key={internship.id}
+                                  id={internship.id}
+                                  title={internship.title}
+                                  company={internship.company}
+                                  location={internship.location}
+                                  isRemote={internship.isRemote}
+                                  stipend={internship.stipend}
+                                  duration={internship.duration}
+                                  applicationDeadline={internship.applicationDeadline}
+                                  imageUrl={internship.logo}
+                                  skills={internship.requiredSkills || []}
+                                  companySize={internship.companySize}
+                                  description={internship.description || ""}
+                                  type="Tech"
+                                  postedDate={new Date().toISOString().split('T')[0]}
+                                  onViewDetails={() => navigate(`/internships/${internship.id}`)}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                              <h3 className="text-lg font-medium mb-2">No bookmarked internships</h3>
+                              <p className="text-muted-foreground mb-4">
+                                You haven't bookmarked any internships yet.
+                              </p>
+                              <Button asChild>
+                                <a href="/internships">Browse Internships</a>
+                              </Button>
+                            </div>
+                          )}
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </div>
       </main>
       
       <Footer />
-    </AnimatedBackground>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your team
+              and remove all members from it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteTeam} className="bg-destructive text-destructive-foreground">
+              Delete Team
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

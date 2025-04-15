@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -35,7 +34,6 @@ export default function ScholarshipDetail() {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
-  // Find scholarship by ID
   const scholarship = scholarshipsData.find(scholarship => scholarship.id === id);
   
   if (!scholarship) {
@@ -248,9 +246,9 @@ export default function ScholarshipDetail() {
       <ReminderModal
         isOpen={isReminderModalOpen}
         onClose={() => setIsReminderModalOpen(false)}
-        eventName={scholarship.title}
-        eventDate={deadlineDate}
-        eventType="scholarship"
+        title={scholarship.title}
+        date={new Date(scholarship.deadline)}
+        type="scholarship"
       />
       
       <AuthModal
