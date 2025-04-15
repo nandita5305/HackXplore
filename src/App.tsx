@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,9 +10,12 @@ import Hackathons from "./pages/Hackathons";
 import HackathonDetail from "./pages/HackathonDetail";
 import Internships from "./pages/Internships";
 import InternshipDetail from "./pages/InternshipDetail";
+import Scholarships from "./pages/Scholarships";
+import ScholarshipDetail from "./pages/ScholarshipDetail";
 import Profile from "./pages/Profile";
 import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
+import { Chatbot } from "./components/ui/chatbot";
 
 const queryClient = new QueryClient();
 
@@ -28,10 +32,13 @@ const App = () => (
             <Route path="/hackathons/:id" element={<HackathonDetail />} />
             <Route path="/internships" element={<Internships />} />
             <Route path="/internships/:id" element={<InternshipDetail />} />
+            <Route path="/scholarships" element={<Scholarships />} />
+            <Route path="/scholarships/:id" element={<ScholarshipDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Chatbot />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

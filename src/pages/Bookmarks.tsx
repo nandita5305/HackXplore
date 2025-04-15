@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AnimatedBackground } from "@/components/ui/animated-background";
@@ -11,7 +10,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBookmarks } from "@/services/bookmarkService";
-import { hackathonsData, internshipsData } from "@/data/mockData";
+import { hackathonsData, internshipsData, scholarshipsData } from "@/data/mockData";
 import { BookmarkIcon, LogIn } from "lucide-react";
 
 export default function Bookmarks() {
@@ -32,6 +31,13 @@ export default function Bookmarks() {
       internshipsData.find(internship => internship.id === bookmark.item_id)
     )
     .filter(internship => internship !== undefined) as any[];
+    
+  const scholarshipBookmarks = bookmarks
+    .filter(bookmark => bookmark.item_type === "scholarship")
+    .map(bookmark => 
+      scholarshipsData.find(scholarship => scholarship.id === bookmark.item_id)
+    )
+    .filter(scholarship => scholarship !== undefined) as any[];
   
   if (!user) {
     return (
@@ -44,7 +50,7 @@ export default function Bookmarks() {
                 <BookmarkIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                 <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
                 <p className="text-muted-foreground mb-6">
-                  You need to be signed in to view your bookmarked hackathons and internships.
+                  You need to be signed in to view your bookmarked hackathons, internships, and scholarships.
                 </p>
                 <Button onClick={() => setIsAuthModalOpen(true)}>
                   <LogIn className="mr-2 h-4 w-4" />
@@ -79,6 +85,9 @@ export default function Bookmarks() {
             </TabsTrigger>
             <TabsTrigger value="internships">
               Internships ({internshipBookmarks.length})
+            </TabsTrigger>
+            <TabsTrigger value="scholarships">
+              Scholarships ({scholarshipBookmarks.length})
             </TabsTrigger>
           </TabsList>
           
@@ -137,6 +146,37 @@ export default function Bookmarks() {
                     </p>
                     <Button asChild>
                       <a href="/internships">Explore Internships</a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="scholarships">
+            {isLoading ? (
+              <div className="space-y-6">
+                {[...Array(3)].map((_, index) => (
+                  <Card key={index} className="w-full h-48 animate-pulse bg-muted"></Card>
+                ))}
+              </div>
+            ) : scholarshipBookmarks.length > 0 ? (
+              <div className="space-y-6">
+                {scholarshipBookmarks.map((scholarship) => (
+                  <Card key={scholarship.id} {...scholarship} />
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center">
+                    <BookmarkIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No bookmarked scholarships</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You haven't bookmarked any scholarships yet. Browse scholarships and click the bookmark icon to add them here.
+                    </p>
+                    <Button asChild>
+                      <a href="/scholarships">Explore Scholarships</a>
                     </Button>
                   </div>
                 </CardContent>

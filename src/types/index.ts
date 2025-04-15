@@ -1,150 +1,28 @@
-
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  skills?: UserSkill[];
-  interests?: HackathonType[];
-  avatarUrl?: string;
-}
-
-export interface UserProfile {
-  name: string;
-  skills: UserSkill[];
-  interests: HackathonType[];
-  lookingFor: 'hackathons' | 'internships' | 'both';
-  avatarUrl?: string;
-  githubUrl?: string;
-  linkedinUrl?: string;
-  portfolioUrl?: string;
-  preferredRole?: string;
-  bio?: string;
-}
-
-export type UserSkill = 
-  | "JavaScript" 
-  | "TypeScript" 
-  | "React" 
-  | "Node.js" 
-  | "Python" 
-  | "Java" 
-  | "C++" 
-  | "C#" 
-  | "Angular" 
-  | "MongoDB" 
-  | "AWS" 
-  | "Azure" 
-  | "Docker" 
-  | "Kubernetes" 
-  | "UI/UX Design" 
-  | "Blockchain" 
-  | "Web3" 
-  | "Solidity" 
-  | "Data Analysis" 
-  | "HTML" 
-  | "CSS" 
-  | "Machine Learning" 
-  | "SQL" 
-  | "Vue.js" 
-  | "Git" 
-  | "Figma" 
-  | "Project Management" 
-  | "Communication" 
-  | "Problem Solving" 
-  | "Leadership" 
-  | "AI" 
-  | "TensorFlow" 
-  | "IoT"
-  | "Swift"
-  | "Objective-C"
-  | "iOS Development"
-  | "macOS Development"
-  | "PyTorch"
+export type HackathonType =
+  | "Open"
+  | "Themed"
+  | "Beginner-Friendly"
   | "AI/ML"
-  | "Data Science"
-  | "Cloud Computing"
-  | "Cybersecurity"
-  | "Backend"
-  | "Mobile Development"
-  | "Software Development"
-  | "Computer Architecture"
-  | "Embedded Systems"
-  | ".NET"
-  | "Vue";
-
-export type HackathonType = 
-  | "Web Development" 
-  | "Mobile App Development" 
-  | "AI/ML" 
-  | "Blockchain" 
-  | "Web3" 
-  | "Open Innovation"
-  | "Social Impact"
-  | "Cybersecurity"
-  | "IoT"
-  | "Cloud Computing"
-  | "Data Science"
-  | "HealthTech"
-  | "EdTech"
-  | "FinTech"
-  | "Blockchain Technology"
-  | "AI & Machine Learning"
-  | "AR/VR"
-  | "IoT (Internet of Things)"
-  | "Hardware"
-  | "Sustainable Development"
-  | "Game Development"
-  | "Mobile Development"
-  | "Fintech"
-  | "Healthtech"
-  | "UI/UX Design"
-  | "E-commerce"
-  | "Social Media"
-  | "Robotics"
-  | "Space Exploration"
-  | "Renewable Energy";
-
-export interface Team {
-  id: string;
-  createdAt: string;
-  name: string;
-  hackathonId: string;
-  description: string;
-  skillsNeeded: UserSkill[];
-  creator: string;
-  maxMembers: number;
-  isOpen: boolean;
-  members: string[];
-}
+  | "Web3"
+  | "Mobile"
+  | "Hardware";
 
 export interface HackathonCard {
   id: string;
   title: string;
-  url: string;
-  imageUrl: string;
-  dates: string;
+  organizer: string;
   startDate: string;
   endDate: string;
-  organizer: string;
-  mode: "online" | "in-person" | "hybrid";
-  type: HackathonType[];
-  prizePool: string;
-  description: string;
-  teamSize: number;
-  skills: UserSkill[];
   location: string;
-  source?: string;
-}
-
-export interface HackathonCardProps extends Partial<HackathonCard> {
-  id: string;
-  title: string;
+  mode: "In-person" | "Online" | "Hybrid";
+  prizePool?: number;
+  tags: string[];
+  applicationDeadline: string;
   url: string;
-  imageUrl: string;
-  location: string;
-  isDetailed?: boolean;
-  onViewDetails?: () => void;
-  onFormTeam?: () => void;
+  image: string;
+  isPopular: boolean;
+  type: HackathonType;
+  description?: string;
 }
 
 export interface InternshipCard {
@@ -152,43 +30,115 @@ export interface InternshipCard {
   title: string;
   company: string;
   location: string;
-  type: string;
-  url: string;
-  imageUrl: string;
-  description: string;
-  skills: UserSkill[];
-  postedDate: string;
+  isRemote: boolean;
+  stipend?: number;
   duration: string;
-  deadline?: string;
-  stipend?: string;
-  isRemote?: boolean;
+  applicationDeadline: string;
+  url: string;
+  logo: string;
+  requiredSkills: string[];
+  companySize: "Startup" | "Small" | "Medium" | "Large";
+  description?: string;
 }
 
-export interface InternshipCardProps extends Partial<InternshipCard> {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  onViewDetailsClick?: () => void;
+export type UserSkill =
+  | "Web Development"
+  | "Mobile Development"
+  | "Data Science"
+  | "Machine Learning"
+  | "Artificial Intelligence"
+  | "Cybersecurity"
+  | "Cloud Computing"
+  | "DevOps"
+  | "Blockchain"
+  | "UI/UX Design"
+  | "Game Development"
+  | "Robotics"
+  | "IoT"
+  | "AR/VR"
+  | "Full Stack Development"
+  | "Frontend Development"
+  | "Backend Development"
+  | "Database Management"
+  | "Network Administration"
+  | "Project Management"
+  | "Product Management"
+  | "Digital Marketing"
+  | "Graphic Design"
+  | "Technical Writing"
+  | "Sales"
+  | "Customer Support"
+  | "Business Analysis"
+  | "Financial Analysis"
+  | "Human Resources"
+  | "Legal"
+  | "Teaching"
+  | "Research"
+  | "Content Creation"
+  | "Video Editing"
+  | "Animation"
+  | "3D Modeling"
+  | "Data Analysis"
+  | "Cloud Architecture"
+  | "Network Security"
+  | "Penetration Testing"
+  | "Incident Response"
+  | "Security Auditing"
+  | "Risk Management"
+  | "Compliance"
+  | "Data Visualization"
+  | "Statistical Analysis"
+  | "Predictive Modeling"
+  | "Natural Language Processing"
+  | "Computer Vision"
+  | "Deep Learning"
+  | "Reinforcement Learning"
+  | "Big Data"
+  | "Data Mining"
+  | "Data Warehousing"
+  | "ETL"
+  | "Data Governance"
+  | "Data Integration"
+  | "Data Quality"
+  | "Data Security"
+  | "Data Privacy"
+  | "Data Ethics"
+  | "Data Literacy"
+  | "Data Storytelling"
+  | "Data Strategy"
+  | "Data Architecture"
+  | "Data Engineering"
+  | "Data Science as a Service"
+  | "Machine Learning as a Service"
+  | "Artificial Intelligence as a Service";
+
+export interface UserProfile {
+  id?: string;
+  userId: string;
+  name?: string;
+  avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  skills?: UserSkill[];
+  interests?: string[];
+  githubUrl?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  preferredRole?: string;
 }
 
-export interface Bookmark {
+export interface Team {
   id: string;
+  hackathonId: string;
+  name: string;
+  description: string;
+  leaderId: string;
+  members: string[];
+  skillsNeeded: UserSkill[];
+  maxMembers: number;
+  isOpen: boolean;
   createdAt: string;
-  userId: string;
-  itemId: string;
-  itemType: 'hackathon' | 'internship';
-}
-
-export interface Reminder {
-  id: string;
-  userId: string;
-  internshipId: string;
-  internshipTitle: string;
-  company: string;
-  reminderDate: string;
-  note?: string;
-  isNotified: boolean;
+  updatedAt: string;
 }
 
 export interface TeamJoinRequest {
@@ -196,5 +146,38 @@ export interface TeamJoinRequest {
   teamId: string;
   userId: string;
   status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
+export type ScholarshipType = 
+  | "Merit-based"
+  | "Need-based"
+  | "Research"
+  | "STEM"
+  | "Diversity"
+  | "International"
+  | "Athletic"
+  | "Community Service"
+  | "Creative Arts";
+
+export interface Scholarship {
+  id: string;
+  title: string;
+  provider: string;
+  amount: number;
+  deadline: string;
+  type: ScholarshipType;
+  eligibility: string[];
+  link?: string;
+  description?: string;
+}
+
+export interface ReminderItem {
+  id: string;
+  userId: string;
+  title: string;
+  date: string;
+  type: "hackathon" | "internship" | "scholarship";
+  notified: boolean;
   createdAt: string;
 }

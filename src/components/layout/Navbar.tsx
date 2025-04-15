@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,6 +86,14 @@ export function Navbar() {
                 className={isActive("/internships") ? "gradient-button" : "hover:bg-primary/10 hover:text-primary"}
               >
                 Internships
+              </Button>
+            </Link>
+            <Link to="/scholarships">
+              <Button 
+                variant={isActive("/scholarships") ? "default" : "ghost"}
+                className={isActive("/scholarships") ? "gradient-button" : "hover:bg-primary/10 hover:text-primary"}
+              >
+                Scholarships
               </Button>
             </Link>
           </nav>
@@ -180,6 +187,9 @@ export function Navbar() {
                 </Link>
                 <Link to="/internships">
                   <Button variant="ghost" className="w-full justify-start">Internships</Button>
+                </Link>
+                <Link to="/scholarships">
+                  <Button variant="ghost" className="w-full justify-start">Scholarships</Button>
                 </Link>
                 
                 {user ? (

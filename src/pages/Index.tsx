@@ -74,7 +74,7 @@ export default function Index() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Search className="h-6 w-6 text-primary" />
+                  Search className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Centralized Discovery</h3>
                 <p className="text-muted-foreground">
@@ -84,7 +84,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <LightbulbIcon className="h-6 w-6 text-primary" />
+                  LightbulbIcon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">AI Recommendations</h3>
                 <p className="text-muted-foreground">
@@ -94,7 +94,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-primary" />
+                  Users className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Team Formation</h3>
                 <p className="text-muted-foreground">
@@ -104,7 +104,7 @@ export default function Index() {
               
               <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                  <Globe className="h-6 w-6 text-primary" />
+                  Globe className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Global Opportunities</h3>
                 <p className="text-muted-foreground">
@@ -165,33 +165,49 @@ export default function Index() {
           </div>
         </section>
         
-        {/* AI Recommendations Message Section */}
+        {/* Scholarships Section */}
         <section className="py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 rounded-xl shadow-lg text-center py-12">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-xl -z-0 transform translate-x-8 -translate-y-8"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/20 rounded-full blur-lg -z-0 transform -translate-x-8 translate-y-8 animate-float"></div>
-              
-              <CardContent className="relative z-10 max-w-3xl mx-auto">
-                <div className="flex items-center justify-center mb-4">
-                  <Sparkles className="h-8 w-8 text-secondary mr-3" />
-                  <h2 className="text-3xl font-bold">Personalized AI Recommendations</h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Featured Scholarships</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Find scholarships that match your skills and interests.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                  <Search className="h-6 w-6 text-primary" />
                 </div>
-                
-                <p className="text-xl text-muted-foreground mb-8">
-                  Sign in to get personalized AI recommendations based on your skills and interests.
+                <h3 className="text-xl font-semibold mb-2">Scholarship 1</h3>
+                <p className="text-muted-foreground">
+                  Description of scholarship 1.
                 </p>
-                
-                {!user && (
-                  <Button size="lg" className="gradient-button" onClick={openSignup}>
-                    Sign up for free
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+              
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                  <LightbulbIcon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Scholarship 2</h3>
+                <p className="text-muted-foreground">
+                  Description of scholarship 2.
+                </p>
+              </div>
+              
+              <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-primary/10 hover:border-primary/30 transition-all hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Scholarship 3</h3>
+                <p className="text-muted-foreground">
+                  Description of scholarship 3.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
-        
         
         {/* Testimonials Section */}
         <TestimonialSection />

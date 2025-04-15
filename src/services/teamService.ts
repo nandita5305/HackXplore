@@ -1,303 +1,201 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Team, UserSkill } from "@/types";
+import { toast } from "@/hooks/use-toast";
+import { Team, TeamJoinRequest } from "@/types";
 
-// Mock data for teams (replace with API calls in a real application)
-const mockTeamsData: Team[] = [
+const mockTeamsData = [
   {
     id: "team-1",
-    name: "Awesome Team",
     hackathonId: "hackathon-1",
-    members: ["user-1", "user-2"],
-    createdAt: "2024-03-15T12:00:00Z",
-    description: "A team working on an awesome project",
-    skillsNeeded: ["JavaScript", "React", "Node.js"] as UserSkill[],
-    creator: "user-1",
+    name: "Team Awesome",
+    description: "We are building something awesome!",
+    skillsNeeded: ["React", "Node.js", "JavaScript"],
     maxMembers: 4,
+    members: ["user-1", "user-2"],
     isOpen: true,
+    createdAt: "2023-05-15T10:30:00Z"
   },
   {
     id: "team-2",
-    name: "Fantastic Four",
     hackathonId: "hackathon-2",
-    members: ["user-3", "user-4", "user-5", "user-6"],
-    createdAt: "2024-03-20T18:00:00Z",
-    description: "A team of fantastic developers",
-    skillsNeeded: ["Python", "Machine Learning", "Data Analysis"] as UserSkill[],
-    creator: "user-3",
-    maxMembers: 4,
-    isOpen: false,
+    name: "The Innovators",
+    description: "Innovating for a better future",
+    skillsNeeded: ["Python", "AI", "Machine Learning"],
+    maxMembers: 5,
+    members: ["user-3", "user-4", "user-5"],
+    isOpen: true,
+    createdAt: "2023-05-16T14:20:00Z"
   },
-];
-
-// Mock data for team join requests
-const mockJoinRequestsData: {
-  id: string;
-  teamId: string;
-  userId: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  createdAt: string;
-}[] = [
   {
-    id: "request-1",
-    teamId: "team-1",
-    userId: "user-3",
-    status: "pending",
-    createdAt: "2024-03-21T10:00:00Z"
+    id: "team-3",
+    hackathonId: "hackathon-1",
+    name: "Code Wizards",
+    description: "Casting spells with code",
+    skillsNeeded: ["JavaScript", "HTML", "CSS"],
+    maxMembers: 3,
+    members: ["user-1"],
+    isOpen: true,
+    createdAt: "2023-05-17T09:15:00Z"
   }
 ];
 
-export const useTeamService = () => {
+const mockJoinRequests = [
+  {
+    id: "request-1",
+    teamId: "team-2",
+    userId: "user-1",
+    status: "pending",
+    createdAt: "2023-05-20T10:00:00Z"
+  },
+  {
+    id: "request-2",
+    teamId: "team-3",
+    userId: "user-2",
+    status: "accepted",
+    createdAt: "2023-05-21T14:00:00Z"
+  },
+  {
+    id: "request-3",
+    teamId: "team-1",
+    userId: "user-3",
+    status: "rejected",
+    createdAt: "2023-05-22T18:00:00Z"
+  }
+];
+
+export const useTeams = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
+  
+  // Function to create a team
+  const createTeam = async (teamData: Omit<Team, 'id' | 'members' | 'createdAt' | 'isOpen'>) => {
+    if (!user) {
+      return { success: false, error: "User not authenticated" };
+    }
+    
+    const newTeam = {
+      id: `team-${Date.now()}`,
+      members: [user.id],
+      createdAt: new Date().toISOString(),
+      isOpen: true,
+      ...teamData
+    };
+    
+    // Simulate API call
+    mockTeamsData.push(newTeam as Team);
+    
+    // Optimistically update the cache
+    queryClient.setQueryData(['user-teams', user.id], (oldData: any) => {
+      return [...(oldData || []), newTeam];
+    });
+    
+    return { success: true, data: newTeam };
+  };
+  
   // Function to fetch teams for a specific hackathon
   const useHackathonTeams = (hackathonId: string) => {
     return useQuery({
-      queryKey: ["teams", hackathonId],
-      queryFn: () => {
-        // Simulate API call to fetch teams for a hackathon
-        return mockTeamsData.filter((team) => team.hackathonId === hackathonId);
+      queryKey: ['hackathon-teams', hackathonId],
+      queryFn: async () => {
+        // Simulate API call
+        return mockTeamsData.filter(team => team.hackathonId === hackathonId);
       },
+      staleTime: 1000 * 60 * 5, // 5 minutes
     });
   };
   
-  // Function to check if a user is in a specific team
-  const isUserInTeam = (teamId: string): boolean => {
-    if (!user) return false;
-    const team = mockTeamsData.find(t => t.id === teamId);
-    return team ? team.members.includes(user.id) || team.creator === user.id : false;
-  };
-
-  // Function to create a new team
-  const createTeam = async (teamData: {
-    hackathonId: string;
-    name: string;
-    description?: string;
-    skillsNeeded?: UserSkill[];
-    maxMembers?: number;
-  }): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // In a real implementation, this would make an API call
-      console.log("Creating team:", teamData);
-
-      // For mock implementation, we'll simulate adding a team
-      const newTeam: Team = {
-        id: `team-${Date.now()}`,
-        name: teamData.name,
-        hackathonId: teamData.hackathonId,
-        description: teamData.description || `Team for hackathon ${teamData.hackathonId}`,
-        skillsNeeded: teamData.skillsNeeded || [],
-        maxMembers: teamData.maxMembers || 4,
-        creator: user?.id || "unknown",
-        members: [user?.id || "unknown"],
-        createdAt: new Date().toISOString(),
-        isOpen: true,
-      };
-      
-      // Add the team to mock data
-      mockTeamsData.push(newTeam);
-      
-      // Invalidate team queries
-      queryClient.invalidateQueries({ queryKey: ["teams"] });
-      queryClient.invalidateQueries({ queryKey: ["userTeams"] });
-      
-      return { success: true };
-    } catch (error) {
-      console.error("Error creating team:", error);
-      return { success: false, error: "Failed to create team" };
-    }
-  };
-
-  // Function to join a team
-  const joinTeam = async (
-    teamId: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // In a real implementation, this would make an API call
-      console.log(`User joining team: ${teamId}`);
-
-      // Create a join request
-      const newRequest = {
-        id: `request-${Date.now()}`,
-        teamId,
-        userId: user?.id || "unknown",
-        status: "pending" as const,
-        createdAt: new Date().toISOString()
-      };
-      
-      mockJoinRequestsData.push(newRequest);
-      queryClient.invalidateQueries({ queryKey: ["joinRequests"] });
-      
-      return { success: true };
-    } catch (error) {
-      console.error("Error joining team:", error);
-      return { success: false, error: "Failed to join team" };
-    }
-  };
-  
-  // Function to leave a team
-  const leaveTeam = async (teamId: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // In a real implementation, this would make an API call
-      console.log(`User leaving team: ${teamId}`);
-      
-      const teamIndex = mockTeamsData.findIndex(t => t.id === teamId);
-      if (teamIndex !== -1 && user) {
-        // Remove user from team members
-        mockTeamsData[teamIndex].members = mockTeamsData[teamIndex].members.filter(
-          memberId => memberId !== user.id
-        );
-        
-        queryClient.invalidateQueries({ queryKey: ["teams"] });
-        queryClient.invalidateQueries({ queryKey: ["userTeams"] });
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error("Error leaving team:", error);
-      return { success: false, error: "Failed to leave team" };
-    }
-  };
-  
-  // Function to delete a team (only for creators)
-  const deleteTeam = async (teamId: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const team = mockTeamsData.find(t => t.id === teamId);
-      
-      if (!team) {
-        return { success: false, error: "Team not found" };
-      }
-      
-      if (team.creator !== user?.id) {
-        return { success: false, error: "Only team creator can delete the team" };
-      }
-      
-      // Remove the team from mock data
-      const teamIndex = mockTeamsData.findIndex(t => t.id === teamId);
-      if (teamIndex !== -1) {
-        mockTeamsData.splice(teamIndex, 1);
-        queryClient.invalidateQueries({ queryKey: ["teams"] });
-        queryClient.invalidateQueries({ queryKey: ["userTeams"] });
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error("Error deleting team:", error);
-      return { success: false, error: "Failed to delete team" };
-    }
-  };
-  
-  // Function to handle join requests
-  const respondToJoinRequest = async (
-    requestId: string, 
-    status: 'accepted' | 'rejected'
-  ): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const requestIndex = mockJoinRequestsData.findIndex(r => r.id === requestId);
-      
-      if (requestIndex === -1) {
-        return { success: false, error: "Request not found" };
-      }
-      
-      const request = mockJoinRequestsData[requestIndex];
-      const team = mockTeamsData.find(t => t.id === request.teamId);
-      
-      if (!team) {
-        return { success: false, error: "Team not found" };
-      }
-      
-      if (team.creator !== user?.id) {
-        return { success: false, error: "Only team creator can respond to requests" };
-      }
-      
-      // Update request status
-      mockJoinRequestsData[requestIndex].status = status;
-      
-      // If accepted, add user to team
-      if (status === 'accepted') {
-        const teamIndex = mockTeamsData.findIndex(t => t.id === request.teamId);
-        if (teamIndex !== -1 && !mockTeamsData[teamIndex].members.includes(request.userId)) {
-          mockTeamsData[teamIndex].members.push(request.userId);
-        }
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ["joinRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["teams"] });
-      
-      return { success: true };
-    } catch (error) {
-      console.error("Error responding to join request:", error);
-      return { success: false, error: "Failed to respond to join request" };
-    }
-  };
-  
-  // Function to get pending join requests for user's teams
-  const useTeamJoinRequests = () => {
-    return useQuery({
-      queryKey: ["joinRequests", user?.id],
-      queryFn: () => {
-        if (!user) return [];
-        
-        // Get teams created by the user
-        const userCreatedTeams = mockTeamsData.filter(team => team.creator === user.id);
-        const userTeamIds = userCreatedTeams.map(team => team.id);
-        
-        // Get join requests for those teams
-        return mockJoinRequestsData.filter(request => 
-          userTeamIds.includes(request.teamId) && request.status === 'pending'
-        );
-      },
-      enabled: !!user,
-    });
-  };
-  
-  // Function to get user's sent join requests
-  const useUserSentRequests = () => {
-    return useQuery({
-      queryKey: ["sentRequests", user?.id],
-      queryFn: () => {
-        if (!user) return [];
-        
-        return mockJoinRequestsData.filter(request => request.userId === user.id);
-      },
-      enabled: !!user,
-    });
-  };
-
-  return {
-    useHackathonTeams,
-    createTeam,
-    joinTeam,
-    leaveTeam,
-    deleteTeam,
-    isUserInTeam,
-    useTeamJoinRequests,
-    respondToJoinRequest,
-    useUserSentRequests
-  };
-};
-
-// Export a useTeams function for getting user teams
-export const useTeams = () => {
-  const { user } = useAuth();
-  const teamService = useTeamService();
-  
+  // Function to fetch teams created or joined by the current user
   const useUserTeams = () => {
     return useQuery({
-      queryKey: ["userTeams", user?.id],
-      queryFn: () => {
-        // Simulate API call to fetch teams for a user
-        return mockTeamsData.filter((team) => 
-          team.members.includes(user?.id || "") || team.creator === user?.id);
+      queryKey: ['user-teams', user?.id],
+      queryFn: async () => {
+        if (!user) return [];
+        
+        // Simulate API call
+        return mockTeamsData.filter(team => team.members.includes(user.id));
       },
-      enabled: !!user?.id,
+      enabled: !!user,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+  };
+  
+  // Function to delete a team
+  const deleteTeam = async (teamId: string) => {
+    if (!user) {
+      return { success: false, error: "User not authenticated" };
+    }
+    
+    // Check if the user is a member of the team
+    const teamToDelete = mockTeamsData.find(team => team.id === teamId);
+    if (!teamToDelete || !teamToDelete.members.includes(user.id)) {
+      return { success: false, error: "User not authorized to delete this team" };
+    }
+    
+    // Simulate API call
+    const index = mockTeamsData.findIndex(team => team.id === teamId);
+    if (index > -1) {
+      mockTeamsData.splice(index, 1);
+    }
+    
+    // Optimistically update the cache
+    queryClient.setQueryData(['user-teams', user.id], (oldData: any) => {
+      return (oldData || []).filter((team: any) => team.id !== teamId);
+    });
+    
+    return { success: true };
+  };
+  
+  // Function to send a join request to a team
+  const sendJoinRequest = async (teamId: string) => {
+    if (!user) {
+      return { success: false, error: "User not authenticated" };
+    }
+    
+    // Check if the user has already requested to join the team
+    if (mockJoinRequests.find(req => req.teamId === teamId && req.userId === user.id)) {
+      return { success: false, error: "Join request already sent" };
+    }
+    
+    const newRequest = {
+      id: `request-${Date.now()}`,
+      teamId: teamId,
+      userId: user.id,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    };
+    
+    // Simulate API call
+    mockJoinRequests.push(newRequest);
+    
+    // Optimistically update the cache
+    queryClient.setQueryData(['user-sent-requests', user.id], (oldData: any) => {
+      return [...(oldData || []), newRequest];
+    });
+    
+    return { success: true, data: newRequest };
+  };
+  
+  // Function to fetch join requests sent by the current user
+  const useUserSentRequests = () => {
+    return useQuery({
+      queryKey: ['user-sent-requests', user?.id],
+      queryFn: async () => {
+        if (!user) return [];
+        
+        // Simulate API call
+        return mockJoinRequests.filter(req => req.userId === user.id);
+      },
+      enabled: !!user,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     });
   };
   
   return {
+    createTeam,
+    useHackathonTeams,
     useUserTeams,
-    ...teamService
+    deleteTeam,
+    sendJoinRequest,
+    useUserSentRequests,
   };
 };

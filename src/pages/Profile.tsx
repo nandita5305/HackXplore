@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -45,6 +44,17 @@ export default function Profile() {
       internshipsData.find(internship => internship.id === bookmark.item_id)
     )
     .filter(internship => internship !== undefined) as any[];
+  
+  const scholarshipBookmarks = bookmarks
+    .filter(bookmark => bookmark.item_type === "scholarship")
+    .map(bookmark => 
+      // Assuming there's a way to fetch scholarship data
+      // For example, you could have a service that fetches scholarship data by ID
+      // and then map it to a scholarship object
+      // For now, let's just assume it's a string
+      bookmark.item_id
+    )
+    .filter(scholarship => scholarship !== undefined) as any[];
   
   const handleDeleteTeam = async (teamId: string) => {
     const result = await deleteTeam(teamId);
@@ -205,6 +215,7 @@ export default function Profile() {
                 <TabsTrigger value="teams">My Teams</TabsTrigger>
                 <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
                 <TabsTrigger value="requests">Join Requests</TabsTrigger>
+                <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
               </TabsList>
               
               <TabsContent value="teams">
@@ -378,6 +389,51 @@ export default function Profile() {
                           </p>
                           <Button asChild>
                             <a href="/internships">Explore Internships</a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="scholarships">
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-semibold">Bookmarked Scholarships</h2>
+                    <Button asChild variant="outline">
+                      <a href="/scholarships">
+                        Find More Scholarships
+                      </a>
+                    </Button>
+                  </div>
+                  
+                  {isLoadingBookmarks ? (
+                    <div className="grid grid-cols-1 gap-6">
+                      {[...Array(3)].map((_, index) => (
+                        <Card key={index} className="w-full h-48 animate-pulse bg-muted"></Card>
+                      ))}
+                    </div>
+                  ) : scholarshipBookmarks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {scholarshipBookmarks.map((scholarship) => (
+                        <Card key={scholarship} className="w-full h-48">
+                          <CardContent>
+                            <CardTitle>{scholarship}</CardTitle>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8">
+                        <div className="text-center">
+                          <h3 className="text-xl font-semibold mb-2">No bookmarked scholarships</h3>
+                          <p className="text-muted-foreground mb-6">
+                            You haven't bookmarked any scholarships yet
+                          </p>
+                          <Button asChild>
+                            <a href="/scholarships">Explore Scholarships</a>
                           </Button>
                         </div>
                       </CardContent>

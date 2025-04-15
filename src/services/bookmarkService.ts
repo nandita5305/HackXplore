@@ -45,14 +45,14 @@ export const useBookmarks = () => {
   });
   
   // Function to check if item is bookmarked
-  const isBookmarked = (itemId: string, itemType: 'hackathon' | 'internship') => {
+  const isBookmarked = (itemId: string, itemType: 'hackathon' | 'internship' | 'scholarship') => {
     return bookmarks.some(bookmark => 
       bookmark.item_id === itemId && bookmark.item_type === itemType
     );
   };
   
   // Function to toggle bookmark status
-  const toggleBookmark = (itemId: string, itemType: 'hackathon' | 'internship') => {
+  const toggleBookmark = (itemId: string, itemType: 'hackathon' | 'internship' | 'scholarship') => {
     if (!user) return;
     
     // If already bookmarked, remove it
@@ -65,7 +65,7 @@ export const useBookmarks = () => {
   };
   
   // Add bookmark function
-  const addBookmark = async (itemId: string, itemType: 'hackathon' | 'internship') => {
+  const addBookmark = async (itemId: string, itemType: 'hackathon' | 'internship' | 'scholarship') => {
     if (!user) return;
     
     // Optimistically update the UI
@@ -91,7 +91,7 @@ export const useBookmarks = () => {
   };
   
   // Remove bookmark function
-  const removeBookmark = async (itemId: string, itemType: 'hackathon' | 'internship') => {
+  const removeBookmark = async (itemId: string, itemType: 'hackathon' | 'internship' | 'scholarship') => {
     if (!user) return;
     
     // Optimistically update the UI

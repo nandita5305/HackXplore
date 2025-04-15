@@ -1,4 +1,3 @@
-
 import { HackathonCard, HackathonType, UserSkill } from "@/types";
 
 // Type for filtering hackathons
@@ -199,3 +198,63 @@ export const getRecommendedHackathons = (
 // Backward compatibility aliases - defined after the main functions
 export const getHackathonRecommendations = getRecommendedHackathons;
 export const getInternshipRecommendations = getRecommendedInternships;
+
+export const filterScholarships = (
+  scholarships: any[],
+  filters: {
+    types: string[];
+    amountMin: number;
+    amountMax: number;
+    deadlineType: "all" | "upcoming" | "urgent";
+    provider: string;
+    eligibility: string[];
+  }
+) => {
+  return scholarships.filter((scholarship) => {
+    // Filter by type
+    if (filters.types.length > 0 && !filters.types.includes(scholarship.type)) {
+      return false;
+    }
+
+    // Filter by amount range
+    if (
+      scholarship.amount < filters.amountMin ||
+      scholarship.amount > filters.amountMax
+    ) {
+      return false;
+    }
+
+    // Filter by deadline
+    if (filters.deadlineType !== "all") {
+      const deadlineDate = new Date(scholarship.deadline);
+      const currentDate = new Date();
+      const timeDiff = deadlineDate.getTime() - currentDate.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+      if (filters.deadlineType === "upcoming" && (daysDiff < 0 || daysDiff > 30)) {
+        return false;
+      }
+
+      if (filters.deadlineType === "urgent" && (daysDiff < 0 || daysDiff > 7)) {
+        return false;
+      }
+    }
+
+    // Filter by provider
+    if (filters.provider && !scholarship.provider.toLowerCase().includes(filters.provider.toLowerCase())) {
+      return false;
+    }
+
+    // Filter by eligibility criteria
+    if (filters.eligibility.length > 0) {
+      const hasMatchingCriteria = filters.eligibility.some(criterion => 
+        scholarship.eligibility.includes(criterion)
+      );
+      if (!hasMatchingCriteria) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+};
