@@ -75,6 +75,26 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
     });
   };
 
+  const handleTypeChange = (type: string, checked: boolean) => {
+    const typedType = type as HackathonType;
+    if (checked) {
+      setSelectedTypes([...selectedTypes, typedType]);
+    } else {
+      setSelectedTypes(selectedTypes.filter(t => t !== typedType));
+    }
+  };
+
+  const handleSkillToggle = (skill: string) => {
+    const typedSkill = skill as UserSkill;
+    const isSelected = selectedSkills.includes(typedSkill);
+    
+    if (isSelected) {
+      setSelectedSkills(selectedSkills.filter(s => s !== typedSkill));
+    } else {
+      setSelectedSkills([...selectedSkills, typedSkill]);
+    }
+  };
+
   const filterContent = (
     <div className="space-y-6">
       <div>
@@ -84,14 +104,8 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
             <div key={type} className="flex items-center space-x-2">
               <CheckboxItem
                 id={`type-${type}`}
-                checked={selectedTypes.includes(type)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedTypes([...selectedTypes, type]);
-                  } else {
-                    setSelectedTypes(selectedTypes.filter((t) => t !== type));
-                  }
-                }}
+                checked={selectedTypes.includes(type as HackathonType)}
+                onCheckedChange={(checked) => handleTypeChange(type, !!checked)}
               />
               <Label htmlFor={`type-${type}`} className="text-sm font-normal">
                 {type}
@@ -179,19 +193,13 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
         <h3 className="text-lg font-medium mb-3">Skills</h3>
         <div className="flex flex-wrap gap-2">
           {skillsOptions.map((skill) => {
-            const isSelected = selectedSkills.includes(skill);
+            const isSelected = selectedSkills.includes(skill as UserSkill);
             return (
               <Badge
                 key={skill}
                 variant={isSelected ? "default" : "outline"}
                 className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                onClick={() => {
-                  if (isSelected) {
-                    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-                  } else {
-                    setSelectedSkills([...selectedSkills, skill]);
-                  }
-                }}
+                onClick={() => handleSkillToggle(skill)}
               >
                 {skill}
               </Badge>
@@ -211,7 +219,6 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
     </div>
   );
 
-  // Render desktop or mobile version
   return isMobile ? (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -289,7 +296,6 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
           ) : null}
         </div>
         
-        {/* Collapsible sections for filters on desktop */}
         <div className="space-y-2">
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md hover:bg-muted">
@@ -301,14 +307,8 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
                   <div key={type} className="flex items-center space-x-2">
                     <CheckboxItem
                       id={`type-${type}`}
-                      checked={selectedTypes.includes(type)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedTypes([...selectedTypes, type]);
-                        } else {
-                          setSelectedTypes(selectedTypes.filter((t) => t !== type));
-                        }
-                      }}
+                      checked={selectedTypes.includes(type as HackathonType)}
+                      onCheckedChange={(checked) => handleTypeChange(type, !!checked)}
                     />
                     <Label htmlFor={`type-${type}`} className="text-sm font-normal">
                       {type}
@@ -321,7 +321,6 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
           
           <Separator />
           
-          {/* Continue with other collapsible sections */}
           <Collapsible defaultOpen>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-md hover:bg-muted">
               <h3 className="text-lg font-medium">Event Mode</h3>
@@ -413,19 +412,13 @@ export function HackathonFilters({ onFilterChange, isMobile = false }: Hackathon
             <CollapsibleContent className="p-2 space-y-2">
               <div className="flex flex-wrap gap-2">
                 {skillsOptions.map((skill) => {
-                  const isSelected = selectedSkills.includes(skill);
+                  const isSelected = selectedSkills.includes(skill as UserSkill);
                   return (
                     <Badge
                       key={skill}
                       variant={isSelected ? "default" : "outline"}
                       className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-                        } else {
-                          setSelectedSkills([...selectedSkills, skill]);
-                        }
-                      }}
+                      onClick={() => handleSkillToggle(skill)}
                     >
                       {skill}
                     </Badge>

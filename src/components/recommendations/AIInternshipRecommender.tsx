@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -177,7 +176,24 @@ export function AIInternshipRecommender({ className }: AIInternshipRecommenderPr
                 {recommendations.internships.length > 0 ? (
                   <div className="space-y-4">
                     {recommendations.internships.slice(0, 3).map(internship => (
-                      <InternshipCard key={internship.id} {...internship} />
+                      <InternshipCard 
+                        key={internship.id}
+                        id={internship.id}
+                        title={internship.title}
+                        company={internship.company}
+                        location={internship.location}
+                        isRemote={internship.isRemote}
+                        stipend={internship.stipend}
+                        duration={internship.duration}
+                        applicationDeadline={internship.applicationDeadline}
+                        skills={internship.requiredSkills || []}
+                        companySize={internship.companySize}
+                        description={internship.description}
+                        imageUrl={internship.logo}
+                        type="Tech"
+                        postedDate="2023-01-01"
+                        onViewDetails={() => {}}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -193,7 +209,22 @@ export function AIInternshipRecommender({ className }: AIInternshipRecommenderPr
                 {recommendations.hackathons.length > 0 ? (
                   <div className="space-y-4">
                     {recommendations.hackathons.slice(0, 3).map(hackathon => (
-                      <HackathonCard key={hackathon.id} {...hackathon} />
+                      <HackathonCard 
+                        key={hackathon.id}
+                        id={hackathon.id}
+                        title={hackathon.title}
+                        organizer={hackathon.organizer}
+                        location={hackathon.location}
+                        url={hackathon.url}
+                        imageUrl={hackathon.image}
+                        type={hackathon.type}
+                        prizePool={hackathon.prizePool ? hackathon.prizePool.toString() : undefined}
+                        mode={hackathon.mode.toLowerCase() as "online" | "in-person" | "hybrid"}
+                        dates={`${new Date(hackathon.startDate).toLocaleDateString()} - ${new Date(hackathon.endDate).toLocaleDateString()}`}
+                        description={hackathon.description}
+                        onViewDetails={() => {}}
+                        onFormTeam={() => {}}
+                      />
                     ))}
                   </div>
                 ) : (

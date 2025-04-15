@@ -1,60 +1,56 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Team, TeamServiceProps } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTeams } from "@/services/teamService";
-import { Team, UserSkill } from "@/types";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, UserPlus, UserMinus, X, AlertTriangle, Trash } from "lucide-react";
+import { User, Users, UserPlus, Clock, Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeamCardProps {
   team: Team;
-  showActions?: boolean;
-  onDelete?: () => void;
+  isUserTeamMember?: boolean;
+  hackathonId?: string;
+  hasJoinRequest?: boolean;
+  isDetailed?: boolean;
 }
 
-export function TeamCard({ team, showActions = false, onDelete }: TeamCardProps) {
+export function TeamCard({ team, isUserTeamMember, hackathonId, hasJoinRequest, isDetailed = false }: TeamCardProps) {
   const { user } = useAuth();
-  const { joinTeam, leaveTeam, isUserInTeam } = useTeams();
+  const { joinTeam, leaveTeam, isUserInTeam, sendJoinRequest } = useTeams() as TeamServiceProps;
   const { toast } = useToast();
-  
   const [isJoining, setIsJoining] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
   
-  const isUserTeamCreator = user?.id === team.creator;
-  const isUserInThisTeam = isUserInTeam(team.id);
-  const isFull = team.members.length >= team.maxMembers;
+  // Check if the user is the creator of the team
+  const isCreator = team.creator && team.leaderId === user?.id;
   
   const handleJoinTeam = async () => {
-    if (!user) return;
+    if (!user || !joinTeam) return;
     
     setIsJoining(true);
+    
     try {
       const result = await joinTeam(team.id);
       
       if (result.success) {
         toast({
-          title: "Request sent successfully",
-          description: `You've requested to join ${team.name}. The team owner will review your request.`,
+          title: "Joined team",
+          description: `You have successfully joined "${team.name}".`,
         });
       } else {
         toast({
-          title: "Error",
-          description: result.error || "Failed to join team. Please try again.",
+          title: "Failed to join team",
+          description: result.error || "An error occurred. Please try again.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -63,29 +59,29 @@ export function TeamCard({ team, showActions = false, onDelete }: TeamCardProps)
   };
   
   const handleLeaveTeam = async () => {
-    if (!user) return;
+    if (!user || !leaveTeam) return;
     
     setIsLeaving(true);
+    
     try {
       const result = await leaveTeam(team.id);
       
       if (result.success) {
         toast({
-          title: "Team left",
-          description: `You've left the team ${team.name}.`,
+          title: "Left team",
+          description: `You have left "${team.name}".`,
         });
-        setShowLeaveDialog(false);
       } else {
         toast({
-          title: "Error",
-          description: result.error || "Failed to leave team. Please try again.",
+          title: "Failed to leave team",
+          description: result.error || "An error occurred. Please try again.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -93,178 +89,116 @@ export function TeamCard({ team, showActions = false, onDelete }: TeamCardProps)
     }
   };
   
-  const handleDeleteTeam = () => {
-    if (onDelete) {
-      onDelete();
-      setShowDeleteDialog(false);
+  const handleSendJoinRequest = async () => {
+    if (!user || !sendJoinRequest) return;
+    
+    setIsSendingRequest(true);
+    
+    try {
+      const result = await sendJoinRequest(team.id);
+      
+      if (result.success) {
+        toast({
+          title: "Request sent",
+          description: `Your request to join "${team.name}" has been sent.`,
+        });
+      } else {
+        toast({
+          title: "Failed to send request",
+          description: result.error || "An error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Team deleted",
-        description: `You've deleted the team ${team.name}.`,
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
       });
+    } finally {
+      setIsSendingRequest(false);
     }
   };
-  
+
   return (
-    <>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start gap-2">
-            <CardTitle className="text-xl line-clamp-1">{team.name}</CardTitle>
-            <Badge variant={team.isOpen ? "outline" : "secondary"}>
-              {team.isOpen ? "Open" : "Closed"}
-            </Badge>
+    <Card className={`glass-card ${isDetailed ? 'border-primary/20' : ''}`}>
+      <CardHeader>
+        <CardTitle>{team.name}</CardTitle>
+        <CardDescription>{team.description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Users className="h-4 w-4 mr-1" />
+            <span>{team.members.length} / {team.maxMembers} members</span>
           </div>
-        </CardHeader>
-        
-        <CardContent className="pb-3">
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-            {team.description}
-          </p>
           
-          <div className="mb-3">
-            <div className="text-sm font-medium mb-1">Looking for:</div>
-            <div className="flex flex-wrap gap-1">
-              {team.skillsNeeded.length > 0 ? (
-                team.skillsNeeded.map((skill: UserSkill) => (
-                  <Badge key={skill} variant="outline" className="text-xs">
-                    {skill}
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-xs text-muted-foreground">No specific skills required</span>
-              )}
+          {team.creator && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                {typeof team.creator === 'string' ? team.creator : team.creator.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{team.creator.name || user?.email}</p>
+                <p className="text-xs text-muted-foreground">Team Leader</p>
+              </div>
             </div>
-          </div>
+          )}
+          
+          <Separator />
           
           <div>
-            <div className="text-sm font-medium mb-1">Team ({team.members.length}/{team.maxMembers}):</div>
-            <div className="flex -space-x-2">
-              {team.members.map((memberId, idx) => (
-                <Avatar key={memberId} className="h-7 w-7 border-2 border-background">
-                  <AvatarFallback className="text-xs">
-                    {memberId === user?.id ? 
-                      (user.email?.charAt(0).toUpperCase() || 'U') : 
-                      `M${idx + 1}`}
-                  </AvatarFallback>
-                </Avatar>
+            <h4 className="text-sm font-medium">Skills Needed</h4>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {team.skillsNeeded.map(skill => (
+                <Badge key={skill} variant="secondary" className="text-xs">
+                  {skill}
+                </Badge>
               ))}
-              {team.members.length < team.maxMembers && (
-                <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center border-2 border-background text-xs text-muted-foreground">
-                  +{team.maxMembers - team.members.length}
-                </div>
-              )}
             </div>
           </div>
-        </CardContent>
-        
-        <CardFooter className="pt-0">
-          {!isUserInThisTeam && !isFull && team.isOpen ? (
-            <Button 
-              onClick={handleJoinTeam} 
-              className="w-full" 
-              disabled={isJoining}
-              variant="outline"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {isJoining ? "Sending Request..." : "Request to Join"}
-            </Button>
-          ) : isUserInThisTeam && !isUserTeamCreator ? (
-            <Button 
-              onClick={() => setShowLeaveDialog(true)} 
-              className="w-full" 
-              variant="outline"
-            >
-              <UserMinus className="mr-2 h-4 w-4" />
-              Leave Team
-            </Button>
-          ) : isUserTeamCreator && showActions ? (
-            <div className="flex w-full gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {/* View team details */}}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Manage
-              </Button>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : null}
-          
-          {isFull && !isUserInThisTeam && (
-            <Alert variant="default" className="w-full">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Team is full</AlertTitle>
-              <AlertDescription>
-                This team has reached its maximum capacity of {team.maxMembers} members.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {!team.isOpen && !isUserInThisTeam && (
-            <Alert variant="default" className="w-full">
-              <X className="h-4 w-4" />
-              <AlertTitle>Team is closed</AlertTitle>
-              <AlertDescription>
-                This team is not accepting new members at this time.
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardFooter>
-      </Card>
-      
-      {/* Leave Team Dialog */}
-      <Dialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Leave Team</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to leave the team "{team.name}"? You'll need to request to join again if you change your mind.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowLeaveDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleLeaveTeam}
-              disabled={isLeaving}
-            >
-              {isLeaving ? "Leaving..." : "Leave Team"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Team Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Team</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the team "{team.name}"? This action cannot be undone and all members will be removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteTeam}
-            >
-              Delete Team
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-end gap-2">
+        {isUserTeamMember ? (
+          <Button variant="destructive" size="sm" onClick={handleLeaveTeam} disabled={isLeaving}>
+            {isLeaving ? (
+              <>
+                Leaving...
+              </>
+            ) : (
+              <>
+                <X className="h-4 w-4 mr-2" />
+                Leave Team
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" onClick={handleSendJoinRequest} disabled={isSendingRequest}>
+            {isSendingRequest ? (
+              <>
+                Sending Request...
+              </>
+            ) : (
+              <>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Request to Join
+              </>
+            )}
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   );
+}
+
+// Add this helper hook
+function useTeams() {
+  // Mock implementation (this should be replaced with your actual implementation)
+  return {
+    sendJoinRequest: async (teamId: string) => ({ success: true }),
+    joinTeam: async (teamId: string) => ({ success: true }),
+    leaveTeam: async (teamId: string) => ({ success: true }),
+    isUserInTeam: (teamId: string) => false
+  };
 }

@@ -16,7 +16,22 @@ export type HackathonType =
   | "Game Development"
   | "IoT"
   | "Robotics"
-  | "AR/VR";
+  | "AR/VR"
+  | "Web Development"
+  | "Mobile Development"
+  | "Data Science"
+  | "Machine Learning"
+  | "Artificial Intelligence"
+  | "Cybersecurity"
+  | "Cloud Computing"
+  | "DevOps"
+  | "Blockchain"
+  | "UI/UX Design"
+  | "Game Development"
+  | "Robotics"
+  | "IoT"
+  | "AR/VR"
+  | "Full Stack Development";
 
 export interface HackathonCard {
   id: string;
@@ -50,6 +65,10 @@ export interface InternshipCard {
   requiredSkills: string[];
   companySize: "Startup" | "Small" | "Medium" | "Large";
   description?: string;
+  imageUrl?: string; // Added for compatibility with InternshipCardProps
+  skills?: string[]; // Added for compatibility with component usage
+  postedDate?: string; // Added for compatibility with InternshipCardProps
+  type?: string; // Added for compatibility with InternshipCardProps
 }
 
 export type UserSkill =
@@ -104,7 +123,14 @@ export type UserSkill =
   | "Swift"
   | "Kotlin"
   | "React Native"
-  | "Flutter";
+  | "Flutter"
+  | "TensorFlow"
+  | "Unity"
+  | "Solidity"
+  | "Web3"
+  | "Tableau"
+  | "Data Analysis"
+  | "Network Security";
 
 export interface User {
   id: string;
@@ -198,4 +224,72 @@ export interface Testimonial {
   role: string;
   avatar: string;
   text: string;
+  company?: string; // Added for compatibility
+  image?: string; // Added for compatibility
+}
+
+// Props interfaces for components
+export interface HackathonCardProps {
+  id: string;
+  title: string;
+  organizer: string;
+  location: string;
+  url: string;
+  imageUrl: string;
+  type: HackathonType | HackathonType[];
+  prizePool?: string;
+  mode: "online" | "in-person" | "hybrid";
+  dates: string;
+  description?: string;
+  onViewDetails: () => void;
+  onFormTeam: () => void;
+  isDetailed?: boolean;
+}
+
+export interface InternshipCardProps {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  imageUrl: string;
+  isRemote: boolean;
+  stipend?: number;
+  duration: string;
+  skills: string[];
+  postedDate?: string;
+  applicationDeadline: string;
+  type: string;
+  companySize?: "Startup" | "Small" | "Medium" | "Large";
+  description?: string;
+  onViewDetails?: () => void;
+  onApply?: () => void;
+}
+
+export interface TeamServiceProps {
+  createTeam: (teamData: Omit<Team, "id" | "isOpen" | "members" | "createdAt" | "updatedAt" | "leaderId">) => Promise<{
+    success: boolean;
+    error: string;
+    data?: any;
+  } | {
+    success: boolean;
+    data: any;
+    error?: undefined;
+  }>;
+  sendJoinRequest: (teamId: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  useHackathonTeams: (hackathonId: string) => any;
+  useUserSentRequests: () => any;
+  joinTeam?: (teamId: string) => Promise<{ success: boolean; error?: string }>;
+  leaveTeam?: (teamId: string) => Promise<{ success: boolean; error?: string }>;
+  isUserInTeam?: (teamId: string) => boolean;
+}
+
+export interface ReminderModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  date: Date;
+  type: string;
 }

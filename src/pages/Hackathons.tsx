@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -95,12 +94,16 @@ export default function Hackathons() {
     window.location.href = `/hackathons/${id}`;
   };
   
+  
+  
   return (
     <>
       <MovingBubbles numBubbles={15} opacity={0.1} minSize={10} maxSize={40} />
       <Navbar />
       
       <main className="flex-1 overflow-x-hidden">
+        
+        
         <section className="py-10 md:py-16 bg-gradient-to-b from-transparent to-primary/5">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-10">
@@ -178,6 +181,7 @@ export default function Hackathons() {
                         </div>
                       ))}
                     </div>
+                    
                     
                     {!showAll && filteredHackathons.length >= 9 && (
                       <div className="flex justify-center mt-8">

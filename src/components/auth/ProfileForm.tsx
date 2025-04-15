@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -54,7 +53,6 @@ export function ProfileForm({ onComplete }: ProfileFormProps) {
     },
   });
 
-  // Update form when profile changes
   useEffect(() => {
     if (profile) {
       form.reset({
@@ -68,8 +66,8 @@ export function ProfileForm({ onComplete }: ProfileFormProps) {
         linkedinUrl: profile.linkedinUrl || "",
         portfolioUrl: profile.portfolioUrl || "",
       });
-      setSelectedSkills(profile.skills);
-      setSelectedInterests(profile.interests);
+      setSelectedSkills(profile.skills || []);
+      setSelectedInterests(profile.interests || []);
     }
   }, [profile, form]);
 
@@ -103,30 +101,32 @@ export function ProfileForm({ onComplete }: ProfileFormProps) {
     }
   }
 
-  const toggleSkill = (skill: UserSkill) => {
+  const toggleSkill = (skill: string) => {
     const currentSkills = form.getValues().skills as UserSkill[];
-    const isSelected = currentSkills.includes(skill);
+    const typedSkill = skill as UserSkill;
+    const isSelected = currentSkills.includes(typedSkill);
     
     let updatedSkills: UserSkill[];
     if (isSelected) {
-      updatedSkills = currentSkills.filter(s => s !== skill);
+      updatedSkills = currentSkills.filter(s => s !== typedSkill);
     } else {
-      updatedSkills = [...currentSkills, skill];
+      updatedSkills = [...currentSkills, typedSkill];
     }
     
     form.setValue("skills", updatedSkills, { shouldValidate: true });
     setSelectedSkills(updatedSkills);
   };
   
-  const toggleInterest = (interest: HackathonType) => {
+  const toggleInterest = (interest: string) => {
     const currentInterests = form.getValues().interests as HackathonType[];
-    const isSelected = currentInterests.includes(interest);
+    const typedInterest = interest as HackathonType;
+    const isSelected = currentInterests.includes(typedInterest);
     
     let updatedInterests: HackathonType[];
     if (isSelected) {
-      updatedInterests = currentInterests.filter(i => i !== interest);
+      updatedInterests = currentInterests.filter(i => i !== typedInterest);
     } else {
-      updatedInterests = [...currentInterests, interest];
+      updatedInterests = [...currentInterests, typedInterest];
     }
     
     form.setValue("interests", updatedInterests, { shouldValidate: true });
@@ -202,7 +202,7 @@ export function ProfileForm({ onComplete }: ProfileFormProps) {
                   <FormLabel>Skills</FormLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {skillsOptions.map((skill) => {
-                      const isSelected = selectedSkills.includes(skill);
+                      const isSelected = selectedSkills.includes(skill as UserSkill);
                       return (
                         <Badge
                           key={skill}
@@ -231,7 +231,7 @@ export function ProfileForm({ onComplete }: ProfileFormProps) {
                   <FormLabel>Interests</FormLabel>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {interestOptions.map((interest) => {
-                      const isSelected = selectedInterests.includes(interest);
+                      const isSelected = selectedInterests.includes(interest as HackathonType);
                       return (
                         <Badge
                           key={interest}

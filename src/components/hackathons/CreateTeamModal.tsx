@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,7 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
   useEffect(() => {
     const allSkills = [...skillsOptions] as UserSkill[];
     const userSkills = profile?.skills || [];
-    const filteredSkills = allSkills.filter(skill => !userSkills.includes(skill));
+    const filteredSkills = allSkills.filter(skill => !userSkills.includes(skill as UserSkill));
     setAvailableSkills(filteredSkills.sort((a, b) => a.localeCompare(b)));
   }, [profile?.skills]);
   
@@ -95,6 +94,8 @@ export function CreateTeamModal({ isOpen, onClose, hackathonId, hackathonTitle }
         description: description || `Team for ${hackathonTitle}`,
         skillsNeeded,
         maxMembers,
+        leaderId: user.id,
+        updatedAt: new Date().toISOString()
       });
       
       if (result.success) {

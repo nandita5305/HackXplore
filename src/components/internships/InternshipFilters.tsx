@@ -71,25 +71,30 @@ export function InternshipFilters({ onFilterChange, isMobile = false }: Internsh
     });
   };
 
+  const handleSkillToggle = (skill: string) => {
+    const typedSkill = skill as UserSkill;
+    const isSelected = selectedSkills.includes(typedSkill);
+    
+    if (isSelected) {
+      setSelectedSkills(selectedSkills.filter(s => s !== typedSkill));
+    } else {
+      setSelectedSkills([...selectedSkills, typedSkill]);
+    }
+  };
+
   const filterContent = (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium mb-3">Skills</h3>
         <div className="flex flex-wrap gap-2">
           {skillsOptions.map((skill) => {
-            const isSelected = selectedSkills.includes(skill);
+            const isSelected = selectedSkills.includes(skill as UserSkill);
             return (
               <Badge
                 key={skill}
                 variant={isSelected ? "default" : "outline"}
                 className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                onClick={() => {
-                  if (isSelected) {
-                    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-                  } else {
-                    setSelectedSkills([...selectedSkills, skill]);
-                  }
-                }}
+                onClick={() => handleSkillToggle(skill)}
               >
                 {skill}
               </Badge>
@@ -233,19 +238,13 @@ export function InternshipFilters({ onFilterChange, isMobile = false }: Internsh
             <CollapsibleContent className="p-2 space-y-2">
               <div className="flex flex-wrap gap-2">
                 {skillsOptions.map((skill) => {
-                  const isSelected = selectedSkills.includes(skill);
+                  const isSelected = selectedSkills.includes(skill as UserSkill);
                   return (
                     <Badge
                       key={skill}
                       variant={isSelected ? "default" : "outline"}
                       className={`cursor-pointer ${isSelected ? 'bg-primary hover:bg-primary/80' : 'hover:bg-primary/20'}`}
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-                        } else {
-                          setSelectedSkills([...selectedSkills, skill]);
-                        }
-                      }}
+                      onClick={() => handleSkillToggle(skill)}
                     >
                       {skill}
                     </Badge>

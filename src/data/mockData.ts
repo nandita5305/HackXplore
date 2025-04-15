@@ -371,16 +371,16 @@ export const interestOptions = [
   "Full Stack Development"
 ];
 
-// Add partner logos
-export const partnerLogos = [
-  "/partners/microsoft.svg",
-  "/partners/google.svg",
-  "/partners/amazon.svg",
-  "/partners/meta.svg",
-  "/partners/ibm.svg",
-  "/partners/nvidia.svg",
-  "/partners/intel.svg",
-  "/partners/apple.svg"
+// Update partner logos to match the PartnerLogo interface
+export const partnerLogos: PartnerLogo[] = [
+  { name: "Microsoft", logo: "/partners/microsoft.svg", url: "https://microsoft.com" },
+  { name: "Google", logo: "/partners/google.svg", url: "https://google.com" },
+  { name: "Amazon", logo: "/partners/amazon.svg", url: "https://amazon.com" },
+  { name: "Meta", logo: "/partners/meta.svg", url: "https://meta.com" },
+  { name: "IBM", logo: "/partners/ibm.svg", url: "https://ibm.com" },
+  { name: "NVIDIA", logo: "/partners/nvidia.svg", url: "https://nvidia.com" },
+  { name: "Intel", logo: "/partners/intel.svg", url: "https://intel.com" },
+  { name: "Apple", logo: "/partners/apple.svg", url: "https://apple.com" }
 ];
 
 // Add testimonials data
@@ -390,21 +390,27 @@ export const testimonialsData = [
     name: "Alex Johnson",
     role: "Software Engineer at Google",
     avatar: "/avatars/avatar-1.png",
-    text: "HackXplore helped me find my first hackathon which led to an internship at Google! The team formation feature was especially useful as I connected with talented peers who became long-term collaborators."
+    text: "HackXplore helped me find my first hackathon which led to an internship at Google! The team formation feature was especially useful as I connected with talented peers who became long-term collaborators.",
+    company: "Google",
+    image: "/avatars/avatar-1.png"
   },
   {
     id: "2",
     name: "Sophia Chen",
     role: "Product Manager at Microsoft",
     avatar: "/avatars/avatar-2.png",
-    text: "As a student looking to break into product management, the internship listings on HackXplore were incredibly valuable. I found my Microsoft internship here, and the rest is history!"
+    text: "As a student looking to break into product management, the internship listings on HackXplore were incredibly valuable. I found my Microsoft internship here, and the rest is history!",
+    company: "Microsoft",
+    image: "/avatars/avatar-2.png"
   },
   {
     id: "3",
     name: "Marcus Williams",
     role: "Full Stack Developer",
     avatar: "/avatars/avatar-3.png",
-    text: "The scholarship section on HackXplore was a game-changer for me. I discovered and secured funding that helped me complete my degree without financial stress. Now I'm working at my dream job!"
+    text: "The scholarship section on HackXplore was a game-changer for me. I discovered and secured funding that helped me complete my degree without financial stress. Now I'm working at my dream job!",
+    company: "Freelance",
+    image: "/avatars/avatar-3.png"
   }
 ];
 
