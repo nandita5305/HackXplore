@@ -553,6 +553,7 @@ export const scholarshipsData = [
   }
 ];
 
+// Skills options
 export const skillsOptions = [
   "JavaScript",
   "Python",
