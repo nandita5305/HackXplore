@@ -1,4 +1,5 @@
-import { HackathonCard, InternshipCard, UserSkill, HackathonType } from "@/types";
+
+import { HackathonCard, InternshipCard, Scholarship, UserSkill, HackathonType, ScholarshipType } from "@/types";
 
 // Filter hackathons based on user preferences
 export const filterHackathons = (hackathons: HackathonCard[], filters: any) => {
@@ -33,7 +34,11 @@ export const filterHackathons = (hackathons: HackathonCard[], filters: any) => {
         ? parseInt(hackathon.prizePool.replace(/,/g, '')) 
         : hackathon.prizePool;
       
-      if (prizePool < prizePoolMin || prizePool > prizePoolMax) {
+      if (prizePoolMin !== undefined && prizePool < prizePoolMin) {
+        return false;
+      }
+      
+      if (prizePoolMax !== undefined && prizePool > prizePoolMax) {
         return false;
       }
     }
@@ -70,6 +75,66 @@ export const filterHackathons = (hackathons: HackathonCard[], filters: any) => {
   });
 };
 
+// Filter scholarships based on user preferences
+export const filterScholarships = (scholarships: Scholarship[], filters: any) => {
+  const { types, amountMin, amountMax, deadlineType, provider, eligibility } = filters;
+  
+  return scholarships.filter(scholarship => {
+    // Filter by scholarship types
+    if (types && types.length > 0) {
+      if (!types.includes(scholarship.type)) {
+        return false;
+      }
+    }
+    
+    // Filter by amount
+    if (scholarship.amount) {
+      if (amountMin !== undefined && scholarship.amount < amountMin) {
+        return false;
+      }
+      
+      if (amountMax !== undefined && scholarship.amount > amountMax) {
+        return false;
+      }
+    }
+    
+    // Filter by deadline type (upcoming, past)
+    if (deadlineType && deadlineType !== "all") {
+      const today = new Date();
+      const deadlineDate = new Date(scholarship.deadline);
+      
+      if (deadlineType === "upcoming" && deadlineDate < today) {
+        return false;
+      } else if (deadlineType === "past" && deadlineDate >= today) {
+        return false;
+      }
+    }
+    
+    // Filter by provider
+    if (provider && provider.trim() !== "") {
+      if (!scholarship.provider.toLowerCase().includes(provider.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    // Filter by eligibility criteria
+    if (eligibility && eligibility.length > 0) {
+      // Check if scholarship meets any of the selected eligibility criteria
+      const matchingCriteria = eligibility.filter(criterion =>
+        scholarship.eligibility.some(item => 
+          item.toLowerCase().includes(criterion.toLowerCase())
+        )
+      );
+      
+      if (matchingCriteria.length === 0) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+};
+
 // Filter internships based on user preferences
 export const filterInternships = (internships: InternshipCard[], filters: any) => {
   const { skills, isRemote, stipendMin, stipendMax, location } = filters;
@@ -90,8 +155,14 @@ export const filterInternships = (internships: InternshipCard[], filters: any) =
       return false;
     }
 
-    if (internship.stipend !== undefined && (internship.stipend < stipendMin || internship.stipend > stipendMax)) {
-      return false;
+    if (internship.stipend !== undefined) {
+      if (stipendMin !== undefined && internship.stipend < stipendMin) {
+        return false;
+      }
+      
+      if (stipendMax !== undefined && internship.stipend > stipendMax) {
+        return false;
+      }
     }
 
     if (location && !internship.location.toLowerCase().includes(location.toLowerCase())) {
@@ -176,5 +247,38 @@ export const getRecommendedInternships = (
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score)
     .map(item => item.internship)
+    .slice(0, 5);
+};
+
+// Get recommended scholarships based on user profile and preferences
+export const getRecommendedScholarships = (
+  scholarships: Scholarship[],
+  userSkills: UserSkill[],
+  userInterests: string[]
+): Scholarship[] => {
+  if (!userSkills?.length && !userInterests?.length) return [];
+  
+  // Score each scholarship based on match with user skills and interests
+  const scoredScholarships = scholarships.map(scholarship => {
+    let score = 0;
+    
+    // Match user interests with scholarship type
+    if (userInterests?.length) {
+      if (userInterests.includes(scholarship.type.toLowerCase())) {
+        score += 3; // Higher weight for interest matches
+      }
+    }
+    
+    // Higher score for scholarships with higher amounts
+    score += Math.min(scholarship.amount / 5000, 3); // Cap at 3 points
+    
+    return { scholarship, score };
+  });
+  
+  // Sort by score (highest first) and return the top 5
+  return scoredScholarships
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.scholarship)
     .slice(0, 5);
 };
