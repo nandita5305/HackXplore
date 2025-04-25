@@ -3,7 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ScholarshipCard } from "@/components/scholarships/ScholarshipCard";
 import { ScholarshipFilters } from "@/components/scholarships/ScholarshipFilters";
-import { MovingBubbles } from "@/components/ui/moving-bubbles";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowDown } from "lucide-react";
