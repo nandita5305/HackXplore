@@ -79,7 +79,7 @@ export default function ScholarshipDetail() {
   const deadlineDate = new Date(scholarship.deadline);
   
   return (
-    <AnimatedBackground>
+    <MovingBubbles>
       <Navbar />
       
       <main className="container py-12">
@@ -256,6 +256,6 @@ export default function ScholarshipDetail() {
         onClose={() => setIsAuthModalOpen(false)}
         defaultView="login"
       />
-    </AnimatedBackground>
+    </MovingBubbles>
   );
 }
