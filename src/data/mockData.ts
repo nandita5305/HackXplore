@@ -439,14 +439,46 @@ export const interestOptions = [
 
 // Update partner logos to match the PartnerLogo interface
 export const partnerLogos: PartnerLogo[] = [
-  { name: "Microsoft", logo: "/partners/microsoft.svg", url: "https://microsoft.com" },
-  { name: "Google", logo: "/partners/google.svg", url: "https://google.com" },
-  { name: "Amazon", logo: "/partners/amazon.svg", url: "https://amazon.com" },
-  { name: "Meta", logo: "/partners/meta.svg", url: "https://meta.com" },
-  { name: "IBM", logo: "/partners/ibm.svg", url: "https://ibm.com" },
-  { name: "NVIDIA", logo: "/partners/nvidia.svg", url: "https://nvidia.com" },
-  { name: "Intel", logo: "/partners/intel.svg", url: "https://intel.com" },
-  { name: "Apple", logo: "/partners/apple.svg", url: "https://apple.com" }
+  { 
+    name: "Microsoft", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.jpg", 
+    url: "https://microsoft.com" 
+  },
+  { 
+    name: "Google", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.jpg", 
+    url: "https://google.com" 
+  },
+  { 
+    name: "Amazon", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1200px-Amazon_logo.svg.jpg", 
+    url: "https://amazon.com" 
+  },
+  { 
+    name: "Meta", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/1200px-Meta_Platforms_Inc._logo.svg.jpg", 
+    url: "https://meta.com" 
+  },
+  { 
+    name: "IBM", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/1200px-IBM_logo.svg.jpg", 
+    url: "https://ibm.com" 
+  },
+  { 
+    name: "NVIDIA", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Nvidia_logo.svg/1200px-Nvidia_logo.svg.jpg", 
+    url: "https://nvidia.com" 
+  },
+  { 
+    name: "Intel", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Intel_logo_%282006-2020%29.svg/1200px-Intel_logo_%282006-2020%29.svg.jpg", 
+    url: "https://intel.com" 
+  },
+  { 
+    name: "Apple", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/1200px-Apple_logo_black.svg.jpg", 
+    url: "https://apple.com" 
+  }
 ];
 
 // Add testimonials data
