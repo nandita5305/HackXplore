@@ -38,7 +38,7 @@ export default function ScholarshipDetail() {
   
   if (!scholarship) {
     return (
-      <AnimatedBackground>
+       <MovingBubbles />
         <Navbar />
         <main className="container py-16">
           <div className="text-center">
