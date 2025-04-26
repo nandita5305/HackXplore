@@ -15,8 +15,8 @@ export function MovingBubbles({
   numBubbles = 20,
   minSize = 20,
   maxSize = 60,
-  minSpeed = 0.5,
-  maxSpeed = 2,
+  minSpeed = 0.1,  // Reduced from 0.5
+  maxSpeed = 0.5,  // Reduced from 2
   colors = ['#674cd7', '#33ccff', '#9b87f5'],
   opacity = 0.2,
 }: BubbleProps) {
