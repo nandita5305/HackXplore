@@ -38,7 +38,7 @@ export default function ScholarshipDetail() {
   
   if (!scholarship) {
     return (
-       <MovingBubbles />
+       
         <Navbar />
         <main className="container py-16">
           <div className="text-center">
@@ -52,7 +52,7 @@ export default function ScholarshipDetail() {
           </div>
         </main>
         <Footer />
-      </MovingBubbles>
+     
     );
   }
   
@@ -79,7 +79,7 @@ export default function ScholarshipDetail() {
   const deadlineDate = new Date(scholarship.deadline);
   
   return (
-    <MovingBubbles>
+    <MovingBubbles />
       <Navbar />
       
       <main className="container py-12">
@@ -256,6 +256,5 @@ export default function ScholarshipDetail() {
         onClose={() => setIsAuthModalOpen(false)}
         defaultView="login"
       />
-    </MovingBubbles>
   );
 }
