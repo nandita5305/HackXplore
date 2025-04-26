@@ -38,7 +38,7 @@ export default function ScholarshipDetail() {
   
   if (!scholarship) {
     return (
-       
+       <>
         <Navbar />
         <main className="container py-16">
           <div className="text-center">
@@ -79,6 +79,7 @@ export default function ScholarshipDetail() {
   const deadlineDate = new Date(scholarship.deadline);
   
   return (
+         <>
     <MovingBubbles />
       <Navbar />
       
