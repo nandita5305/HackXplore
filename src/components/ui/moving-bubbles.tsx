@@ -108,8 +108,9 @@ export function MovingBubbles({
             bubble.y = bubble.originalY! + Math.sin(bubble.angle) * bubble.amplitude! * 5;
           } else {
             // Traditional linear movement
-            bubble.x += bubble.speedX;
-            bubble.y += bubble.speedY;
+           const deltaSeconds = elapsed / 1000; // elapsed time since last update in seconds
+            bubble.x += bubble.speedX * deltaSeconds * 60; // 60 is a base multiplier for "normal" feeling
+            bubble.y += bubble.speedY * deltaSeconds * 60;
             
             // Bounce off walls with dampened speed
             if (bubble.x < bubble.radius || bubble.x > canvas.width - bubble.radius) {
