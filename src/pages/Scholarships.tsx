@@ -88,7 +88,8 @@ export default function Scholarships() {
   
   return (
     <>
-      <MovingBubbles numBubbles={15} opacity={0.1} minSize={10} maxSize={40}/>
+      <MovingBubbles numBubbles={15} opacity={0.1}  minSpeed={0.05} 
+        maxSpeed={0.2} minSize={10} maxSize={40}/>
       <Navbar />
       
       <main className="flex-1 overflow-x-hidden">
