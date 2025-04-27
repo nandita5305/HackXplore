@@ -42,7 +42,7 @@ export default function Index() {
         {/* Hero Section */}
         <section className="py-20 text-center relative overflow-hidden">
           <div className="container px-4 sm:px-6 relative z-10">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent animate-pulse-slow">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-[#00c6ff] to-[#0072ff] bg-clip-text text-transparent animate-pulse-slow">
               Discover. Connect. <br /> Hack. Grow.
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
