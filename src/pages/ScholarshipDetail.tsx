@@ -80,7 +80,7 @@ export default function ScholarshipDetail() {
   
   return (
          <>
-    <MovingBubbles />
+    
       <Navbar />
       
       <main className="container py-12">
